@@ -1,0 +1,1 @@
+{"output":"Paris!","guardrail_verdict":"passed","latency_ms":2494,"input_tokens":109,"output_tokens":3,"cost_usd":0.0,"stubbed":false,"provider":"ollama","model":"gemma3:1b"}

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ project_name }} — Delivery Report</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 2.4cm 2cm;
+      @bottom-center {
+        content: counter(page) " / " counter(pages);
+        font-family: 'Inter', sans-serif;
+        font-size: 9pt;
+        color: #9a9a9a;
+      }
+    }
+
+    body {
+      font-family: 'Inter', 'Helvetica', sans-serif;
+      color: #1a1a1a;
+      line-height: 1.55;
+      font-size: 11pt;
+      margin: 0;
+    }
+
+    h1, h2, h3 {
+      letter-spacing: -0.01em;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    h2 {
+      font-size: 16pt;
+      margin: 36pt 0 14pt;
+      padding-bottom: 8pt;
+      border-bottom: 1px solid #e8e5de;
+    }
+
+    h3 {
+      font-size: 12pt;
+      margin: 18pt 0 6pt;
+    }
+
+    p { margin: 0 0 10pt; }
+
+    /* Cover */
+    .cover {
+      page-break-after: always;
+      padding-top: 7cm;
+      text-align: left;
+    }
+    .cover .badge-mark {
+      display: inline-block;
+      width: 32pt;
+      height: 32pt;
+      background: #1a1a1a;
+      color: white;
+      border-radius: 6pt;
+      text-align: center;
+      line-height: 32pt;
+      font-weight: 700;
+      font-size: 14pt;
+      margin-bottom: 28pt;
+    }
+    .cover h1 {
+      font-size: 36pt;
+      font-weight: 600;
+      letter-spacing: -0.025em;
+      margin: 0 0 12pt;
+      line-height: 1.1;
+    }
+    .cover .subtitle {
+      color: #6b6b6b;
+      font-size: 14pt;
+      margin: 0 0 36pt;
+    }
+    .cover .meta {
+      margin-top: 1cm;
+      font-size: 10pt;
+      color: #6b6b6b;
+      border-top: 1px solid #e8e5de;
+      padding-top: 16pt;
+    }
+    .cover .meta-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 4pt 0;
+    }
+    .cover .meta-row .label {
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 9pt;
+      color: #9a9a9a;
+    }
+    .cover .meta-row .value {
+      color: #1a1a1a;
+      font-weight: 500;
+    }
+
+    /* Section eyebrow */
+    .eyebrow {
+      text-transform: uppercase;
+      font-size: 8.5pt;
+      letter-spacing: 0.14em;
+      color: #9a9a9a;
+      font-weight: 500;
+      margin: 0 0 6pt;
+    }
+
+    /* Feature blocks */
+    .feature {
+      margin: 14pt 0;
+      padding: 14pt 18pt;
+      background: #faf9f6;
+      border-left: 2pt solid #1a1a1a;
+      border-radius: 0 4pt 4pt 0;
+      page-break-inside: avoid;
+    }
+    .feature h3 { margin-top: 0; }
+    .feature p { color: #4a4a4a; margin-bottom: 0; }
+
+    /* Quality evidence cards */
+    .evidence-grid {
+      display: flex;
+      gap: 14pt;
+      margin: 18pt 0;
+    }
+    .evidence-card {
+      flex: 1;
+      background: #faf9f6;
+      padding: 18pt 14pt;
+      border-radius: 6pt;
+      border: 1pt solid #e8e5de;
+      text-align: left;
+    }
+    .evidence-card .num {
+      font-size: 28pt;
+      font-weight: 600;
+      color: #1a1a1a;
+      letter-spacing: -0.025em;
+      line-height: 1;
+      display: block;
+      margin-bottom: 6pt;
+    }
+    .evidence-card .label {
+      font-size: 9pt;
+      color: #6b6b6b;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* Steps */
+    ol.steps {
+      counter-reset: step;
+      list-style: none;
+      padding: 0;
+      margin: 12pt 0;
+    }
+    ol.steps li {
+      counter-increment: step;
+      position: relative;
+      padding: 10pt 0 10pt 38pt;
+      border-bottom: 1px solid #f0eee8;
+    }
+    ol.steps li:last-child { border-bottom: 0; }
+    ol.steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 10pt;
+      width: 24pt;
+      height: 24pt;
+      background: #1a1a1a;
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 24pt;
+      font-size: 10pt;
+      font-weight: 600;
+    }
+
+    .footer {
+      margin-top: 2cm;
+      font-size: 8.5pt;
+      color: #9a9a9a;
+      text-align: center;
+      border-top: 1px solid #e8e5de;
+      padding-top: 14pt;
+    }
+  </style>
+</head>
+<body>
+
+  <section class="cover">
+    <div class="badge-mark">F</div>
+    <h1>{{ project_name }}</h1>
+    <p class="subtitle">Delivery report</p>
+
+    <div class="meta">
+      <div class="meta-row">
+        <span class="label">Prepared for</span>
+        <span class="value">{{ client_name }}</span>
+      </div>
+      <div class="meta-row">
+        <span class="label">Delivered</span>
+        <span class="value">{{ delivery_date }}</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="eyebrow">01 — Overview</div>
+  <h2>What was built</h2>
+  <p>{{ summary }}</p>
+  {% for feature in features %}
+    <div class="feature">
+      <h3>{{ feature.name }}</h3>
+      <p>{{ feature.description }}</p>
+    </div>
+  {% endfor %}
+
+  <div class="eyebrow">02 — Evidence</div>
+  <h2>Quality evidence</h2>
+  <div class="evidence-grid">
+    <div class="evidence-card">
+      <span class="num">{{ tests_total }}</span>
+      <span class="label">Tests run</span>
+    </div>
+    <div class="evidence-card">
+      <span class="num">{{ tests_pass_rate }}%</span>
+      <span class="label">Pass rate</span>
+    </div>
+    <div class="evidence-card">
+      <span class="num">{{ security_checks }}</span>
+      <span class="label">Security checks passed</span>
+    </div>
+  </div>
+  <p>{{ quality_narrative }}</p>
+
+  <div class="eyebrow">03 — Next steps</div>
+  <h2>How to get started</h2>
+  <ol class="steps">
+    {% for step in getting_started %}
+      <li>{{ step }}</li>
+    {% endfor %}
+  </ol>
+
+  <div class="footer">
+    Generated by Fleet · {{ delivery_date }}
+  </div>
+
+</body>
+</html>
