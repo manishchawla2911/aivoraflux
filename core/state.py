@@ -213,6 +213,8 @@ class WorkspaceMember(SQLModel, table=True):
     role: str                                   # catalog role id, e.g. "ceo"
     display_name: Optional[str] = None
     order_index: int = 0
+    parent_member_id: Optional[str] = None     # member that spawned this one
+    origin: str = "seed"                        # seed | spawned
     created_at: datetime = Field(default_factory=_utcnow)
 
 
@@ -243,6 +245,22 @@ class WorkspaceChatMessage(SQLModel, table=True):
     triggered_by_id: Optional[str] = None       # message id that caused this one
     pinned_memory_id: Optional[str] = None      # WorkspaceMemory.id once pinned
     created_at: datetime = Field(default_factory=_utcnow)
+
+
+class WorkspaceProject(SQLModel, table=True):
+    """A unit of work in a workspace; anchors a spawned team + a cost quote."""
+    __tablename__ = "workspace_project"
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    name: str
+    brief: str = ""
+    client_name: Optional[str] = None
+    status: str = "estimating"                  # estimating | staffed | archived
+    pm_member_id: Optional[str] = None          # spawned PM's WorkspaceMember.id
+    estimate_json: Optional[str] = None         # JSON CostEstimate (client quote)
+    created_at: datetime = Field(default_factory=_utcnow)
+    updated_at: datetime = Field(default_factory=_utcnow)
 
 
 # ─────────────────────────────────────────────────────────────
