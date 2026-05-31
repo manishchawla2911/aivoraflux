@@ -89,3 +89,59 @@ def test_unknown_backend_falls_back_to_stub(monkeypatch):
     monkeypatch.setenv("EMBEDDING_BACKEND", "does-not-exist")
     out = embeddings.embed(["x"])
     assert len(out) == 1 and len(out[0]) == embeddings.STUB_DIM
+
+
+from core import workspace_memory as wm
+
+
+def _seed_ws(db, ws_id="w1", mission="Grow revenue 3x this year"):
+    with Session(db) as s:
+        s.add(Workspace(id=ws_id, owner_email="o@x.com", name="Acme", mission=mission))
+        s.commit()
+
+
+def test_add_entry_persists_to_sqlite(db):
+    _seed_ws(db)
+    with Session(db) as s:
+        entry = wm.add_entry(s, "w1", author="owner", kind="fact",
+                             content="We sell B2B analytics", tags=["context"])
+        assert entry.id
+        rows = s.exec(select(WorkspaceMemory).where(WorkspaceMemory.workspace_id == "w1")).all()
+        assert len(rows) == 1 and rows[0].content == "We sell B2B analytics"
+
+
+def test_query_returns_relevant_entries(db):
+    _seed_ws(db)
+    with Session(db) as s:
+        wm.add_entry(s, "w1", author="owner", kind="fact", content="Our pricing is usage-based")
+        wm.add_entry(s, "w1", author="owner", kind="fact", content="Hiring two engineers in Q3")
+        results = wm.query(s, "w1", "tell me about pricing", k=2)
+        assert len(results) >= 1
+        assert all(isinstance(r, WorkspaceMemory) for r in results)
+
+
+def test_query_sql_fallback_when_chroma_unavailable(db, monkeypatch):
+    _seed_ws(db)
+    with Session(db) as s:
+        wm.add_entry(s, "w1", author="owner", kind="note", content="alpha")
+        wm.add_entry(s, "w1", author="owner", kind="note", content="beta")
+        # Force the Chroma path to blow up — query must still return rows via SQL.
+        monkeypatch.setattr(wm, "_get_collection", lambda ws_id: (_ for _ in ()).throw(RuntimeError("no chroma")))
+        results = wm.query(s, "w1", "anything", k=5)
+        assert len(results) == 2
+
+
+def test_build_memory_context_includes_mission_and_entries(db):
+    _seed_ws(db, mission="Become the #1 analytics tool")
+    with Session(db) as s:
+        wm.add_entry(s, "w1", author="cfo", kind="decision", content="Cap CAC at $400")
+        ctx = wm.build_memory_context(s, "w1", "what is our budget stance?", k=5)
+        assert "Become the #1 analytics tool" in ctx
+        assert "Cap CAC at $400" in ctx
+        assert "Shared workspace memory" in ctx
+
+
+def test_build_memory_context_empty_workspace_is_safe(db):
+    with Session(db) as s:
+        # Unknown workspace → empty string, never raises.
+        assert wm.build_memory_context(s, "ghost", "hi", k=5) == ""
