@@ -100,3 +100,52 @@ def test_resolve_mentions_unknown_ignored_and_dedup():
 def test_resolve_mentions_order_preserved():
     members = [("m1", "CEO", "ceo"), ("m2", "CFO", "cfo")]
     assert wc.resolve_mentions("@CFO then @CEO", members) == ["m2", "m1"]
+
+
+def _make_ws(db):
+    with Session(db) as s:
+        ws = wf.create_workspace(
+            s, owner_email="o@x.com", name="Acme", company_description="",
+            mission="Win the market", selected_roles=["ceo", "cfo"],
+        )
+        return ws.id
+
+
+def test_owner_post_no_mention_creates_only_owner_message(db, monkeypatch):
+    monkeypatch.setattr("core.llm_providers.complete", _echo_complete)
+    ws_id = _make_ws(db)
+    with Session(db) as s:
+        created = wc.post_message(s, ws_id, author_kind="owner", content="just thinking")
+        assert len(created) == 1
+        assert created[0].author_kind == "owner"
+        agent_msgs = s.exec(select(WorkspaceChatMessage).where(
+            WorkspaceChatMessage.author_kind == "agent")).all()
+        assert agent_msgs == []
+
+
+def test_single_mention_triggers_one_reply_grounded(db, monkeypatch):
+    monkeypatch.setattr("core.llm_providers.complete", _echo_complete)
+    ws_id = _make_ws(db)
+    with Session(db) as s:
+        created = wc.post_message(s, ws_id, author_kind="owner", content="hey @CEO plan?")
+        assert len(created) == 2
+        reply = created[1]
+        assert reply.author_kind == "agent"
+        assert reply.triggered_by_id == created[0].id
+        assert "Win the market" in reply.content
+        assert "Team chat (recent)" in reply.content
+
+
+def test_cascade_is_bounded_and_loops_guarded(db, monkeypatch):
+    def chain_complete(req, provider):
+        return CompletionResponse(text="@CFO @CEO keep going", provider=provider,
+                                  model=req.model, stubbed=True)
+    monkeypatch.setattr("core.llm_providers.complete", chain_complete)
+    monkeypatch.setenv("WORKSPACE_CHAT_MAX_TURNS", "6")
+    ws_id = _make_ws(db)
+    with Session(db) as s:
+        created = wc.post_message(s, ws_id, author_kind="owner", content="@CEO start")
+        agent_turns = [m for m in created if m.author_kind == "agent"]
+        assert len(agent_turns) <= 6
+        triggered_members = [m.author_member_id for m in agent_turns]
+        assert len(triggered_members) == len(set(triggered_members))  # no member twice
