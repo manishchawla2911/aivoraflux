@@ -111,3 +111,35 @@ def send_message(platform: str, channel: str, text: str, *,
     except Exception:
         logger.warning("chat_bridge.send_failed platform=%s", platform, exc_info=True)
         return False
+
+
+def handle_inbound(session: Session, platform: str, payload: Dict) -> Dict:
+    """Route an inbound platform message into workspace chat and reply back.
+
+    Always safe to call: unparseable/unmapped inbound returns {"handled": False}.
+    """
+    msg = parse_inbound(platform, payload)
+    if msg is None:
+        return {"handled": False, "reason": "unparseable"}
+    if msg.challenge is not None:
+        return {"challenge": msg.challenge}
+
+    channel = session.exec(
+        select(WorkspaceChannel).where(
+            (WorkspaceChannel.platform == platform)
+            & (WorkspaceChannel.external_id == msg.external_id)
+            & (WorkspaceChannel.active == True)  # noqa: E712
+        )
+    ).first()
+    if channel is None:
+        return {"handled": False, "reason": "unmapped"}
+
+    created = workspace_chat.post_message(
+        session, channel.workspace_id, author_kind="owner", content=msg.text
+    )
+    token = os.getenv(channel.token_env, "") if channel.token_env else ""
+    replies = [m for m in created if m.author_kind == "agent"]
+    for reply in replies:
+        send_message(platform, msg.external_id, reply.content, token=token or None)
+
+    return {"handled": True, "replies": len(replies)}
