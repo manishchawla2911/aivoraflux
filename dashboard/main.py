@@ -35,7 +35,7 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import timedelta
 from pathlib import Path
-from typing import Awaitable, Callable, List, Optional, Union
+from typing import Awaitable, Callable, List, Union
 
 from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse

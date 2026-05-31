@@ -129,7 +129,9 @@ Pure logic over a passed `Session`; no web coupling.
 | `GET /workspaces/{id}/chat` | render transcript + composer (404 if workspace missing) |
 | `POST /workspaces/{id}/chat` | owner posts `content`; runs cascade; 303 back to chat |
 | `POST /workspaces/{id}/chat/{msg_id}/pin` | pin message into `WorkspaceMemory` (kind defaults to `decision`); set `pinned_memory_id`; 303 |
-| `GET /workspaces/{id}/chat/api/messages` | JSON message list; optional `after` cursor |
+
+(A `GET …/chat/api/messages` JSON endpoint was considered but dropped this cycle — the
+HTML view re-renders on POST, so polling has no consumer until a streaming UI lands.)
 
 ## UI
 
