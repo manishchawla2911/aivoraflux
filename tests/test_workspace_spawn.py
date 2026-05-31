@@ -156,3 +156,37 @@ def test_spawn_project_team_without_ceo_uses_none_parent(db):
         team = ws_spawn.spawn_project_team(s, ws.id, project)
         assert team["pm"].parent_member_id is None
         assert len(team["developers"]) == 1
+
+
+from core import cost_estimator as ce
+
+
+def test_model_rates_known_and_fallback():
+    in_rate, out_rate = ce.model_rates("anthropic", "claude-sonnet-4-6")
+    assert in_rate == 3.0 and out_rate == 15.0
+    # unknown provider/model -> anthropic sonnet fallback
+    assert ce.model_rates("nope", "nope") == (3.0, 15.0)
+
+
+def test_estimate_is_deterministic(monkeypatch):
+    monkeypatch.setenv("COST_ASSUMED_TURNS", "8")
+    monkeypatch.setenv("COST_BASE_CONTEXT_TOKENS", "1500")
+    monkeypatch.setenv("COST_OUTPUT_TOKENS_PER_TURN", "500")
+    est = ce.estimate_project_cost("Build a landing page", team_size=4)
+    brief_tokens = len("Build a landing page") // 4
+    expected_in = (1500 + brief_tokens) * 32      # team_size 4 * 8 turns
+    expected_out = 500 * 32
+    assert est.input_tokens == expected_in
+    assert est.output_tokens == expected_out
+    assert est.team_size == 4
+    expected_cost = round(expected_in / 1e6 * 3.0 + expected_out / 1e6 * 15.0, 4)
+    assert est.cost_usd == expected_cost
+
+
+def test_estimate_json_roundtrip():
+    est = ce.estimate_project_cost("x" * 500, team_size=5)
+    blob = est.to_json()
+    back = ce.CostEstimate.from_json(blob)
+    assert back.input_tokens == est.input_tokens
+    assert back.cost_usd == est.cost_usd
+    assert back.assumptions["assumed_turns"] == est.assumptions["assumed_turns"]
