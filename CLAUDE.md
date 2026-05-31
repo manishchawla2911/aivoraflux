@@ -58,6 +58,8 @@ Three structural layers, plus the runtime engine:
    - `core/workspace_memory.py` — shared memory store. Canonical in SQLite (`WorkspaceMemory`); semantically indexed in a per-workspace **ChromaDB** collection under `CHROMA_DIR`. `add_entry`/`query`/`build_memory_context`; **fail-open** — Chroma failures fall back to SQL recent-rows and never break a run.
    - `core/embeddings.py` — pluggable `embed()` (`EMBEDDING_BACKEND`: `stub` for tests, `sentence_transformers` default, `ollama`), fail-open to the stub.
    - Routes: `/workspaces`, `/workspaces/new`, `/workspaces/{id}`, plus memory-add and archive. Member runs reuse `/agents/{id}/run`, which prepends the shared-memory block to the system prompt **only** when the agent is a workspace member (Studio runs are unchanged).
+   - `core/agent_runtime.py::run_agent_completion` — the shared guardrail→complete→persist core used by BOTH `/agents/{id}/run` and internal chat (single seam; tests patch `core.llm_providers.complete`).
+   - `core/workspace_chat.py` — internal chat (subsystem D): one channel per workspace (`WorkspaceChatMessage`). `resolve_mentions` matches `@name`/`/name`; `post_message` runs a **bounded** agent-to-agent cascade (`WORKSPACE_CHAT_MAX_TURNS`, default 6) with a per-cascade visited-set so it cannot loop. Each turn reads shared memory + recent transcript (`CHAT_HISTORY_N`, default 12). Owner can pin a message into `WorkspaceMemory`. Routes: `/workspaces/{id}/chat` (+ post, `/chat/{msg}/pin`).
 
 ### Key invariants
 
