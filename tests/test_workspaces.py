@@ -220,7 +220,7 @@ def client(db, monkeypatch):
         return CompletionResponse(text=f"SYSTEM_WAS:::{req.system}",
                                   provider=provider, model=req.model, stubbed=True)
 
-    monkeypatch.setattr(dash, "complete", fake_complete)
+    monkeypatch.setattr("core.llm_providers.complete", fake_complete)
     return TestClient(dash.app)
 
 

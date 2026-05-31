@@ -31,7 +31,6 @@ import inspect
 import json
 import logging
 import os
-import time
 import uuid
 from contextlib import asynccontextmanager
 from datetime import timedelta
@@ -47,9 +46,10 @@ from sqlmodel import Session, select
 from core.agent_factory import (
     AgentSpec, CATEGORIES, TOOL_CATALOG, _slugify, auto_craft,
 )
-from core.guardrails import GUARDRAIL_FEATURES, Guardrails
-from core.llm_providers import CompletionRequest, complete, list_providers
-from core.observability import WINDOWS, compute_metrics, detect_anomalies, record_event
+from core.guardrails import GUARDRAIL_FEATURES
+from core.llm_providers import list_providers
+from core.observability import WINDOWS, compute_metrics, detect_anomalies
+from core.agent_runtime import run_agent_completion
 from core.state import (
     Agent, AgentRun, GuardrailProfile, HumanDecision, Project,
     ProviderConfig, Workspace, WorkspaceMember, WorkspaceMemory,
@@ -292,117 +292,44 @@ async def agent_detail(request: Request, agent_id: str) -> HTMLResponse:
 
 @app.post("/agents/{agent_id}/run")
 async def run_agent(agent_id: str, input: str = Form(...)) -> JSONResponse:
-    t_start = time.time()
     if len(input) > MAX_RUN_INPUT_CHARS:
         return JSONResponse(
             {"error": f"input too large ({len(input)} chars); max is {MAX_RUN_INPUT_CHARS}"},
             status_code=413,
         )
-    memory_block = ""
     with Session(get_engine()) as s:
         agent = s.get(Agent, agent_id)
         if not agent:
             return JSONResponse({"error": "agent not found"}, status_code=404)
-        profile = s.get(GuardrailProfile, agent.guardrail_profile_id) if agent.guardrail_profile_id else None
         member = s.exec(
             select(WorkspaceMember).where(WorkspaceMember.agent_id == agent_id)
         ).first()
-        if member:
-            memory_block = workspace_memory.build_memory_context(
-                s, member.workspace_id, input, k=WORKSPACE_MEMORY_K
-            )
+        memory_block = workspace_memory.build_memory_context(
+            s, member.workspace_id, input, k=WORKSPACE_MEMORY_K
+        ) if member else ""
+        result = run_agent_completion(s, agent, user_input=input, extra_system=memory_block)
 
-    rails = Guardrails(profile=profile)
-    in_verdict = rails.check_input(agent_id, input)
-    if not in_verdict.allowed:
-        _save_run(agent_id, input, "", verdict="blocked", reason=in_verdict.reason, latency=0,
-                  agent_name=agent.name, agent_type=agent.category)
+    if result.blocked:
+        msg = (f"⛔ Blocked by guardrails: {result.reason}" if result.block_stage == "input"
+               else f"⛔ Output blocked: {result.reason}")
         return JSONResponse({
             "guardrail_verdict": "blocked",
-            "reason": in_verdict.reason,
-            "output": f"⛔ Blocked by guardrails: {in_verdict.reason}",
-            "latency_ms": int((time.time() - t_start) * 1000),
+            "reason": result.reason,
+            "output": msg,
+            "latency_ms": result.latency_ms,
         })
-
-    system_prompt = agent.system_prompt
-    if memory_block:
-        system_prompt = f"{memory_block}\n\n{agent.system_prompt}"
-
-    req = CompletionRequest(
-        system=system_prompt,
-        user=input,
-        model=agent.model_name,
-        temperature=agent.temperature,
-        max_tokens=agent.max_tokens,
-    )
-    resp = complete(req, agent.model_provider)
-
-    out_verdict = rails.check_output(resp.text)
-    if not out_verdict.allowed:
-        _save_run(agent_id, input, resp.text, verdict="blocked",
-                  reason=out_verdict.reason, latency=resp.latency_ms,
-                  in_tok=resp.input_tokens, out_tok=resp.output_tokens, cost=resp.cost_usd,
-                  agent_name=agent.name, agent_type=agent.category)
-        return JSONResponse({
-            "guardrail_verdict": "blocked",
-            "reason": out_verdict.reason,
-            "output": f"⛔ Output blocked: {out_verdict.reason}",
-            "latency_ms": resp.latency_ms,
-        })
-
-    final_text = out_verdict.redacted_text or resp.text
-    _save_run(agent_id, input, final_text, verdict="passed", latency=resp.latency_ms,
-              in_tok=resp.input_tokens, out_tok=resp.output_tokens, cost=resp.cost_usd,
-              agent_name=agent.name, agent_type=agent.category)
 
     return JSONResponse({
-        "output": final_text,
+        "output": result.final_text,
         "guardrail_verdict": "passed",
-        "latency_ms": resp.latency_ms,
-        "input_tokens": resp.input_tokens,
-        "output_tokens": resp.output_tokens,
-        "cost_usd": resp.cost_usd,
-        "stubbed": resp.stubbed,
-        "provider": resp.provider,
-        "model": resp.model,
+        "latency_ms": result.latency_ms,
+        "input_tokens": result.input_tokens,
+        "output_tokens": result.output_tokens,
+        "cost_usd": result.cost_usd,
+        "stubbed": result.stubbed,
+        "provider": result.provider,
+        "model": result.model,
     })
-
-
-def _save_run(agent_id: str, inp: str, out: str, *, verdict: str,
-              reason: Optional[str] = None, latency: int = 0,
-              in_tok: int = 0, out_tok: int = 0, cost: float = 0.0,
-              agent_name: Optional[str] = None, agent_type: Optional[str] = None) -> None:
-    with Session(get_engine()) as s:
-        s.add(AgentRun(
-            id=str(uuid.uuid4()),
-            agent_id=agent_id,
-            input_text=inp,
-            output_text=out,
-            latency_ms=latency,
-            input_tokens=in_tok,
-            output_tokens=out_tok,
-            cost_usd=cost,
-            guardrail_verdict=verdict,
-            guardrail_reason=reason,
-        ))
-        s.commit()
-    # Mirror the run into the unified observability stream (fail-open, no raw text).
-    record_event(
-        event_type="guardrail_block" if verdict == "blocked" else "run",
-        source="studio",
-        status="blocked" if verdict == "blocked" else "passed",
-        agent_id=agent_id,
-        agent_name=agent_name,
-        agent_type=agent_type,
-        guardrail_verdict=verdict,
-        error=reason,
-        duration_ms=latency,
-        input_tokens=in_tok,
-        output_tokens=out_tok,
-        cost_usd=cost,
-        input_chars=len(inp or ""),
-        output_chars=len(out or ""),
-    )
 
 
 # ─────────────────────────────────────────────────────────────
