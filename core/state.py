@@ -229,6 +229,22 @@ class WorkspaceMemory(SQLModel, table=True):
     created_at: datetime = Field(default_factory=_utcnow)
 
 
+class WorkspaceChatMessage(SQLModel, table=True):
+    """One message in a workspace's single internal chat channel."""
+    __tablename__ = "workspace_chat_message"
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    author_kind: str = "owner"                  # owner | agent
+    author_member_id: Optional[str] = None      # WorkspaceMember.id when agent-authored
+    author_name: str = "Owner"                  # display label in the transcript
+    content: str = ""
+    mentions: Optional[str] = None              # JSON list of resolved member ids
+    triggered_by_id: Optional[str] = None       # message id that caused this one
+    pinned_memory_id: Optional[str] = None      # WorkspaceMemory.id once pinned
+    created_at: datetime = Field(default_factory=_utcnow)
+
+
 # ─────────────────────────────────────────────────────────────
 # Observability — append-only telemetry for the agent fleet & studio.
 # ─────────────────────────────────────────────────────────────
