@@ -252,3 +252,64 @@ def test_non_workspace_agent_run_is_unchanged(db, client):
     out = r.json()["output"]
     assert "Shared workspace memory" not in out
     assert out == "SYSTEM_WAS:::You are solo."
+
+
+def test_workspace_create_flow_via_http(db, client):
+    # empty list first
+    r = client.get("/workspaces")
+    assert r.status_code == 200
+
+    # wizard renders the role catalog
+    r = client.get("/workspaces/new")
+    assert r.status_code == 200
+    assert "CEO" in r.text and "CFO" in r.text
+
+    # create
+    r = client.post("/workspaces", data={
+        "name": "Acme Co",
+        "company_description": "B2B analytics",
+        "mission": "Triple revenue this year",
+        "roles": ["ceo", "cfo"],
+    }, follow_redirects=False)
+    assert r.status_code == 303
+    detail_url = r.headers["location"]
+
+    # detail shows roster + mission
+    detail = client.get(detail_url)
+    assert detail.status_code == 200
+    assert "Acme Co" in detail.text
+    assert "Triple revenue this year" in detail.text
+    assert "CEO" in detail.text and "CFO" in detail.text
+
+
+def test_add_memory_entry_via_http(db, client):
+    with Session(db) as s:
+        ws = wf.create_workspace(
+            s, owner_email="o@x.com", name="Acme", company_description="",
+            mission="Win", selected_roles=["ceo"],
+        )
+        ws_id = ws.id
+
+    r = client.post(f"/workspaces/{ws_id}/memory", data={
+        "kind": "decision", "content": "Launch in Q4", "tags": "launch,strategy",
+    }, follow_redirects=False)
+    assert r.status_code == 303
+
+    with Session(db) as s:
+        rows = s.exec(select(WorkspaceMemory).where(
+            WorkspaceMemory.workspace_id == ws_id)).all()
+        assert any(x.content == "Launch in Q4" and x.kind == "decision" for x in rows)
+
+
+def test_archive_workspace_via_http(db, client):
+    with Session(db) as s:
+        ws = wf.create_workspace(
+            s, owner_email="o@x.com", name="Acme", company_description="",
+            mission="", selected_roles=["ceo"],
+        )
+        ws_id = ws.id
+
+    r = client.post(f"/workspaces/{ws_id}/archive", follow_redirects=False)
+    assert r.status_code == 303
+    with Session(db) as s:
+        assert s.get(Workspace, ws_id).status == "archived"

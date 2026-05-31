@@ -405,6 +405,116 @@ def _save_run(agent_id: str, inp: str, out: str, *, verdict: str,
     )
 
 
+# ─────────────────────────────────────────────────────────────
+# Workspaces — an AI company: roster of role agents + shared memory
+# ─────────────────────────────────────────────────────────────
+
+@app.get("/workspaces", response_class=HTMLResponse)
+async def workspaces_list(request: Request) -> HTMLResponse:
+    with Session(get_engine()) as s:
+        workspaces = s.exec(
+            select(Workspace).order_by(Workspace.created_at.desc())
+        ).all()
+        counts = {
+            w.id: (s.scalar(
+                select(func.count()).select_from(WorkspaceMember)
+                .where(WorkspaceMember.workspace_id == w.id)
+            ) or 0)
+            for w in workspaces
+        }
+    return templates.TemplateResponse(request, "workspaces.html", {
+        "workspaces": workspaces,
+        "member_counts": counts,
+    })
+
+
+@app.get("/workspaces/new", response_class=HTMLResponse)
+async def workspaces_new(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(request, "workspace_new.html", {
+        "roles": ROLE_CATALOG,
+    })
+
+
+@app.post("/workspaces")
+async def workspaces_create(request: Request) -> RedirectResponse:
+    form = await request.form()
+    valid = {r["id"] for r in ROLE_CATALOG}
+    selected = [r for r in form.getlist("roles") if r in valid]
+    overrides = {}
+    for role_id in selected:
+        dn = (form.get(f"name_{role_id}") or "").strip()
+        if dn:
+            overrides[role_id] = {"display_name": dn}
+    with Session(get_engine()) as s:
+        ws = create_workspace(
+            s,
+            owner_email=None,
+            name=form.get("name", "Untitled").strip() or "Untitled",
+            company_description=form.get("company_description", ""),
+            mission=form.get("mission", ""),
+            selected_roles=selected,
+            member_overrides=overrides,
+        )
+        ws_id = ws.id
+    return RedirectResponse(url=f"/workspaces/{ws_id}", status_code=303)
+
+
+@app.get("/workspaces/{workspace_id}", response_class=HTMLResponse)
+async def workspace_detail(request: Request, workspace_id: str) -> HTMLResponse:
+    with Session(get_engine()) as s:
+        ws = s.get(Workspace, workspace_id)
+        if not ws:
+            raise HTTPException(404, "workspace not found")
+        members = s.exec(
+            select(WorkspaceMember).where(WorkspaceMember.workspace_id == workspace_id)
+            .order_by(WorkspaceMember.order_index)
+        ).all()
+        agents = {a.id: a for a in s.exec(
+            select(Agent).where(Agent.id.in_([m.agent_id for m in members]))
+        ).all()} if members else {}
+        memories = s.exec(
+            select(WorkspaceMemory).where(WorkspaceMemory.workspace_id == workspace_id)
+            .order_by(WorkspaceMemory.created_at.desc()).limit(50)
+        ).all()
+    return templates.TemplateResponse(request, "workspace_detail.html", {
+        "ws": ws,
+        "members": members,
+        "agents": agents,
+        "memories": memories,
+        "memory_kinds": ["note", "fact", "decision", "goal"],
+    })
+
+
+@app.post("/workspaces/{workspace_id}/memory")
+async def workspace_add_memory(workspace_id: str, request: Request) -> RedirectResponse:
+    form = await request.form()
+    content = (form.get("content") or "").strip()
+    if content:
+        kind = form.get("kind", "note")
+        kind = kind if kind in {"note", "fact", "decision", "goal"} else "note"
+        tags = [t.strip() for t in (form.get("tags") or "").split(",") if t.strip()]
+        with Session(get_engine()) as s:
+            if s.get(Workspace, workspace_id) is None:
+                raise HTTPException(404, "workspace not found")
+            workspace_memory.add_entry(
+                s, workspace_id, author="owner", kind=kind, content=content, tags=tags,
+            )
+    return RedirectResponse(url=f"/workspaces/{workspace_id}", status_code=303)
+
+
+@app.post("/workspaces/{workspace_id}/archive")
+async def workspace_archive(workspace_id: str) -> RedirectResponse:
+    with Session(get_engine()) as s:
+        ws = s.get(Workspace, workspace_id)
+        if not ws:
+            raise HTTPException(404, "workspace not found")
+        ws.status = "archived"
+        ws.updated_at = utcnow()
+        s.add(ws)
+        s.commit()
+    return RedirectResponse(url="/workspaces", status_code=303)
+
+
 @app.post("/agents/{agent_id}/delete")
 async def delete_agent(agent_id: str) -> RedirectResponse:
     with Session(get_engine()) as s:
