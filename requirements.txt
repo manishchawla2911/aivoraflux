@@ -1,0 +1,39 @@
+# requirements.txt
+# Pin exact versions after first successful install
+
+# Core
+anthropic>=0.40.0
+pydantic>=2.0.0
+sqlmodel>=0.0.18
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+
+# Async
+asyncio-mqtt>=0.16.0        # optional: if MQTT event bus needed later
+aiohttp>=3.10.0             # for async HTTP (GitHub API, Slack webhooks)
+httpx>=0.27.0
+
+# Git / GitHub
+pygithub>=2.4.0             # GitHub API
+gitpython>=3.1.43           # local git operations
+
+# PDF generation
+weasyprint>=62.0            # proof report PDF
+jinja2>=3.1.4               # HTML templates
+
+# Security scanning (install separately — system tools)
+# semgrep — install via: pip install semgrep
+# bandit  — install via: pip install bandit
+# pip-audit — install via: pip install pip-audit
+
+# Dev / Testing
+pytest>=8.0.0
+pytest-asyncio>=0.24.0
+pytest-cov>=5.0.0
+respx>=0.21.0               # mock httpx requests in tests
+python-dotenv>=1.0.0
+
+# Utilities
+structlog>=24.0.0           # structured logging
+rich>=13.0.0                # pretty terminal output
+typer>=0.12.0               # CLI for manual orchestrator control

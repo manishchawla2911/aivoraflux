@@ -1,0 +1,225 @@
+{% extends "_base.html" %}
+{% block title %}Agent Studio — Craft AI agents that ship work{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="relative overflow-hidden">
+  <div class="absolute inset-0 bg-grad-deep pointer-events-none"></div>
+  <div class="absolute inset-0 grid-bg pointer-events-none"></div>
+
+  <div class="relative max-w-7xl mx-auto px-6 lg:px-8 pt-24 pb-24 lg:pt-32 lg:pb-32">
+    <div class="max-w-3xl">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-slate-300">
+        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+        New · Auto-craft agents from a single sentence
+      </div>
+      <h1 class="mt-6 text-5xl lg:text-7xl font-semibold tracking-tight text-white leading-[1.05]">
+        Craft AI agents
+        <span class="block text-gradient">that ship work.</span>
+      </h1>
+      <p class="mt-7 text-lg text-slate-300 max-w-2xl leading-relaxed">
+        Agent Studio is the studio for building production AI agents — design them by hand, or describe what you want and we'll auto-generate the system prompt, tools and guardrails. Switch between Claude, GPT, Gemini, Mistral, or your local Ollama with one click.
+      </p>
+      <div class="mt-9 flex flex-wrap items-center gap-3">
+        <a href="/studio" class="group inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-grad-brand text-ink-950 font-semibold shadow-glow-v hover:shadow-glow-c transition">
+          Start crafting — it's free
+          <svg class="w-4 h-4 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </a>
+        <a href="/dashboard" class="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-white/5 border border-white/10 text-slate-100 hover:bg-white/10 transition">
+          See live demo
+        </a>
+        <span class="text-xs text-slate-500 ml-2">No credit card · 5 free agents · Open guardrails</span>
+      </div>
+
+      <!-- Logo strip -->
+      <div class="mt-16">
+        <div class="text-xs uppercase tracking-[0.18em] text-slate-500 mb-4">Runs on the best models</div>
+        <div class="flex flex-wrap gap-x-8 gap-y-3 text-slate-400 font-medium">
+          <span>Anthropic</span><span class="text-slate-700">·</span>
+          <span>OpenAI</span><span class="text-slate-700">·</span>
+          <span>Google Gemini</span><span class="text-slate-700">·</span>
+          <span>Mistral</span><span class="text-slate-700">·</span>
+          <span>Groq</span><span class="text-slate-700">·</span>
+          <span>Ollama</span><span class="text-slate-700">·</span>
+          <span>LM Studio</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live preview card -->
+    <div class="relative mt-20 mx-auto max-w-5xl">
+      <div class="absolute -inset-2 bg-grad-soft blur-2xl rounded-3xl"></div>
+      <div class="relative rounded-2xl bg-ink-900/80 backdrop-blur border border-white/10 shadow-2xl overflow-hidden ring-grad">
+        <div class="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-ink-800/50">
+          <span class="w-2.5 h-2.5 rounded-full bg-pink-500/70"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-yellow-500/70"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-cyan-500/70"></span>
+          <span class="ml-3 font-mono text-xs text-slate-500">agentstudio.app · auto-craft</span>
+        </div>
+        <div class="grid md:grid-cols-2">
+          <div class="p-6 border-b md:border-b-0 md:border-r border-white/5">
+            <div class="text-xs text-slate-500 uppercase tracking-wider">Brief</div>
+            <p class="mt-2 text-slate-200">An agent that monitors my Stripe failures every morning, drafts retry emails to customers, and posts a daily summary to Slack.</p>
+            <div class="mt-5 flex items-center gap-2 text-xs text-slate-400">
+              <svg class="w-4 h-4 text-cyan-400 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+              Auto-designing agent…
+            </div>
+          </div>
+          <div class="p-6 bg-ink-800/30">
+            <div class="text-xs text-slate-500 uppercase tracking-wider mb-3">Generated</div>
+            <div class="flex items-center gap-3 mb-3">
+              <span class="text-2xl">💸</span>
+              <div>
+                <div class="font-semibold text-white">Stripe Recovery Pilot</div>
+                <div class="text-xs text-slate-400">finance · Claude Sonnet 4.6</div>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="text-xs px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/30">stripe</span>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/30">email_send</span>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/30">slack_post</span>
+            </div>
+            <div class="mt-4 text-xs font-mono text-slate-400 bg-ink-950/60 border border-white/5 rounded p-3 max-h-32 overflow-auto scrollbar-thin">
+You are an autonomous AI agent created in Agent Studio.<br>
+<br>
+## Your mission<br>
+Monitor Stripe payment failures daily, draft personalized retry emails…
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="relative">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8 py-10">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/5 rounded-2xl overflow-hidden border border-white/10">
+      {% for s in [('7+', 'LLM providers'), ('12', 'built-in tools'), ('7', 'safety layers'), ('<200ms', 'p50 guardrail latency')] %}
+      <div class="bg-ink-900 p-6 text-center">
+        <div class="text-3xl font-semibold text-gradient">{{ s[0] }}</div>
+        <div class="text-xs uppercase tracking-wider text-slate-500 mt-1">{{ s[1] }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="relative">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8 py-24">
+    <div class="max-w-2xl">
+      <div class="text-xs uppercase tracking-[0.18em] text-violet-400 font-medium">The studio</div>
+      <h2 class="mt-3 text-4xl font-semibold text-white tracking-tight">Two ways to craft. One way to ship.</h2>
+      <p class="mt-4 text-slate-400">Whether you want full control over every token or you want to describe an agent and walk away, Agent Studio has a path for you.</p>
+    </div>
+
+    <div class="mt-14 grid md:grid-cols-2 gap-6">
+      <div class="relative rounded-2xl border border-white/10 bg-ink-900/60 p-8 hover:border-violet-500/40 transition group">
+        <div class="w-12 h-12 rounded-xl bg-violet-500/15 border border-violet-500/30 flex items-center justify-center text-2xl group-hover:scale-110 transition">🛠</div>
+        <h3 class="mt-5 text-xl font-semibold text-white">Manual builder</h3>
+        <p class="mt-2 text-slate-400">Write the system prompt yourself, pick the model, attach tools, set temperature, choose a guardrail profile. Every knob exposed.</p>
+        <ul class="mt-5 space-y-2 text-sm text-slate-300">
+          <li class="flex gap-2"><span class="text-violet-400">›</span> Live token & cost estimate per provider</li>
+          <li class="flex gap-2"><span class="text-violet-400">›</span> Versioned prompts with diff view</li>
+          <li class="flex gap-2"><span class="text-violet-400">›</span> 12 plug-and-play tools out of the box</li>
+        </ul>
+      </div>
+
+      <div class="relative rounded-2xl border border-white/10 bg-ink-900/60 p-8 hover:border-cyan-500/40 transition group">
+        <div class="w-12 h-12 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-2xl group-hover:scale-110 transition">✨</div>
+        <h3 class="mt-5 text-xl font-semibold text-white">Auto-craft</h3>
+        <p class="mt-2 text-slate-400">Describe what you want in one sentence. We synthesize the prompt, pick the right tools, recommend guardrails, and you can run it instantly.</p>
+        <ul class="mt-5 space-y-2 text-sm text-slate-300">
+          <li class="flex gap-2"><span class="text-cyan-400">›</span> Powered by Claude Sonnet 4.6 by default</li>
+          <li class="flex gap-2"><span class="text-cyan-400">›</span> Editable after generation — nothing is locked</li>
+          <li class="flex gap-2"><span class="text-cyan-400">›</span> Cold-start fallback if no API key is configured</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SAFETY -->
+<section id="safety" class="relative">
+  <div class="absolute inset-0 bg-gradient-to-b from-transparent via-violet-500/[0.04] to-transparent pointer-events-none"></div>
+  <div class="relative max-w-7xl mx-auto px-6 lg:px-8 py-24">
+    <div class="max-w-2xl">
+      <div class="text-xs uppercase tracking-[0.18em] text-cyan-400 font-medium">Safety</div>
+      <h2 class="mt-3 text-4xl font-semibold text-white tracking-tight">SOTA guardrails, on by default.</h2>
+      <p class="mt-4 text-slate-400">Every agent ships with seven layers of defense — input filtering, dialog policy, output moderation, and audit logs. Tune per agent, not per request.</p>
+    </div>
+
+    <div class="mt-14 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for f in guardrail_features %}
+      <div class="rounded-xl border border-white/10 bg-ink-900/60 p-6 hover:border-cyan-500/40 transition">
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 shrink-0 rounded-lg bg-grad-soft border border-white/10 flex items-center justify-center">
+            <span class="text-cyan-400">🛡</span>
+          </div>
+          <div>
+            <div class="font-semibold text-white">{{ f[1] }}</div>
+            <p class="mt-1 text-sm text-slate-400">{{ f[2] }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- PROVIDERS -->
+<section id="providers" class="relative">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8 py-24">
+    <div class="max-w-2xl">
+      <div class="text-xs uppercase tracking-[0.18em] text-pink-500 font-medium">Providers</div>
+      <h2 class="mt-3 text-4xl font-semibold text-white tracking-tight">Bring your own LLM. Or use ours.</h2>
+      <p class="mt-4 text-slate-400">Swap models per agent or per run. Compare cost, latency and quality side-by-side. Run completely local with Ollama or LM Studio — no data leaves your machine.</p>
+    </div>
+
+    <div class="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {% for p in providers %}
+      <div class="rounded-xl border border-white/10 bg-ink-900/60 p-5 hover:border-white/20 transition">
+        <div class="flex items-center justify-between">
+          <div class="font-semibold text-white">{{ p.label }}</div>
+          {% if p.kind == 'local' %}
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 uppercase">Local</span>
+          {% else %}
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-violet-500/15 text-violet-300 border border-violet-500/30 uppercase">Cloud</span>
+          {% endif %}
+        </div>
+        <div class="mt-3 space-y-1.5">
+          {% for m in p.models[:3] %}
+          <div class="flex justify-between text-xs text-slate-400">
+            <span class="font-mono">{{ m.name }}</span>
+            {% if m['in'] > 0 %}<span>${{ m['in'] }}/M</span>{% else %}<span class="text-cyan-400">free</span>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        <div class="mt-3 text-[11px] text-slate-500">
+          {% if p.available %}<span class="text-cyan-400">●</span> ready{% else %}<span class="text-slate-600">○</span> needs {{ p.env or 'config' }}{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="relative">
+  <div class="max-w-5xl mx-auto px-6 lg:px-8 py-20">
+    <div class="relative rounded-3xl bg-grad-soft border border-white/10 p-12 text-center overflow-hidden">
+      <div class="absolute inset-0 grid-bg opacity-50"></div>
+      <div class="relative">
+        <h2 class="text-4xl font-semibold text-white tracking-tight">Your first agent in 60 seconds.</h2>
+        <p class="mt-4 text-slate-300 max-w-xl mx-auto">Describe what you want done. Get a working, guarded agent. Run it, share it, sell it.</p>
+        <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <a href="/studio" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-grad-brand text-ink-950 font-semibold shadow-glow-v">Open the studio →</a>
+          <a href="/pricing" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-ink-900 border border-white/10 text-slate-100 hover:bg-white/5">See pricing</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

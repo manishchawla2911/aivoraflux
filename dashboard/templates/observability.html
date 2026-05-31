@@ -1,0 +1,133 @@
+{% extends "_base.html" %}
+{% block title %}Observability — Agent Studio{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-6 lg:px-8 pt-12 pb-24">
+
+  <div class="flex items-end justify-between flex-wrap gap-4">
+    <div>
+      <div class="text-xs uppercase tracking-[0.18em] text-cyan-400 font-medium">Platform health</div>
+      <h1 class="mt-2 text-3xl font-semibold text-white tracking-tight">AI Observability</h1>
+      <p class="mt-1 text-slate-400 text-sm">
+        {{ metrics.fleet.runs }} runs · {{ "%.0f"|format(metrics.fleet.error_rate * 100) }}% error rate ·
+        {{ anomalies|length }} anomalies ({{ critical_count }} critical) · window {{ window }}
+      </p>
+    </div>
+    <div class="flex items-center gap-1 rounded-lg bg-white/5 border border-white/10 p-1">
+      {% for w in windows %}
+      <a href="/observability?window={{ w }}"
+         class="text-xs px-3 py-1.5 rounded-md {{ 'bg-grad-brand text-ink-950 font-semibold' if w == window else 'text-slate-300 hover:bg-white/10' }}">{{ w }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if ungated %}
+  <div class="mt-6 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+    ⚠ This dashboard is <strong>ungated</strong>. Set the <code class="font-mono">ADMIN_TOKEN</code> env var to require
+    an <code class="font-mono">X-Admin-Token</code> header (or <code class="font-mono">?token=</code>) — it exposes cost and error data.
+  </div>
+  {% endif %}
+
+  <!-- Fleet summary -->
+  <div class="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+    {% set f = metrics.fleet %}
+    {% macro stat(label, value, accent='text-white') %}
+      <div class="rounded-xl border border-white/10 bg-ink-900/60 p-4">
+        <div class="text-[11px] uppercase tracking-wider text-slate-500">{{ label }}</div>
+        <div class="mt-1 text-xl font-semibold {{ accent }}">{{ value }}</div>
+      </div>
+    {% endmacro %}
+    {{ stat("Runs", f.runs) }}
+    {{ stat("Error rate", "%.0f%%"|format(f.error_rate * 100), 'text-pink-500' if f.error_rate > 0.25 else 'text-white') }}
+    {{ stat("p95 latency", "{:,} ms".format(f.p95_ms)) }}
+    {{ stat("Escalations", f.escalations) }}
+    {{ stat("Guardrail blocks", f.guardrail_blocks) }}
+    {{ stat("Cost", "$%.4f"|format(f.cost_usd)) }}
+  </div>
+
+  <!-- Anomalies -->
+  <div class="mt-10">
+    <h2 class="text-xl font-semibold text-white tracking-tight">Flagged anomalies</h2>
+    {% if not anomalies %}
+    <div class="mt-4 rounded-xl border border-white/10 bg-ink-900/40 px-5 py-6 text-sm text-slate-400">
+      ✓ No anomalies in the last {{ window }}. The manager and admin have nothing to act on.
+    </div>
+    {% else %}
+    <div class="mt-4 space-y-2">
+      {% for a in anomalies %}
+      {% if a.severity == 'critical' %}
+        {% set ring = 'border-pink-500/40 bg-pink-500/10' %}{% set chip = 'bg-pink-500/20 text-pink-300 border-pink-500/40' %}
+      {% elif a.severity == 'warning' %}
+        {% set ring = 'border-amber-500/30 bg-amber-500/5' %}{% set chip = 'bg-amber-500/15 text-amber-300 border-amber-500/30' %}
+      {% else %}
+        {% set ring = 'border-white/10 bg-ink-900/40' %}{% set chip = 'bg-white/5 text-slate-300 border-white/10' %}
+      {% endif %}
+      <div class="rounded-xl border {{ ring }} px-4 py-3 flex items-start justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border {{ chip }}">{{ a.severity }}</span>
+            <span class="text-xs text-slate-400 font-mono">{{ a.detector }}</span>
+            <span class="text-xs text-slate-500">· {{ a.agent }}</span>
+          </div>
+          <p class="mt-1.5 text-sm text-slate-200">{{ a.message }}</p>
+        </div>
+        <div class="text-right shrink-0">
+          <div class="text-sm font-mono text-white">{{ a.value }}</div>
+          <div class="text-[11px] text-slate-500">thr {{ a.threshold }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Per-agent table -->
+  <div class="mt-10">
+    <h2 class="text-xl font-semibold text-white tracking-tight">Per-agent behaviour</h2>
+    <p class="text-sm text-slate-500 mt-1">Fleet pipeline + studio agents · scanned {{ metrics.scanned }} events{% if metrics.truncated %} (truncated){% endif %}</p>
+    {% if not metrics.agents %}
+    <div class="mt-4 rounded-xl border border-dashed border-white/15 bg-ink-900/40 px-5 py-8 text-center text-slate-400">
+      No agent activity recorded yet in this window.
+    </div>
+    {% else %}
+    <div class="mt-4 rounded-2xl border border-white/10 overflow-hidden overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-ink-800/60 text-slate-400 text-xs uppercase tracking-wider">
+          <tr>
+            <th class="text-left font-medium px-4 py-3">Agent</th>
+            <th class="text-right font-medium px-4 py-3">Runs</th>
+            <th class="text-right font-medium px-4 py-3">Error %</th>
+            <th class="text-right font-medium px-4 py-3">p50</th>
+            <th class="text-right font-medium px-4 py-3">p95</th>
+            <th class="text-right font-medium px-4 py-3">Retries/run</th>
+            <th class="text-right font-medium px-4 py-3">Blocks</th>
+            <th class="text-right font-medium px-4 py-3">Cost</th>
+            <th class="text-right font-medium px-4 py-3">Last seen</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+          {% for a in metrics.agents %}
+          <tr class="bg-ink-900/40 hover:bg-ink-800/50 transition">
+            <td class="px-4 py-3 text-white font-medium">{{ a.agent }}</td>
+            <td class="px-4 py-3 text-right font-mono text-slate-300">{{ a.runs }}</td>
+            <td class="px-4 py-3 text-right font-mono {{ 'text-pink-400' if a.error_rate > 0.25 else 'text-slate-300' }}">{{ "%.0f"|format(a.error_rate * 100) }}%</td>
+            <td class="px-4 py-3 text-right font-mono text-slate-400">{{ a.p50_ms }}</td>
+            <td class="px-4 py-3 text-right font-mono text-slate-300">{{ a.p95_ms }}</td>
+            <td class="px-4 py-3 text-right font-mono {{ 'text-amber-400' if a.retries_per_run > 1 else 'text-slate-400' }}">{{ "%.1f"|format(a.retries_per_run) }}</td>
+            <td class="px-4 py-3 text-right font-mono text-slate-400">{{ a.guardrail_blocks }}</td>
+            <td class="px-4 py-3 text-right font-mono text-slate-300">${{ "%.4f"|format(a.cost_usd) }}</td>
+            <td class="px-4 py-3 text-right font-mono text-slate-500 text-xs">{{ a.last_seen[11:19] if a.last_seen else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+
+  <p class="mt-8 text-xs text-slate-600">
+    JSON: <a class="hover:text-slate-400 font-mono" href="/observability/api/metrics?window={{ window }}">/observability/api/metrics</a>
+    · <a class="hover:text-slate-400 font-mono" href="/observability/api/anomalies?window={{ window }}">/observability/api/anomalies</a>
+  </p>
+</section>
+{% endblock %}

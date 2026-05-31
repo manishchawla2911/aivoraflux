@@ -1,0 +1,79 @@
+{% extends "_base.html" %}
+{% block title %}Dashboard — Agent Studio{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-6 lg:px-8 pt-12 pb-24">
+  <div class="flex items-end justify-between flex-wrap gap-4">
+    <div>
+      <div class="text-xs uppercase tracking-[0.18em] text-violet-400 font-medium">Your fleet</div>
+      <h1 class="mt-2 text-3xl font-semibold text-white tracking-tight">Agents</h1>
+      <p class="mt-1 text-slate-400 text-sm">{{ agents|length }} crafted · {{ runs_today }} runs today</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="/observability" class="text-sm px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-200 hover:bg-white/10">📊 Observability</a>
+      <a href="/settings/providers" class="text-sm px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-200 hover:bg-white/10">⚙ Providers</a>
+      <a href="/studio" class="text-sm px-3 py-2 rounded-lg bg-grad-brand text-ink-950 font-semibold shadow-glow-v">+ Craft new agent</a>
+    </div>
+  </div>
+
+  {% if not agents %}
+  <div class="mt-12 rounded-2xl border border-dashed border-white/15 bg-ink-900/40 p-16 text-center">
+    <div class="text-6xl mb-4">✦</div>
+    <div class="text-xl font-semibold text-white">No agents yet</div>
+    <p class="mt-2 text-slate-400">Craft your first agent manually, or describe what you want and let Agent Studio auto-generate it.</p>
+    <div class="mt-6 flex items-center justify-center gap-3">
+      <a href="/studio?mode=auto" class="px-4 py-2.5 rounded-lg bg-grad-brand text-ink-950 font-semibold shadow-glow-v">✨ Auto-craft</a>
+      <a href="/studio?mode=manual" class="px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white">🛠 Manual builder</a>
+    </div>
+  </div>
+  {% else %}
+  <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for a in agents %}
+    <a href="/agents/{{ a.id }}" class="group relative rounded-2xl border border-white/10 bg-ink-900/60 p-6 hover:border-violet-500/40 transition block">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-xl bg-grad-soft border border-white/10 flex items-center justify-center text-2xl">{{ a.avatar_emoji }}</div>
+          <div>
+            <div class="font-semibold text-white">{{ a.name }}</div>
+            <div class="text-xs text-slate-500">{{ a.category or 'general' }} · {{ a.model_provider }}</div>
+          </div>
+        </div>
+        {% if a.status == 'published' %}
+        <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">live</span>
+        {% else %}
+        <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 text-slate-400 border border-white/10">{{ a.status }}</span>
+        {% endif %}
+      </div>
+      <p class="mt-4 text-sm text-slate-400 line-clamp-3">{{ a.description or '—' }}</p>
+      <div class="mt-5 flex items-center justify-between text-xs text-slate-500">
+        <span class="font-mono">{{ a.model_name }}</span>
+        <span>{{ a.crafted_mode }}</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Projects (legacy section, preserved) -->
+  {% if projects %}
+  <div class="mt-20">
+    <h2 class="text-xl font-semibold text-white tracking-tight">Delivery projects</h2>
+    <p class="text-sm text-slate-500 mt-1">Multi-agent pipelines turning client briefs into shipped codebases.</p>
+    <div class="mt-5 rounded-2xl border border-white/10 overflow-hidden divide-y divide-white/5">
+      {% for p in projects %}
+      <a href="/projects/{{ p.id }}" class="flex items-center justify-between px-5 py-4 bg-ink-900/40 hover:bg-ink-800/60 transition">
+        <div>
+          <div class="text-white font-medium">{{ p.name }}</div>
+          <div class="text-xs text-slate-500">{{ p.client_name or 'internal' }}</div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/30">{{ p.status }}</span>
+          <span class="text-xs text-slate-500 font-mono">{{ p.created_at.strftime('%b %d') }}</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "_base.html" %}
+{% block title %}Delivery projects · Agent Studio{% endblock %}
+
+{% block content %}
+<section class="max-w-5xl mx-auto px-6 lg:px-8 pt-12 pb-24">
+  <div class="flex items-center gap-3 text-sm text-slate-500 mb-3">
+    <a href="/dashboard" class="hover:text-white">← Dashboard</a>
+    <span>/</span>
+    <span class="text-white">Delivery projects</span>
+  </div>
+  <h1 class="text-3xl font-semibold text-white tracking-tight">Delivery projects</h1>
+  <p class="mt-2 text-slate-400 max-w-xl">Multi-agent pipelines that turn a client brief into a shipped codebase.</p>
+
+  <form method="post" action="/projects/new" class="mt-8 flex flex-wrap gap-2">
+    <input type="text" name="name" placeholder="Project name" required
+           class="flex-1 min-w-[200px] bg-ink-950/60 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-slate-600 focus:border-violet-500/60 outline-none">
+    <input type="text" name="client_name" placeholder="Client (optional)"
+           class="flex-1 min-w-[200px] bg-ink-950/60 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-slate-600 focus:border-violet-500/60 outline-none">
+    <button type="submit" class="px-4 py-2 rounded-lg bg-grad-brand text-ink-950 font-semibold shadow-glow-v">Create project</button>
+  </form>
+
+  {% if projects %}
+  <div class="mt-8 rounded-2xl border border-white/10 overflow-hidden divide-y divide-white/5">
+    {% for p in projects %}
+    <a href="/projects/{{ p.id }}" class="block px-5 py-4 bg-ink-900/40 hover:bg-ink-800/60 transition">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <div class="text-white font-medium">{{ p.name }}</div>
+          <div class="text-xs text-slate-500">{{ p.client_name or 'Internal' }}</div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/30">{{ p.status.replace('_', ' ').title() }}</span>
+          <span class="text-xs text-slate-500 font-mono">{{ p.created_at.strftime('%b %d, %Y') if p.created_at else '—' }}</span>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="mt-10 rounded-2xl border border-dashed border-white/15 bg-ink-900/40 p-12 text-center text-slate-400">
+    <div class="text-white font-medium mb-1">No projects yet</div>
+    Create one above to get the fleet started.
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

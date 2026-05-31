@@ -1,0 +1,54 @@
+{% extends "_base.html" %}
+{% block title %}Providers — Agent Studio{% endblock %}
+
+{% block content %}
+<section class="max-w-5xl mx-auto px-6 lg:px-8 pt-12 pb-24">
+  <div class="flex items-center gap-3 text-sm text-slate-500 mb-3">
+    <a href="/dashboard" class="hover:text-white">← Dashboard</a>
+    <span>/</span>
+    <span class="text-white">Settings · Providers</span>
+  </div>
+  <h1 class="text-3xl font-semibold text-white tracking-tight">LLM providers</h1>
+  <p class="mt-2 text-slate-400 max-w-xl">Connect cloud providers or point at a local model server. Agents inherit per-agent overrides — these are the defaults.</p>
+
+  <div class="mt-10 space-y-4">
+    {% for p in providers %}
+    <div class="rounded-2xl border border-white/10 bg-ink-900/60 p-6">
+      <div class="flex items-start justify-between">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-xl bg-grad-soft border border-white/10 flex items-center justify-center text-xl">
+            {% if p.kind == 'local' %}🖥{% else %}☁{% endif %}
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <div class="font-semibold text-white">{{ p.label }}</div>
+              {% if p.kind == 'local' %}
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 uppercase">Local</span>
+              {% else %}
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-violet-500/15 text-violet-300 border border-violet-500/30 uppercase">Cloud</span>
+              {% endif %}
+              {% if p.available %}
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 uppercase">connected</span>
+              {% else %}
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10 uppercase">not configured</span>
+              {% endif %}
+            </div>
+            <div class="text-sm text-slate-400 mt-1">
+              {% if p.env %}Set <code class="text-violet-300 bg-white/5 px-1.5 py-0.5 rounded">{{ p.env }}</code> in your environment.{% else %}Local — runs on your machine, no API key needed.{% endif %}
+            </div>
+            <div class="mt-3 flex flex-wrap gap-1.5">
+              {% for m in p.models %}<span class="text-[11px] font-mono px-2 py-0.5 rounded bg-ink-950/60 border border-white/10 text-slate-300">{{ m.id }}</span>{% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="mt-12 rounded-2xl border border-white/10 bg-ink-900/40 p-6">
+    <h2 class="text-lg font-semibold text-white">How keys are stored</h2>
+    <p class="mt-2 text-sm text-slate-400">Agent Studio never persists API keys to disk. They're read from your environment at request time. For self-hosted deployments, mount your secrets manager into the container.</p>
+  </div>
+</section>
+{% endblock %}

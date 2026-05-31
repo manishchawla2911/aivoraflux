@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Agent Studio — Craft AI agents that ship work{% endblock %}</title>
+  <meta name="description" content="{% block description %}Agent Studio is the studio for building production AI agents — manually or auto-generated — with SOTA safety, multi-LLM switching, and a one-click run surface.{% endblock %}">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter var', 'Inter', 'ui-sans-serif', 'system-ui'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+          },
+          colors: {
+            ink:    { 950: '#05050a', 900: '#0a0a14', 800: '#10101c', 700: '#1a1a2e', 600: '#252540' },
+            violet: { 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed' },
+            cyan:   { 400: '#22d3ee', 500: '#06b6d4' },
+            pink:   { 500: '#ec4899' },
+          },
+          boxShadow: {
+            'glow-v':   '0 0 60px -10px rgba(139, 92, 246, 0.45)',
+            'glow-c':   '0 0 60px -10px rgba(34, 211, 238, 0.45)',
+          },
+          backgroundImage: {
+            'grad-brand':  'linear-gradient(135deg, #8b5cf6 0%, #22d3ee 100%)',
+            'grad-soft':   'linear-gradient(135deg, rgba(139,92,246,.18) 0%, rgba(34,211,238,.12) 100%)',
+            'grad-deep':   'radial-gradient(1200px 600px at 50% -10%, rgba(139,92,246,.25), transparent 60%), radial-gradient(900px 500px at 90% 10%, rgba(34,211,238,.15), transparent 60%)',
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    html, body { font-family: 'Inter var', Inter, ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    code, pre, .font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; }
+    .text-gradient { background: linear-gradient(135deg, #a78bfa 0%, #22d3ee 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .ring-grad { position: relative; }
+    .ring-grad::before { content:''; position:absolute; inset:0; padding:1px; border-radius: inherit; background: linear-gradient(135deg, rgba(139,92,246,.6), rgba(34,211,238,.6)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events:none; }
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 50%, transparent 100%);
+    }
+    .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #252540; border-radius: 8px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  </style>
+  {% block head_extra %}{% endblock %}
+</head>
+<body class="bg-ink-950 text-slate-200 min-h-screen antialiased">
+
+  <header class="sticky top-0 z-40 backdrop-blur-xl bg-ink-950/70 border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2.5 group">
+        <span class="w-8 h-8 rounded-lg bg-grad-brand flex items-center justify-center text-ink-950 font-bold shadow-glow-v">✦</span>
+        <span class="font-semibold text-white tracking-tight">Agent Studio</span>
+        <span class="text-xs text-slate-500 hidden sm:inline">/ AI agent studio</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-7 text-sm text-slate-300">
+        <a href="/#features" class="hover:text-white transition">Features</a>
+        <a href="/#safety"   class="hover:text-white transition">Safety</a>
+        <a href="/#providers"class="hover:text-white transition">Providers</a>
+        <a href="/pricing"   class="hover:text-white transition">Pricing</a>
+        <a href="/dashboard" class="hover:text-white transition">Dashboard</a>
+      </nav>
+      <div class="flex items-center gap-2">
+        <a href="/dashboard" class="hidden sm:inline-flex text-sm px-3 py-1.5 rounded-md text-slate-300 hover:text-white hover:bg-white/5 transition">Sign in</a>
+        <a href="/studio" class="inline-flex items-center gap-1.5 text-sm font-medium bg-grad-brand text-ink-950 px-3.5 py-1.5 rounded-md shadow-glow-v hover:shadow-glow-c transition">
+          Craft an agent
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="mt-24 border-t border-white/5 bg-ink-900/40">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12 grid grid-cols-2 md:grid-cols-5 gap-8 text-sm">
+      <div class="col-span-2">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-7 h-7 rounded-md bg-grad-brand flex items-center justify-center text-ink-950 font-bold">✦</span>
+          <span class="font-semibold text-white">Agent Studio</span>
+        </div>
+        <p class="text-slate-400 max-w-sm">The studio for crafting production AI agents with SOTA safety, multi-LLM switching, and one-click runs.</p>
+        <p class="text-slate-600 text-xs mt-4">© {{ '2026' }} Agent Studio. Made with multi-LLM intelligence.</p>
+      </div>
+      <div>
+        <div class="font-medium text-white mb-3">Product</div>
+        <ul class="space-y-2 text-slate-400">
+          <li><a href="/studio" class="hover:text-white">Studio</a></li>
+          <li><a href="/dashboard" class="hover:text-white">Dashboard</a></li>
+          <li><a href="/pricing" class="hover:text-white">Pricing</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="font-medium text-white mb-3">Safety</div>
+        <ul class="space-y-2 text-slate-400">
+          <li>NeMo Guardrails</li>
+          <li>Llama Guard 4</li>
+          <li>PII redaction</li>
+          <li>Jailbreak shield</li>
+        </ul>
+      </div>
+      <div>
+        <div class="font-medium text-white mb-3">Providers</div>
+        <ul class="space-y-2 text-slate-400">
+          <li>Anthropic · OpenAI</li>
+          <li>Google · Mistral</li>
+          <li>Groq · Together</li>
+          <li>Ollama · LM Studio</li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
