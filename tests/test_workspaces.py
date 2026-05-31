@@ -65,3 +65,27 @@ def test_role_catalog_well_formed():
 def test_get_role_lookup():
     assert get_role("ceo")["label"] == "CEO"
     assert get_role("nope") is None
+
+
+from core import embeddings
+
+
+def test_stub_embeddings_deterministic_and_dimensioned(monkeypatch):
+    monkeypatch.setenv("EMBEDDING_BACKEND", "stub")
+    a = embeddings.embed(["hello world", "different text"])
+    b = embeddings.embed(["hello world", "different text"])
+    assert a == b                                   # deterministic
+    assert len(a) == 2
+    assert all(len(v) == embeddings.STUB_DIM for v in a)
+    assert a[0] != a[1]                             # distinct inputs differ
+
+
+def test_embed_empty_returns_empty(monkeypatch):
+    monkeypatch.setenv("EMBEDDING_BACKEND", "stub")
+    assert embeddings.embed([]) == []
+
+
+def test_unknown_backend_falls_back_to_stub(monkeypatch):
+    monkeypatch.setenv("EMBEDDING_BACKEND", "does-not-exist")
+    out = embeddings.embed(["x"])
+    assert len(out) == 1 and len(out[0]) == embeddings.STUB_DIM
