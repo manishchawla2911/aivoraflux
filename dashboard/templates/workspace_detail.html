@@ -8,11 +8,14 @@
       <h1 class="text-2xl font-semibold text-white mt-1">{{ ws.name }}</h1>
       {% if ws.company_description %}<p class="text-slate-400 text-sm">{{ ws.company_description }}</p>{% endif %}
     </div>
-    {% if ws.status == 'active' %}
-      <form method="post" action="/workspaces/{{ ws.id }}/archive">
-        <button class="text-xs text-slate-400 border border-white/10 px-3 py-1.5 rounded-md hover:text-white hover:border-white/30 transition">Archive</button>
-      </form>
-    {% endif %}
+    <div class="flex items-center gap-2">
+      <a href="/workspaces/{{ ws.id }}/chat" class="text-xs text-violet-300 border border-violet-500/30 px-3 py-1.5 rounded-md hover:bg-violet-500/10 transition">Team chat →</a>
+      {% if ws.status == 'active' %}
+        <form method="post" action="/workspaces/{{ ws.id }}/archive">
+          <button class="text-xs text-slate-400 border border-white/10 px-3 py-1.5 rounded-md hover:text-white hover:border-white/30 transition">Archive</button>
+        </form>
+      {% endif %}
+    </div>
   </div>
 
   {% if ws.mission %}

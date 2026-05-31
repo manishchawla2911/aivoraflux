@@ -52,10 +52,11 @@ from core.observability import WINDOWS, compute_metrics, detect_anomalies
 from core.agent_runtime import run_agent_completion
 from core.state import (
     Agent, AgentRun, GuardrailProfile, HumanDecision, Project,
-    ProviderConfig, Workspace, WorkspaceMember, WorkspaceMemory,
+    ProviderConfig, Workspace, WorkspaceChatMessage, WorkspaceMember, WorkspaceMemory,
     get_engine, init_db, utcnow,
 )
 from core import workspace_memory
+from core import workspace_chat
 from core.workspace_factory import create_workspace
 from core.workspace_roles import ROLE_CATALOG
 from dataclasses import asdict
@@ -440,6 +441,57 @@ async def workspace_archive(workspace_id: str) -> RedirectResponse:
         s.add(ws)
         s.commit()
     return RedirectResponse(url="/workspaces", status_code=303)
+
+
+@app.get("/workspaces/{workspace_id}/chat", response_class=HTMLResponse)
+async def workspace_chat_view(request: Request, workspace_id: str) -> HTMLResponse:
+    with Session(get_engine()) as s:
+        ws = s.get(Workspace, workspace_id)
+        if not ws:
+            raise HTTPException(404, "workspace not found")
+        members = s.exec(
+            select(WorkspaceMember).where(WorkspaceMember.workspace_id == workspace_id)
+            .order_by(WorkspaceMember.order_index)
+        ).all()
+        messages = s.exec(
+            select(WorkspaceChatMessage).where(WorkspaceChatMessage.workspace_id == workspace_id)
+            .order_by(WorkspaceChatMessage.created_at)
+        ).all()
+    return templates.TemplateResponse(request, "workspace_chat.html", {
+        "ws": ws,
+        "members": members,
+        "messages": messages,
+    })
+
+
+@app.post("/workspaces/{workspace_id}/chat")
+async def workspace_chat_post(workspace_id: str, content: str = Form(...)) -> RedirectResponse:
+    text = content.strip()
+    with Session(get_engine()) as s:
+        if s.get(Workspace, workspace_id) is None:
+            raise HTTPException(404, "workspace not found")
+        if text:
+            workspace_chat.post_message(s, workspace_id, author_kind="owner", content=text)
+    return RedirectResponse(url=f"/workspaces/{workspace_id}/chat", status_code=303)
+
+
+@app.post("/workspaces/{workspace_id}/chat/{msg_id}/pin")
+async def workspace_chat_pin(workspace_id: str, msg_id: str, request: Request) -> RedirectResponse:
+    form = await request.form()
+    kind = form.get("kind", "decision")
+    kind = kind if kind in {"note", "fact", "decision", "goal"} else "decision"
+    with Session(get_engine()) as s:
+        msg = s.get(WorkspaceChatMessage, msg_id)
+        if msg is None or msg.workspace_id != workspace_id:
+            raise HTTPException(404, "message not found")
+        entry = workspace_memory.add_entry(
+            s, workspace_id, author=msg.author_name, kind=kind,
+            content=msg.content, tags=["pinned"],
+        )
+        msg.pinned_memory_id = entry.id
+        s.add(msg)
+        s.commit()
+    return RedirectResponse(url=f"/workspaces/{workspace_id}/chat", status_code=303)
 
 
 @app.post("/agents/{agent_id}/delete")

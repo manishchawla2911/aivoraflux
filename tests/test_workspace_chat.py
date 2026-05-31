@@ -149,3 +149,53 @@ def test_cascade_is_bounded_and_loops_guarded(db, monkeypatch):
         assert len(agent_turns) <= 6
         triggered_members = [m.author_member_id for m in agent_turns]
         assert len(triggered_members) == len(set(triggered_members))  # no member twice
+
+
+from fastapi.testclient import TestClient
+
+
+@pytest.fixture()
+def client(db, monkeypatch):
+    import dashboard.main as dash
+    monkeypatch.setattr("core.llm_providers.complete", _echo_complete)
+    return TestClient(dash.app)
+
+
+def test_chat_view_and_post_flow(db, client):
+    ws_id = _make_ws(db)
+    r = client.get(f"/workspaces/{ws_id}/chat")
+    assert r.status_code == 200
+
+    r = client.post(f"/workspaces/{ws_id}/chat", data={"content": "hey @CEO plan?"},
+                    follow_redirects=False)
+    assert r.status_code == 303
+
+    detail = client.get(f"/workspaces/{ws_id}/chat")
+    assert "hey @CEO plan?" in detail.text
+    with Session(db) as s:
+        agent_msgs = s.exec(select(WorkspaceChatMessage).where(
+            WorkspaceChatMessage.author_kind == "agent")).all()
+        assert len(agent_msgs) == 1
+
+
+def test_chat_post_missing_workspace_404(db, client):
+    r = client.post("/workspaces/ghost/chat", data={"content": "hi"},
+                    follow_redirects=False)
+    assert r.status_code == 404
+
+
+def test_pin_message_to_memory(db, client):
+    ws_id = _make_ws(db)
+    with Session(db) as s:
+        created = wc.post_message(s, ws_id, author_kind="owner", content="@CEO decide X")
+        ceo_reply_id = created[1].id
+
+    r = client.post(f"/workspaces/{ws_id}/chat/{ceo_reply_id}/pin",
+                    data={"kind": "decision"}, follow_redirects=False)
+    assert r.status_code == 303
+    with Session(db) as s:
+        msg = s.get(WorkspaceChatMessage, ceo_reply_id)
+        assert msg.pinned_memory_id is not None
+        mems = s.exec(select(WorkspaceMemory).where(
+            WorkspaceMemory.id == msg.pinned_memory_id)).all()
+        assert len(mems) == 1 and mems[0].kind == "decision"
