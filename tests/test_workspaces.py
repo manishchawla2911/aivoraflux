@@ -145,3 +145,61 @@ def test_build_memory_context_empty_workspace_is_safe(db):
     with Session(db) as s:
         # Unknown workspace → empty string, never raises.
         assert wm.build_memory_context(s, "ghost", "hi", k=5) == ""
+
+
+from core import workspace_factory as wf
+
+
+def test_create_workspace_builds_agents_members_and_seeds_mission(db):
+    with Session(db) as s:
+        ws = wf.create_workspace(
+            s,
+            owner_email="o@x.com",
+            name="Acme Co",
+            company_description="B2B analytics",
+            mission="Triple revenue",
+            selected_roles=["ceo", "cto"],
+        )
+        agents = s.exec(select(Agent)).all()
+        members = s.exec(select(WorkspaceMember).where(
+            WorkspaceMember.workspace_id == ws.id)).all()
+        mems = s.exec(select(WorkspaceMemory).where(
+            WorkspaceMemory.workspace_id == ws.id)).all()
+
+        assert ws.status == "active"
+        assert len(agents) == 2
+        assert {m.role for m in members} == {"ceo", "cto"}
+        # mission seeded as the first goal entry
+        assert any(m.kind == "goal" and m.content == "Triple revenue" for m in mems)
+        # order_index assigned in selection order
+        assert sorted(m.order_index for m in members) == [0, 1]
+
+
+def test_create_workspace_applies_overrides(db):
+    with Session(db) as s:
+        ws = wf.create_workspace(
+            s,
+            owner_email="o@x.com",
+            name="Acme",
+            company_description="",
+            mission="",
+            selected_roles=["ceo"],
+            member_overrides={"ceo": {"display_name": "Dana", "system_prompt": "Custom CEO."}},
+        )
+        member = s.exec(select(WorkspaceMember).where(
+            WorkspaceMember.workspace_id == ws.id)).one()
+        agent = s.get(Agent, member.agent_id)
+        assert member.display_name == "Dana"
+        assert agent.name == "Dana"
+        assert agent.system_prompt == "Custom CEO."
+
+
+def test_create_workspace_ignores_unknown_roles(db):
+    with Session(db) as s:
+        ws = wf.create_workspace(
+            s, owner_email="o@x.com", name="Acme",
+            company_description="", mission="", selected_roles=["ceo", "wizard"],
+        )
+        members = s.exec(select(WorkspaceMember).where(
+            WorkspaceMember.workspace_id == ws.id)).all()
+        assert {m.role for m in members} == {"ceo"}
