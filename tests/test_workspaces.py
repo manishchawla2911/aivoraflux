@@ -203,3 +203,52 @@ def test_create_workspace_ignores_unknown_roles(db):
         members = s.exec(select(WorkspaceMember).where(
             WorkspaceMember.workspace_id == ws.id)).all()
         assert {m.role for m in members} == {"ceo"}
+
+
+from fastapi.testclient import TestClient
+
+from core.llm_providers import CompletionResponse
+
+
+@pytest.fixture()
+def client(db, monkeypatch):
+    """TestClient sharing the `db` fixture's engine + a completion that echoes
+    its received system prompt, so we can assert what the agent was given."""
+    import dashboard.main as dash
+
+    def fake_complete(req, provider):
+        return CompletionResponse(text=f"SYSTEM_WAS:::{req.system}",
+                                  provider=provider, model=req.model, stubbed=True)
+
+    monkeypatch.setattr(dash, "complete", fake_complete)
+    return TestClient(dash.app)
+
+
+def test_workspace_member_run_injects_memory(db, client):
+    with Session(db) as s:
+        ws = wf.create_workspace(
+            s, owner_email="o@x.com", name="Acme", company_description="",
+            mission="Dominate the analytics market", selected_roles=["ceo"],
+        )
+        member = s.exec(select(WorkspaceMember).where(
+            WorkspaceMember.workspace_id == ws.id)).one()
+        agent_id = member.agent_id
+
+    r = client.post(f"/agents/{agent_id}/run", data={"input": "what is our mission?"})
+    assert r.status_code == 200
+    out = r.json()["output"]
+    assert "Shared workspace memory" in out                 # block was prepended
+    assert "Dominate the analytics market" in out            # mission included
+    assert "You are the CEO" in out                          # original prompt kept
+
+
+def test_non_workspace_agent_run_is_unchanged(db, client):
+    with Session(db) as s:
+        s.add(Agent(id="solo", name="Solo", system_prompt="You are solo."))
+        s.commit()
+
+    r = client.post("/agents/solo/run", data={"input": "hi"})
+    assert r.status_code == 200
+    out = r.json()["output"]
+    assert "Shared workspace memory" not in out
+    assert out == "SYSTEM_WAS:::You are solo."

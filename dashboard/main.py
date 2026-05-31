@@ -52,8 +52,12 @@ from core.llm_providers import CompletionRequest, complete, list_providers
 from core.observability import WINDOWS, compute_metrics, detect_anomalies, record_event
 from core.state import (
     Agent, AgentRun, GuardrailProfile, HumanDecision, Project,
-    ProviderConfig, get_engine, init_db, utcnow,
+    ProviderConfig, Workspace, WorkspaceMember, WorkspaceMemory,
+    get_engine, init_db, utcnow,
 )
+from core import workspace_memory
+from core.workspace_factory import create_workspace
+from core.workspace_roles import ROLE_CATALOG
 from dataclasses import asdict
 
 logger = logging.getLogger(__name__)
@@ -63,6 +67,7 @@ PROJECTS_DIR = Path(os.getenv("PROJECTS_BASE_PATH", "./projects"))
 
 # Maximum characters accepted by the agent run endpoint (SEC-2). Override via env.
 MAX_RUN_INPUT_CHARS = int(os.getenv("MAX_RUN_INPUT_CHARS", "20000"))
+WORKSPACE_MEMORY_K = int(os.getenv("WORKSPACE_MEMORY_K", "5"))
 
 # Startup-hook registry — lets `main.py` attach the orchestrator boot to the
 # same lifespan without a second (deprecated) on_event handler (DEP-2).
@@ -293,11 +298,19 @@ async def run_agent(agent_id: str, input: str = Form(...)) -> JSONResponse:
             {"error": f"input too large ({len(input)} chars); max is {MAX_RUN_INPUT_CHARS}"},
             status_code=413,
         )
+    memory_block = ""
     with Session(get_engine()) as s:
         agent = s.get(Agent, agent_id)
         if not agent:
             return JSONResponse({"error": "agent not found"}, status_code=404)
         profile = s.get(GuardrailProfile, agent.guardrail_profile_id) if agent.guardrail_profile_id else None
+        member = s.exec(
+            select(WorkspaceMember).where(WorkspaceMember.agent_id == agent_id)
+        ).first()
+        if member:
+            memory_block = workspace_memory.build_memory_context(
+                s, member.workspace_id, input, k=WORKSPACE_MEMORY_K
+            )
 
     rails = Guardrails(profile=profile)
     in_verdict = rails.check_input(agent_id, input)
@@ -311,8 +324,12 @@ async def run_agent(agent_id: str, input: str = Form(...)) -> JSONResponse:
             "latency_ms": int((time.time() - t_start) * 1000),
         })
 
+    system_prompt = agent.system_prompt
+    if memory_block:
+        system_prompt = f"{memory_block}\n\n{agent.system_prompt}"
+
     req = CompletionRequest(
-        system=agent.system_prompt,
+        system=system_prompt,
         user=input,
         model=agent.model_name,
         temperature=agent.temperature,
