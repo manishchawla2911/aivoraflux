@@ -45,3 +45,23 @@ def test_workspace_tables_roundtrip(db):
         mems = s.exec(select(WorkspaceMemory).where(WorkspaceMemory.workspace_id == "w1")).all()
         assert len(members) == 1 and members[0].role == "ceo"
         assert len(mems) == 1 and mems[0].kind == "goal"
+
+
+from core.agent_factory import CATEGORIES, TOOL_CATALOG
+from core.workspace_roles import ROLE_CATALOG, get_role
+
+
+def test_role_catalog_well_formed():
+    assert {r["id"] for r in ROLE_CATALOG} == {"ceo", "cfo", "cto", "marketing", "coo"}
+    tool_ids = {t["id"] for t in TOOL_CATALOG}
+    for r in ROLE_CATALOG:
+        assert r["label"] and r["avatar_emoji"]
+        assert r["category"] in CATEGORIES
+        assert len(r["default_system_prompt"]) > 40
+        assert set(r["suggested_tools"]).issubset(tool_ids)
+        assert r["default_model"]
+
+
+def test_get_role_lookup():
+    assert get_role("ceo")["label"] == "CEO"
+    assert get_role("nope") is None
