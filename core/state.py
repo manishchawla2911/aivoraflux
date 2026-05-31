@@ -185,6 +185,51 @@ class GuardrailProfile(SQLModel, table=True):
 
 
 # ─────────────────────────────────────────────────────────────
+# Workspace layer — an "AI company": a roster of role agents that
+# share a common memory. Members reuse the existing Agent row.
+# ─────────────────────────────────────────────────────────────
+
+class Workspace(SQLModel, table=True):
+    """An owner's AI company — a named container for a roster + shared memory."""
+    __tablename__ = "workspace"
+
+    id: str = Field(primary_key=True)
+    owner_email: Optional[str] = Field(default=None, index=True)
+    name: str
+    company_description: Optional[str] = None
+    mission: Optional[str] = None
+    status: str = "active"                      # active | archived
+    created_at: datetime = Field(default_factory=_utcnow)
+    updated_at: datetime = Field(default_factory=_utcnow)
+
+
+class WorkspaceMember(SQLModel, table=True):
+    """Join row: places an existing Agent into a workspace under a role."""
+    __tablename__ = "workspace_member"
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    agent_id: str = Field(foreign_key="agent.id", index=True)
+    role: str                                   # catalog role id, e.g. "ceo"
+    display_name: Optional[str] = None
+    order_index: int = 0
+    created_at: datetime = Field(default_factory=_utcnow)
+
+
+class WorkspaceMemory(SQLModel, table=True):
+    """One shared-memory entry. Canonical here; mirrored into ChromaDB by id."""
+    __tablename__ = "workspace_memory"
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    author: Optional[str] = None                # member display name or "owner"
+    kind: str = "note"                          # goal | decision | fact | note
+    content: str = ""
+    tags: Optional[str] = None                  # JSON list
+    created_at: datetime = Field(default_factory=_utcnow)
+
+
+# ─────────────────────────────────────────────────────────────
 # Observability — append-only telemetry for the agent fleet & studio.
 # ─────────────────────────────────────────────────────────────
 
