@@ -50,10 +50,12 @@ from core.guardrails import GUARDRAIL_FEATURES
 from core.llm_providers import list_providers
 from core.observability import WINDOWS, compute_metrics, detect_anomalies
 from core.agent_runtime import run_agent_completion
+from core import chat_bridge
+from core.chat_bridge import BRIDGE_PLATFORMS
 from core.state import (
     Agent, AgentRun, GuardrailProfile, HumanDecision, Project,
-    ProviderConfig, Workspace, WorkspaceChatMessage, WorkspaceMember, WorkspaceMemory,
-    WorkspaceProject,
+    ProviderConfig, Workspace, WorkspaceChannel, WorkspaceChatMessage, WorkspaceMember,
+    WorkspaceMemory, WorkspaceProject,
     get_engine, init_db, utcnow,
 )
 from core import workspace_memory
@@ -597,6 +599,72 @@ async def workspace_project_archive(workspace_id: str, project_id: str) -> Redir
         s.add(project)
         s.commit()
     return RedirectResponse(url=f"/workspaces/{workspace_id}/projects", status_code=303)
+
+
+@app.post("/bridge/{platform}/webhook")
+async def bridge_webhook(platform: str, request: Request) -> JSONResponse:
+    if platform not in BRIDGE_PLATFORMS:
+        raise HTTPException(404, "unknown platform")
+    try:
+        payload = await request.json()
+    except Exception:
+        payload = {}
+    try:
+        with Session(get_engine()) as s:
+            result = chat_bridge.handle_inbound(s, platform, payload)
+    except Exception as e:  # never 5xx — platforms retry-storm on errors
+        logger.warning("bridge.webhook_error platform=%s err=%s", platform, e)
+        result = {"handled": False, "error": str(e)}
+    return JSONResponse(result, status_code=200)
+
+
+@app.get("/workspaces/{workspace_id}/channels", response_class=HTMLResponse)
+async def workspace_channels(request: Request, workspace_id: str) -> HTMLResponse:
+    with Session(get_engine()) as s:
+        ws = s.get(Workspace, workspace_id)
+        if not ws:
+            raise HTTPException(404, "workspace not found")
+        channels = s.exec(
+            select(WorkspaceChannel).where(WorkspaceChannel.workspace_id == workspace_id)
+            .order_by(WorkspaceChannel.created_at.desc())
+        ).all()
+    return templates.TemplateResponse(request, "workspace_channels.html", {
+        "ws": ws,
+        "channels": channels,
+        "platforms": BRIDGE_PLATFORMS,
+    })
+
+
+@app.post("/workspaces/{workspace_id}/channels")
+async def workspace_channel_link(workspace_id: str, platform: str = Form(...),
+                                 external_id: str = Form(...), label: str = Form(""),
+                                 token_env: str = Form("")) -> RedirectResponse:
+    with Session(get_engine()) as s:
+        if s.get(Workspace, workspace_id) is None:
+            raise HTTPException(404, "workspace not found")
+        if platform in BRIDGE_PLATFORMS and external_id.strip():
+            s.add(WorkspaceChannel(
+                id=str(uuid.uuid4()),
+                workspace_id=workspace_id,
+                platform=platform,
+                external_id=external_id.strip(),
+                label=label.strip() or None,
+                token_env=token_env.strip() or BRIDGE_PLATFORMS[platform]["token_env"],
+            ))
+            s.commit()
+    return RedirectResponse(url=f"/workspaces/{workspace_id}/channels", status_code=303)
+
+
+@app.post("/workspaces/{workspace_id}/channels/{channel_id}/remove")
+async def workspace_channel_remove(workspace_id: str, channel_id: str) -> RedirectResponse:
+    with Session(get_engine()) as s:
+        ch = s.get(WorkspaceChannel, channel_id)
+        if ch is None or ch.workspace_id != workspace_id:
+            raise HTTPException(404, "channel not found")
+        ch.active = False
+        s.add(ch)
+        s.commit()
+    return RedirectResponse(url=f"/workspaces/{workspace_id}/channels", status_code=303)
 
 
 @app.post("/agents/{agent_id}/delete")

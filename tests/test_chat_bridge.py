@@ -114,3 +114,68 @@ def test_handle_inbound_slack_challenge(db):
     with Session(db) as s:
         result = cb.handle_inbound(s, "slack", {"type": "url_verification", "challenge": "z"})
         assert result.get("challenge") == "z"
+
+
+from fastapi.testclient import TestClient
+
+
+@pytest.fixture()
+def client(db, monkeypatch):
+    import dashboard.main as dash
+    monkeypatch.setattr("core.llm_providers.complete", _echo_complete)
+    return TestClient(dash.app)
+
+
+def test_webhook_unknown_platform_404(db, client):
+    r = client.post("/bridge/nope/webhook", json={})
+    assert r.status_code == 404
+
+
+def test_webhook_slack_challenge_echoed(db, client):
+    r = client.post("/bridge/slack/webhook", json={"type": "url_verification", "challenge": "ping"})
+    assert r.status_code == 200
+    assert r.json().get("challenge") == "ping"
+
+
+def test_webhook_routes_inbound(db, client, monkeypatch):
+    sent = []
+    import core.chat_bridge as cbmod
+    monkeypatch.setattr(cbmod, "send_message",
+                        lambda platform, channel, text, **kw: sent.append((channel, text)) or True)
+    with Session(db) as s:
+        ws = wf.create_workspace(
+            s, owner_email="o@x.com", name="Acme", company_description="",
+            mission="Win", selected_roles=["ceo"],
+        )
+        s.add(WorkspaceChannel(id="c1", workspace_id=ws.id, platform="telegram",
+                               external_id="77", token_env="TELEGRAM_BOT_TOKEN"))
+        s.commit()
+    r = client.post("/bridge/telegram/webhook",
+                    json={"message": {"chat": {"id": 77}, "text": "/ceo hi"}})
+    assert r.status_code == 200
+    assert r.json().get("handled") is True
+    assert sent and sent[0][0] == "77"
+
+
+def test_channel_link_and_remove_flow(db, client):
+    with Session(db) as s:
+        ws = wf.create_workspace(
+            s, owner_email="o@x.com", name="Acme", company_description="",
+            mission="", selected_roles=["ceo"],
+        )
+        ws_id = ws.id
+    r = client.get(f"/workspaces/{ws_id}/channels")
+    assert r.status_code == 200
+    r = client.post(f"/workspaces/{ws_id}/channels", data={
+        "platform": "telegram", "external_id": "555", "label": "Team",
+        "token_env": "TELEGRAM_BOT_TOKEN"}, follow_redirects=False)
+    assert r.status_code == 303
+    with Session(db) as s:
+        ch = s.exec(select(WorkspaceChannel).where(
+            WorkspaceChannel.workspace_id == ws_id)).one()
+        assert ch.external_id == "555" and ch.active is True
+        cid = ch.id
+    r = client.post(f"/workspaces/{ws_id}/channels/{cid}/remove", follow_redirects=False)
+    assert r.status_code == 303
+    with Session(db) as s:
+        assert s.get(WorkspaceChannel, cid).active is False
