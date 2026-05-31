@@ -263,6 +263,20 @@ class WorkspaceProject(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=_utcnow)
 
 
+class WorkspaceChannel(SQLModel, table=True):
+    """Links a workspace to an external chat platform channel (subsystem E)."""
+    __tablename__ = "workspace_channel"
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    platform: str                               # telegram | slack | whatsapp
+    external_id: str = Field(index=True)        # chat / channel / phone id
+    label: Optional[str] = None
+    token_env: Optional[str] = None             # env var name holding the bot token
+    active: bool = True
+    created_at: datetime = Field(default_factory=_utcnow)
+
+
 # ─────────────────────────────────────────────────────────────
 # Observability — append-only telemetry for the agent fleet & studio.
 # ─────────────────────────────────────────────────────────────
