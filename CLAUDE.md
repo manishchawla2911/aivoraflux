@@ -51,6 +51,13 @@ Three structural layers, plus the runtime engine:
    - `core/guardrails.py` — composite input/output safety stack (prompt-injection, jailbreak, toxicity, blocked-topics, PII redaction, rate limiting) driven by a `GuardrailProfile`.
    - Routes: `/`, `/pricing`, `/dashboard`, `/studio`, `/agents/*`, `/settings/providers`. The `/agents/{id}/run` endpoint caps input at `MAX_RUN_INPUT_CHARS`.
    - **Observability routes**: `/observability` (HTML), `/observability/api/metrics`, `/observability/api/anomalies` (JSON). Gated by `_admin_gate` — when `ADMIN_TOKEN` is set it requires an `X-Admin-Token` header or `?token=`; when unset the view stays open (demo) but renders an "ungated" warning.
+6. **Workspace layer** — a third product on the same app/DB: an "AI company".
+   - `core/state.py` hosts `Workspace`, `WorkspaceMember` (join → existing `Agent`), and `WorkspaceMemory`.
+   - `core/workspace_roles.py` — `ROLE_CATALOG` of code-defined role templates (CEO, CFO, CTO, Marketing, COO), mirroring `TOOL_CATALOG`.
+   - `core/workspace_factory.py::create_workspace` — instantiates selected roles into real `Agent` rows + `WorkspaceMember` links and seeds the mission as the first memory entry.
+   - `core/workspace_memory.py` — shared memory store. Canonical in SQLite (`WorkspaceMemory`); semantically indexed in a per-workspace **ChromaDB** collection under `CHROMA_DIR`. `add_entry`/`query`/`build_memory_context`; **fail-open** — Chroma failures fall back to SQL recent-rows and never break a run.
+   - `core/embeddings.py` — pluggable `embed()` (`EMBEDDING_BACKEND`: `stub` for tests, `sentence_transformers` default, `ollama`), fail-open to the stub.
+   - Routes: `/workspaces`, `/workspaces/new`, `/workspaces/{id}`, plus memory-add and archive. Member runs reuse `/agents/{id}/run`, which prepends the shared-memory block to the system prompt **only** when the agent is a workspace member (Studio runs are unchanged).
 
 ### Key invariants
 
