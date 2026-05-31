@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Agent Studio — Craft AI agents that ship work{% endblock %}</title>
-  <meta name="description" content="{% block description %}Agent Studio is the studio for building production AI agents — manually or auto-generated — with SOTA safety, multi-LLM switching, and a one-click run surface.{% endblock %}">
+  <title>{% block title %}aivoraflux — intelligent flow, always on{% endblock %}</title>
+  <meta name="description" content="{% block description %}aivoraflux — intelligent flow, always on. Build production AI agents manually or auto-generated, with SOTA safety, multi-LLM switching, and a one-click run surface.{% endblock %}">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -13,11 +13,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>">
+  <link rel="icon" type="image/png" href="/static/favicon.png">
 
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
@@ -25,20 +24,15 @@
             mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
           },
           colors: {
-            ink:    { 950: '#05050a', 900: '#0a0a14', 800: '#10101c', 700: '#1a1a2e', 600: '#252540' },
-            violet: { 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed' },
-            cyan:   { 400: '#22d3ee', 500: '#06b6d4' },
-            pink:   { 500: '#ec4899' },
+            ink: '#0a0a0a',
+            paper: '#ffffff',
+            stone: {
+              50: '#fafafa', 100: '#f5f5f5', 200: '#e7e7e7', 300: '#d4d4d4',
+              400: '#a3a3a3', 500: '#737373', 600: '#525252', 700: '#404040',
+              800: '#262626', 900: '#171717',
+            },
           },
-          boxShadow: {
-            'glow-v':   '0 0 60px -10px rgba(139, 92, 246, 0.45)',
-            'glow-c':   '0 0 60px -10px rgba(34, 211, 238, 0.45)',
-          },
-          backgroundImage: {
-            'grad-brand':  'linear-gradient(135deg, #8b5cf6 0%, #22d3ee 100%)',
-            'grad-soft':   'linear-gradient(135deg, rgba(139,92,246,.18) 0%, rgba(34,211,238,.12) 100%)',
-            'grad-deep':   'radial-gradient(1200px 600px at 50% -10%, rgba(139,92,246,.25), transparent 60%), radial-gradient(900px 500px at 90% 10%, rgba(34,211,238,.15), transparent 60%)',
-          },
+          letterSpacing: { tightest: '-0.04em' },
         }
       }
     }
@@ -47,43 +41,104 @@
   <style>
     html, body { font-family: 'Inter var', Inter, ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
     code, pre, .font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; }
-    .text-gradient { background: linear-gradient(135deg, #a78bfa 0%, #22d3ee 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .ring-grad { position: relative; }
-    .ring-grad::before { content:''; position:absolute; inset:0; padding:1px; border-radius: inherit; background: linear-gradient(135deg, rgba(139,92,246,.6), rgba(34,211,238,.6)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events:none; }
-    .grid-bg {
-      background-image:
-        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
-      background-size: 48px 48px;
-      mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 50%, transparent 100%);
-    }
+    .hairline { border-color: rgba(0,0,0,.08); }
     .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
-    .scrollbar-thin::-webkit-scrollbar-thumb { background: #252540; border-radius: 8px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 8px; }
     .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    ::selection { background: #0a0a0a; color: #fff; }
+
+    html { scroll-behavior: smooth; }
+
+    /* ---- Scroll-reveal: elements rise + fade as they enter the viewport ---- */
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1);
+      transition-delay: var(--reveal-delay, 0ms);
+      will-change: opacity, transform;
+    }
+    [data-reveal].is-visible { opacity: 1; transform: none; }
+
+    /* ---- Hero entrance: staggered clip-reveal of headline lines ---- */
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(40px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .anim-rise { opacity: 0; animation: riseIn 1s cubic-bezier(.16,1,.3,1) forwards; }
+    .anim-d1 { animation-delay: .05s; }
+    .anim-d2 { animation-delay: .18s; }
+    .anim-d3 { animation-delay: .32s; }
+    .anim-d4 { animation-delay: .46s; }
+    .anim-d5 { animation-delay: .60s; }
+
+    /* ---- Infinite marquee for the logo strip ---- */
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .marquee { display: flex; width: max-content; animation: marquee 28s linear infinite; }
+    .marquee-mask { -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+    .marquee-pause:hover .marquee { animation-play-state: paused; }
+
+    /* ---- Card hover lift ---- */
+    .lift { transition: transform .4s cubic-bezier(.16,1,.3,1), box-shadow .4s cubic-bezier(.16,1,.3,1); }
+    .lift:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -24px rgba(0,0,0,.35); }
+
+    /* ---- Animated underline links ---- */
+    .link-underline { position: relative; }
+    .link-underline::after { content:''; position:absolute; left:0; bottom:-2px; height:1px; width:100%; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform .4s cubic-bezier(.16,1,.3,1); }
+    .link-underline:hover::after { transform: scaleX(1); transform-origin: left; }
+
+    /* ---- Animated "aurora" background: drifting, morphing gradient blobs ---- */
+    .aurora { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+    .aurora__blob {
+      position: absolute; border-radius: 9999px;
+      filter: blur(64px); opacity: .55; will-change: transform;
+      mix-blend-mode: multiply;
+    }
+    .aurora__blob--1 { width: 46vw; height: 46vw; left: -8vw; top: -12vw;
+      background: radial-gradient(circle at 30% 30%, #c4b5fd, transparent 62%);
+      animation: drift1 22s ease-in-out infinite alternate; }
+    .aurora__blob--2 { width: 42vw; height: 42vw; right: -10vw; top: -6vw;
+      background: radial-gradient(circle at 60% 40%, #a5f3fc, transparent 62%);
+      animation: drift2 26s ease-in-out infinite alternate; }
+    .aurora__blob--3 { width: 40vw; height: 40vw; left: 22vw; top: 8vw;
+      background: radial-gradient(circle at 50% 50%, #fbcfe8, transparent 62%);
+      animation: drift3 30s ease-in-out infinite alternate; }
+    .aurora__blob--4 { width: 36vw; height: 36vw; right: 14vw; top: 14vw;
+      background: radial-gradient(circle at 50% 50%, #fde68a, transparent 64%);
+      animation: drift4 24s ease-in-out infinite alternate; }
+    @keyframes drift1 { 0%{transform:translate3d(0,0,0) scale(1) rotate(0deg)} 100%{transform:translate3d(8vw,6vw,0) scale(1.25) rotate(40deg)} }
+    @keyframes drift2 { 0%{transform:translate3d(0,0,0) scale(1.1) rotate(0deg)} 100%{transform:translate3d(-7vw,9vw,0) scale(.9) rotate(-30deg)} }
+    @keyframes drift3 { 0%{transform:translate3d(0,0,0) scale(.95) rotate(0deg)} 100%{transform:translate3d(-6vw,-7vw,0) scale(1.2) rotate(35deg)} }
+    @keyframes drift4 { 0%{transform:translate3d(0,0,0) scale(1) rotate(0deg)} 100%{transform:translate3d(6vw,-6vw,0) scale(1.15) rotate(-45deg)} }
+    /* fade the aurora out toward the bottom so content stays crisp */
+    .aurora__mask { position:absolute; inset:0; background: linear-gradient(180deg, transparent 0%, transparent 45%, rgba(255,255,255,.7) 80%, #fff 100%); }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      [data-reveal], .anim-rise { opacity: 1 !important; transform: none !important; animation: none !important; }
+      .marquee { animation: none !important; }
+      .aurora__blob { animation: none !important; }
+    }
   </style>
   {% block head_extra %}{% endblock %}
 </head>
-<body class="bg-ink-950 text-slate-200 min-h-screen antialiased">
+<body class="bg-paper text-ink min-h-screen antialiased">
 
-  <header class="sticky top-0 z-40 backdrop-blur-xl bg-ink-950/70 border-b border-white/5">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-2.5 group">
-        <span class="w-8 h-8 rounded-lg bg-grad-brand flex items-center justify-center text-ink-950 font-bold shadow-glow-v">✦</span>
-        <span class="font-semibold text-white tracking-tight">Agent Studio</span>
-        <span class="text-xs text-slate-500 hidden sm:inline">/ AI agent studio</span>
+  <header class="sticky top-0 z-40 bg-paper/80 backdrop-blur-md border-b border-black/5">
+    <div class="max-w-screen-xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="/" class="flex items-center group">
+        <img src="/static/logo.png" alt="aivoraflux — intelligent flow, always on" class="h-9 w-auto" />
       </a>
-      <nav class="hidden md:flex items-center gap-7 text-sm text-slate-300">
-        <a href="/#features" class="hover:text-white transition">Features</a>
-        <a href="/#safety"   class="hover:text-white transition">Safety</a>
-        <a href="/#providers"class="hover:text-white transition">Providers</a>
-        <a href="/pricing"   class="hover:text-white transition">Pricing</a>
-        <a href="/dashboard" class="hover:text-white transition">Dashboard</a>
+      <nav class="hidden md:flex items-center gap-8 text-sm text-stone-600">
+        <a href="/#features"  class="hover:text-ink transition">Product</a>
+        <a href="/#safety"    class="hover:text-ink transition">Safety</a>
+        <a href="/#providers" class="hover:text-ink transition">Providers</a>
+        <a href="/pricing"    class="hover:text-ink transition">Pricing</a>
+        <a href="/dashboard"  class="hover:text-ink transition">Dashboard</a>
       </nav>
       <div class="flex items-center gap-2">
-        <a href="/dashboard" class="hidden sm:inline-flex text-sm px-3 py-1.5 rounded-md text-slate-300 hover:text-white hover:bg-white/5 transition">Sign in</a>
-        <a href="/studio" class="inline-flex items-center gap-1.5 text-sm font-medium bg-grad-brand text-ink-950 px-3.5 py-1.5 rounded-md shadow-glow-v hover:shadow-glow-c transition">
-          Craft an agent
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        <a href="/dashboard" class="hidden sm:inline-flex text-sm px-3 py-1.5 rounded-md text-stone-700 hover:text-ink transition">Sign in</a>
+        <a href="/studio" class="inline-flex items-center gap-1.5 text-sm font-medium bg-ink text-paper px-4 py-2 rounded-md hover:bg-stone-800 transition">
+          Get started
         </a>
       </div>
     </div>
@@ -93,27 +148,26 @@
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="mt-24 border-t border-white/5 bg-ink-900/40">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12 grid grid-cols-2 md:grid-cols-5 gap-8 text-sm">
+  <footer class="mt-32 border-t border-black/5">
+    <div class="max-w-screen-xl mx-auto px-6 lg:px-8 py-16 grid grid-cols-2 md:grid-cols-5 gap-10 text-sm">
       <div class="col-span-2">
-        <div class="flex items-center gap-2 mb-3">
-          <span class="w-7 h-7 rounded-md bg-grad-brand flex items-center justify-center text-ink-950 font-bold">✦</span>
-          <span class="font-semibold text-white">Agent Studio</span>
+        <div class="mb-4">
+          <img src="/static/logo.png" alt="aivoraflux" class="h-9 w-auto" />
         </div>
-        <p class="text-slate-400 max-w-sm">The studio for crafting production AI agents with SOTA safety, multi-LLM switching, and one-click runs.</p>
-        <p class="text-slate-600 text-xs mt-4">© {{ '2026' }} Agent Studio. Made with multi-LLM intelligence.</p>
+        <p class="text-stone-500 max-w-sm leading-relaxed"><span class="text-ink font-medium">Intelligent flow, always on.</span> Production AI agents with SOTA safety, multi-LLM switching, and one-click runs.</p>
+        <p class="text-stone-400 text-xs mt-6">© {{ '2026' }} aivoraflux. All rights reserved.</p>
       </div>
       <div>
-        <div class="font-medium text-white mb-3">Product</div>
-        <ul class="space-y-2 text-slate-400">
-          <li><a href="/studio" class="hover:text-white">Studio</a></li>
-          <li><a href="/dashboard" class="hover:text-white">Dashboard</a></li>
-          <li><a href="/pricing" class="hover:text-white">Pricing</a></li>
+        <div class="font-medium text-ink mb-4">Product</div>
+        <ul class="space-y-3 text-stone-500">
+          <li><a href="/studio" class="hover:text-ink transition">Studio</a></li>
+          <li><a href="/dashboard" class="hover:text-ink transition">Dashboard</a></li>
+          <li><a href="/pricing" class="hover:text-ink transition">Pricing</a></li>
         </ul>
       </div>
       <div>
-        <div class="font-medium text-white mb-3">Safety</div>
-        <ul class="space-y-2 text-slate-400">
+        <div class="font-medium text-ink mb-4">Safety</div>
+        <ul class="space-y-3 text-stone-500">
           <li>NeMo Guardrails</li>
           <li>Llama Guard 4</li>
           <li>PII redaction</li>
@@ -121,8 +175,8 @@
         </ul>
       </div>
       <div>
-        <div class="font-medium text-white mb-3">Providers</div>
-        <ul class="space-y-2 text-slate-400">
+        <div class="font-medium text-ink mb-4">Providers</div>
+        <ul class="space-y-3 text-stone-500">
           <li>Anthropic · OpenAI</li>
           <li>Google · Mistral</li>
           <li>Groq · Together</li>
@@ -131,5 +185,67 @@
       </div>
     </div>
   </footer>
+
+  <script>
+    (function () {
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Scroll-reveal: stagger siblings that share a [data-reveal-group]
+      var revealEls = Array.prototype.slice.call(document.querySelectorAll('[data-reveal]'));
+      if (reduce || !('IntersectionObserver' in window)) {
+        revealEls.forEach(function (el) { el.classList.add('is-visible'); });
+      } else {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            var el = entry.target;
+            var group = el.closest('[data-reveal-group]');
+            if (group) {
+              var sibs = Array.prototype.slice.call(group.querySelectorAll('[data-reveal]'));
+              el.style.setProperty('--reveal-delay', (Math.max(0, sibs.indexOf(el)) * 90) + 'ms');
+            }
+            el.classList.add('is-visible');
+            io.unobserve(el);
+          });
+        }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+        revealEls.forEach(function (el) { io.observe(el); });
+      }
+
+      // Count-up animation for [data-count] when it scrolls into view
+      function animateCount(el) {
+        var raw = el.getAttribute('data-count');
+        var num = parseFloat(raw);
+        if (isNaN(num)) { el.textContent = raw; return; }
+        var prefix = el.getAttribute('data-prefix') || '';
+        var suffix = el.getAttribute('data-suffix') || '';
+        var dur = 1400, start = null;
+        function step(ts) {
+          if (!start) start = ts;
+          var p = Math.min((ts - start) / dur, 1);
+          var eased = 1 - Math.pow(1 - p, 3);
+          var val = num * eased;
+          var out = Number.isInteger(num) ? Math.round(val).toString() : val.toFixed(1);
+          el.textContent = prefix + out + suffix;
+          if (p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      }
+      var counters = Array.prototype.slice.call(document.querySelectorAll('[data-count]'));
+      if (reduce || !('IntersectionObserver' in window)) {
+        counters.forEach(function (el) {
+          el.textContent = (el.getAttribute('data-prefix') || '') + el.getAttribute('data-count') + (el.getAttribute('data-suffix') || '');
+        });
+      } else {
+        var co = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            animateCount(entry.target);
+            co.unobserve(entry.target);
+          });
+        }, { threshold: 0.6 });
+        counters.forEach(function (el) { co.observe(el); });
+      }
+    })();
+  </script>
 </body>
 </html>

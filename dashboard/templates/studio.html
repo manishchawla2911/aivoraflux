@@ -1,39 +1,41 @@
 {% extends "_base.html" %}
-{% block title %}Agent Studio{% endblock %}
+{% block title %}Studio — aivoraflux{% endblock %}
+
+{% block head_extra %}<style>[x-cloak]{display:none!important}</style>{% endblock %}
 
 {% block content %}
-<section class="max-w-7xl mx-auto px-6 lg:px-8 pt-12 pb-24" x-data="{ mode: '{{ mode }}' }">
-  <div class="flex items-center gap-3 text-sm text-slate-500 mb-3">
-    <a href="/dashboard" class="hover:text-white">← Dashboard</a>
+<section class="max-w-screen-xl mx-auto px-6 lg:px-8 pt-12 pb-24" x-data="{ mode: '{{ mode }}' }">
+  <div class="flex items-center gap-3 text-sm text-stone-400 mb-3">
+    <a href="/dashboard" class="hover:text-ink transition">← Dashboard</a>
     <span>/</span>
-    <span class="text-white">Studio</span>
+    <span class="text-ink">Studio</span>
   </div>
-  <h1 class="text-4xl font-semibold text-white tracking-tight">Craft an agent</h1>
-  <p class="mt-2 text-slate-400">Pick a mode. You can switch at any time — drafts auto-save.</p>
+  <h1 class="text-4xl font-semibold text-ink tracking-tightest">Craft an agent</h1>
+  <p class="mt-2 text-stone-500">Pick a mode. You can switch at any time — drafts auto-save.</p>
 
   <!-- Mode switch -->
-  <div class="mt-8 inline-flex p-1 rounded-xl bg-ink-900/80 border border-white/10">
-    <button @click="mode = 'auto'"   :class="mode==='auto'   ? 'bg-grad-brand text-ink-950 shadow-glow-v' : 'text-slate-300 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition">✨ Auto-craft</button>
-    <button @click="mode = 'manual'" :class="mode==='manual' ? 'bg-grad-brand text-ink-950 shadow-glow-v' : 'text-slate-300 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition">🛠 Manual builder</button>
+  <div class="mt-8 inline-flex p-1 rounded-lg bg-stone-100 border border-black/5">
+    <button @click="mode = 'auto'"   :class="mode==='auto'   ? 'bg-ink text-paper' : 'text-stone-600 hover:text-ink'" class="px-4 py-2 rounded-md text-sm font-medium transition">✨ Auto-craft</button>
+    <button @click="mode = 'manual'" :class="mode==='manual' ? 'bg-ink text-paper' : 'text-stone-600 hover:text-ink'" class="px-4 py-2 rounded-md text-sm font-medium transition">🛠 Manual builder</button>
   </div>
 
   <!-- AUTO mode -->
   <div x-show="mode==='auto'" class="mt-8 grid lg:grid-cols-5 gap-8">
-    <form method="post" action="/agents/auto" class="lg:col-span-3 rounded-2xl border border-white/10 bg-ink-900/60 p-7"
+    <form method="post" action="/agents/auto" class="lg:col-span-3 rounded-2xl border border-black/10 bg-paper p-7"
           x-data="{ p: '{{ default_provider }}' }">
-      <label class="text-sm font-medium text-white">Describe your agent</label>
-      <p class="text-xs text-slate-500 mt-1">One sentence is enough — be specific about what it should do and which tools it needs.</p>
+      <label class="text-sm font-medium text-ink">Describe your agent</label>
+      <p class="text-xs text-stone-400 mt-1">One sentence is enough — be specific about what it should do and which tools it needs.</p>
       <textarea
         name="brief"
         rows="5"
         required
         placeholder="e.g. An agent that watches my GitHub repo for new issues, triages them by severity, and posts a daily standup digest to Slack."
-        class="mt-4 w-full bg-ink-950/60 border border-white/10 rounded-xl p-4 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-violet-500/60 focus:ring-1 focus:ring-violet-500/40 font-mono text-sm leading-relaxed"></textarea>
+        class="mt-4 w-full bg-stone-50 border border-black/10 rounded-xl p-4 text-ink placeholder-stone-400 focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink font-mono text-sm leading-relaxed"></textarea>
 
       <div class="mt-5 grid sm:grid-cols-2 gap-4">
         <div>
-          <label class="text-xs uppercase tracking-wider text-slate-500">Provider</label>
-          <select name="provider" x-model="p" class="mt-1.5 w-full bg-ink-950/60 border border-white/10 rounded-lg px-3 py-2 text-slate-100">
+          <label class="text-xs uppercase tracking-wider text-stone-400">Provider</label>
+          <select name="provider" x-model="p" class="mt-1.5 w-full bg-stone-50 border border-black/10 rounded-lg px-3 py-2 text-ink">
             {% for p in providers %}
             <option value="{{ p.id }}">
               {{ p.label }}{% if p.kind == 'local' and p.available %} · ready{% elif not p.available %} (needs {{ p.env or 'daemon' }}){% endif %}
@@ -42,8 +44,8 @@
           </select>
         </div>
         <div>
-          <label class="text-xs uppercase tracking-wider text-slate-500">Model</label>
-          <select name="model" class="mt-1.5 w-full bg-ink-950/60 border border-white/10 rounded-lg px-3 py-2 text-slate-100">
+          <label class="text-xs uppercase tracking-wider text-stone-400">Model</label>
+          <select name="model" class="mt-1.5 w-full bg-stone-50 border border-black/10 rounded-lg px-3 py-2 text-ink">
             {% for prov in providers %}
               {% for m in prov.models %}
               <option value="{{ m.id }}" x-show="p==='{{ prov.id }}'">{{ m.name }}</option>
@@ -53,18 +55,18 @@
         </div>
       </div>
 
-      <button type="submit" class="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-grad-brand text-ink-950 font-semibold shadow-glow-v">
+      <button type="submit" class="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-ink text-paper font-medium hover:bg-stone-800 transition">
         ✨ Auto-craft this agent
       </button>
     </form>
 
     <aside class="lg:col-span-2 space-y-3">
-      <div class="text-xs uppercase tracking-wider text-slate-500">Examples — click to use</div>
+      <div class="text-xs uppercase tracking-wider text-stone-400">Examples — click to use</div>
       {% for ex in examples %}
       <button type="button"
               onclick="document.querySelector('[name=brief]').value = this.dataset.brief; document.querySelector('[name=brief]').focus();"
               data-brief="{{ ex }}"
-              class="block w-full text-left rounded-xl border border-white/10 bg-ink-900/40 p-4 hover:border-cyan-500/40 hover:bg-ink-800/60 transition text-sm text-slate-300">
+              class="block w-full text-left rounded-xl border border-black/10 bg-paper p-4 hover:border-black/25 hover:bg-stone-50 transition text-sm text-stone-600">
         {{ ex }}
       </button>
       {% endfor %}
@@ -74,48 +76,48 @@
   <!-- MANUAL mode -->
   <form x-show="mode==='manual'" method="post" action="/agents/manual" class="mt-8 grid lg:grid-cols-3 gap-8" x-cloak>
     <div class="lg:col-span-2 space-y-6">
-      <div class="rounded-2xl border border-white/10 bg-ink-900/60 p-7">
-        <h2 class="text-lg font-semibold text-white">Identity</h2>
+      <div class="rounded-2xl border border-black/10 bg-paper p-7">
+        <h2 class="text-lg font-semibold text-ink">Identity</h2>
         <div class="mt-4 grid sm:grid-cols-3 gap-4">
           <div class="sm:col-span-2">
-            <label class="text-xs uppercase tracking-wider text-slate-500">Name</label>
-            <input type="text" name="name" required placeholder="Stripe Recovery Pilot" class="mt-1.5 w-full bg-ink-950/60 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-slate-600">
+            <label class="text-xs uppercase tracking-wider text-stone-400">Name</label>
+            <input type="text" name="name" required placeholder="Stripe Recovery Pilot" class="mt-1.5 w-full bg-stone-50 border border-black/10 rounded-lg px-3 py-2 text-ink placeholder-stone-400">
           </div>
           <div>
-            <label class="text-xs uppercase tracking-wider text-slate-500">Avatar</label>
-            <input type="text" name="avatar_emoji" maxlength="2" value="🤖" class="mt-1.5 w-full bg-ink-950/60 border border-white/10 rounded-lg px-3 py-2 text-white text-center text-xl">
+            <label class="text-xs uppercase tracking-wider text-stone-400">Avatar</label>
+            <input type="text" name="avatar_emoji" maxlength="2" value="🤖" class="mt-1.5 w-full bg-stone-50 border border-black/10 rounded-lg px-3 py-2 text-ink text-center text-xl">
           </div>
         </div>
         <div class="mt-4">
-          <label class="text-xs uppercase tracking-wider text-slate-500">Description</label>
-          <input type="text" name="description" placeholder="One-line summary visible on the dashboard" class="mt-1.5 w-full bg-ink-950/60 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-slate-600">
+          <label class="text-xs uppercase tracking-wider text-stone-400">Description</label>
+          <input type="text" name="description" placeholder="One-line summary visible on the dashboard" class="mt-1.5 w-full bg-stone-50 border border-black/10 rounded-lg px-3 py-2 text-ink placeholder-stone-400">
         </div>
         <div class="mt-4">
-          <label class="text-xs uppercase tracking-wider text-slate-500">Category</label>
-          <select name="category" class="mt-1.5 w-full bg-ink-950/60 border border-white/10 rounded-lg px-3 py-2 text-white">
+          <label class="text-xs uppercase tracking-wider text-stone-400">Category</label>
+          <select name="category" class="mt-1.5 w-full bg-stone-50 border border-black/10 rounded-lg px-3 py-2 text-ink">
             {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
           </select>
         </div>
       </div>
 
-      <div class="rounded-2xl border border-white/10 bg-ink-900/60 p-7">
-        <h2 class="text-lg font-semibold text-white">System prompt</h2>
-        <p class="text-xs text-slate-500 mt-1">This is the agent's brain. Be specific about role, tone, do/don't.</p>
+      <div class="rounded-2xl border border-black/10 bg-paper p-7">
+        <h2 class="text-lg font-semibold text-ink">System prompt</h2>
+        <p class="text-xs text-stone-400 mt-1">This is the agent's brain. Be specific about role, tone, do/don't.</p>
         <textarea name="system_prompt" rows="10" required
-                  class="mt-4 w-full bg-ink-950/60 border border-white/10 rounded-xl p-4 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-violet-500/60 font-mono text-sm leading-relaxed"
+                  class="mt-4 w-full bg-stone-50 border border-black/10 rounded-xl p-4 text-ink placeholder-stone-400 focus:outline-none focus:border-ink font-mono text-sm leading-relaxed"
                   placeholder="You are an expert ... When the user asks ... Never ..."></textarea>
       </div>
 
-      <div class="rounded-2xl border border-white/10 bg-ink-900/60 p-7">
-        <h2 class="text-lg font-semibold text-white">Tools</h2>
-        <p class="text-xs text-slate-500 mt-1">Pick capabilities your agent can call.</p>
+      <div class="rounded-2xl border border-black/10 bg-paper p-7">
+        <h2 class="text-lg font-semibold text-ink">Tools</h2>
+        <p class="text-xs text-stone-400 mt-1">Pick capabilities your agent can call.</p>
         <div class="mt-4 grid sm:grid-cols-2 gap-2">
           {% for t in tools %}
-          <label class="flex items-start gap-3 p-3 rounded-lg border border-white/10 hover:border-violet-500/40 cursor-pointer transition">
-            <input type="checkbox" name="tools" value="{{ t.id }}" class="mt-1 accent-violet-500">
+          <label class="flex items-start gap-3 p-3 rounded-lg border border-black/10 hover:border-black/25 cursor-pointer transition">
+            <input type="checkbox" name="tools" value="{{ t.id }}" class="mt-1 accent-ink">
             <div>
-              <div class="text-sm font-medium text-white">{{ t.label }}</div>
-              <div class="text-xs text-slate-500">{{ t.desc }}</div>
+              <div class="text-sm font-medium text-ink">{{ t.label }}</div>
+              <div class="text-xs text-stone-400">{{ t.desc }}</div>
             </div>
           </label>
           {% endfor %}
@@ -124,20 +126,20 @@
     </div>
 
     <aside class="space-y-6">
-      <div class="rounded-2xl border border-white/10 bg-ink-900/60 p-7">
-        <h2 class="text-lg font-semibold text-white">Model</h2>
+      <div class="rounded-2xl border border-black/10 bg-paper p-7">
+        <h2 class="text-lg font-semibold text-ink">Model</h2>
         <div class="mt-4 space-y-3" x-data="{ p: '{{ default_provider }}' }">
           <div>
-            <label class="text-xs uppercase tracking-wider text-slate-500">Provider</label>
-            <select name="model_provider" x-model="p" class="mt-1.5 w-full bg-ink-950/60 border border-white/10 rounded-lg px-3 py-2 text-white">
+            <label class="text-xs uppercase tracking-wider text-stone-400">Provider</label>
+            <select name="model_provider" x-model="p" class="mt-1.5 w-full bg-stone-50 border border-black/10 rounded-lg px-3 py-2 text-ink">
               {% for p in providers %}
               <option value="{{ p.id }}">{{ p.label }}</option>
               {% endfor %}
             </select>
           </div>
           <div>
-            <label class="text-xs uppercase tracking-wider text-slate-500">Model</label>
-            <select name="model_name" class="mt-1.5 w-full bg-ink-950/60 border border-white/10 rounded-lg px-3 py-2 text-white">
+            <label class="text-xs uppercase tracking-wider text-stone-400">Model</label>
+            <select name="model_name" class="mt-1.5 w-full bg-stone-50 border border-black/10 rounded-lg px-3 py-2 text-ink">
               {% for p in providers %}
                 {% for m in p.models %}
                 <option value="{{ m.id }}" x-show="p==='{{ p.id }}'">{{ m.name }}</option>
@@ -147,31 +149,31 @@
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="text-xs uppercase tracking-wider text-slate-500">Temperature</label>
-              <input type="number" step="0.1" min="0" max="2" value="0.7" name="temperature" class="mt-1.5 w-full bg-ink-950/60 border border-white/10 rounded-lg px-3 py-2 text-white">
+              <label class="text-xs uppercase tracking-wider text-stone-400">Temperature</label>
+              <input type="number" step="0.1" min="0" max="2" value="0.7" name="temperature" class="mt-1.5 w-full bg-stone-50 border border-black/10 rounded-lg px-3 py-2 text-ink">
             </div>
             <div>
-              <label class="text-xs uppercase tracking-wider text-slate-500">Max tokens</label>
-              <input type="number" min="64" max="32000" value="2048" name="max_tokens" class="mt-1.5 w-full bg-ink-950/60 border border-white/10 rounded-lg px-3 py-2 text-white">
+              <label class="text-xs uppercase tracking-wider text-stone-400">Max tokens</label>
+              <input type="number" min="64" max="32000" value="2048" name="max_tokens" class="mt-1.5 w-full bg-stone-50 border border-black/10 rounded-lg px-3 py-2 text-ink">
             </div>
           </div>
         </div>
       </div>
 
-      <div class="rounded-2xl border border-white/10 bg-ink-900/60 p-7">
-        <h2 class="text-lg font-semibold text-white">Guardrails</h2>
-        <p class="text-xs text-slate-500 mt-1">All layers active by default. Untick to relax.</p>
+      <div class="rounded-2xl border border-black/10 bg-paper p-7">
+        <h2 class="text-lg font-semibold text-ink">Guardrails</h2>
+        <p class="text-xs text-stone-400 mt-1">All layers active by default. Untick to relax.</p>
         <div class="mt-4 space-y-2">
           {% for f in guardrail_features %}
-          <label class="flex items-center gap-3 text-sm text-slate-300">
-            <input type="checkbox" name="guardrails" value="{{ f[0] }}" checked class="accent-cyan-500">
+          <label class="flex items-center gap-3 text-sm text-stone-600">
+            <input type="checkbox" name="guardrails" value="{{ f[0] }}" checked class="accent-ink">
             <span>{{ f[1] }}</span>
           </label>
           {% endfor %}
         </div>
       </div>
 
-      <button type="submit" class="w-full px-5 py-3 rounded-lg bg-grad-brand text-ink-950 font-semibold shadow-glow-v">Publish agent →</button>
+      <button type="submit" class="w-full px-5 py-3 rounded-md bg-ink text-paper font-medium hover:bg-stone-800 transition">Publish agent →</button>
     </aside>
   </form>
 </section>

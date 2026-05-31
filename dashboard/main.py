@@ -40,6 +40,7 @@ from typing import Awaitable, Callable, List, Optional, Union
 
 from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func
 from sqlmodel import Session, select
@@ -59,6 +60,7 @@ from dataclasses import asdict
 logger = logging.getLogger(__name__)
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
+STATIC_DIR = Path(__file__).resolve().parent / "static"
 PROJECTS_DIR = Path(os.getenv("PROJECTS_BASE_PATH", "./projects"))
 
 # Maximum characters accepted by the agent run endpoint (SEC-2). Override via env.
@@ -86,7 +88,8 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Agent Studio", lifespan=lifespan)
+app = FastAPI(title="aivoraflux", lifespan=lifespan)
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 
