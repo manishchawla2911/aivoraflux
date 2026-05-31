@@ -74,3 +74,29 @@ def test_run_agent_completion_no_extra_system(db, monkeypatch):
         agent = s.get(Agent, "a2")
         result = run_agent_completion(s, agent, user_input="hi")
         assert result.final_text == "SYS:::Bare."
+
+
+from core import workspace_chat as wc
+
+
+def test_resolve_mentions_basic():
+    members = [("m1", "CEO", "ceo"), ("m2", "CFO", "cfo")]
+    assert wc.resolve_mentions("hey @CEO what now", members) == ["m1"]
+    assert wc.resolve_mentions("ping /cfo please", members) == ["m2"]
+
+
+def test_resolve_mentions_longest_match_wins():
+    members = [("m1", "Marketing", "marketing"),
+               ("m2", "Marketing Lead", "marketing-lead")]
+    assert wc.resolve_mentions("talk to @Marketing Lead now", members) == ["m2"]
+
+
+def test_resolve_mentions_unknown_ignored_and_dedup():
+    members = [("m1", "CEO", "ceo")]
+    assert wc.resolve_mentions("@nobody here", members) == []
+    assert wc.resolve_mentions("@CEO and again @ceo", members) == ["m1"]
+
+
+def test_resolve_mentions_order_preserved():
+    members = [("m1", "CEO", "ceo"), ("m2", "CFO", "cfo")]
+    assert wc.resolve_mentions("@CFO then @CEO", members) == ["m2", "m1"]
