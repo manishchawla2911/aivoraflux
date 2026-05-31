@@ -1,0 +1,14 @@
+{% extends "_base.html" %}
+{% block title %}New project · {{ ws.name }}{% endblock %}
+{% block content %}
+<section class="max-w-2xl mx-auto px-6 lg:px-8 py-12">
+  <a href="/workspaces/{{ ws.id }}/projects" class="text-xs text-slate-500 hover:text-white">← Projects</a>
+  <h1 class="text-2xl font-semibold text-white mt-1 mb-6">New project</h1>
+  <form method="post" action="/workspaces/{{ ws.id }}/projects" class="space-y-3">
+    <input name="name" required placeholder="Project name" class="w-full bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-white">
+    <input name="client_name" placeholder="Client name (optional)" class="w-full bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-white">
+    <textarea name="brief" rows="4" placeholder="Brief: what needs to be built?" class="w-full bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-white"></textarea>
+    <button class="text-sm font-medium bg-grad-brand text-ink-950 px-5 py-2 rounded-md shadow-glow-v hover:shadow-glow-c transition">Open project &amp; estimate</button>
+  </form>
+</section>
+{% endblock %}

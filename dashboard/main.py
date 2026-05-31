@@ -53,10 +53,13 @@ from core.agent_runtime import run_agent_completion
 from core.state import (
     Agent, AgentRun, GuardrailProfile, HumanDecision, Project,
     ProviderConfig, Workspace, WorkspaceChatMessage, WorkspaceMember, WorkspaceMemory,
+    WorkspaceProject,
     get_engine, init_db, utcnow,
 )
 from core import workspace_memory
 from core import workspace_chat
+from core import workspace_spawn
+from core.cost_estimator import estimate_project_cost, CostEstimate
 from core.workspace_factory import create_workspace
 from core.workspace_roles import ROLE_CATALOG
 from dataclasses import asdict
@@ -492,6 +495,108 @@ async def workspace_chat_pin(workspace_id: str, msg_id: str, request: Request) -
         s.add(msg)
         s.commit()
     return RedirectResponse(url=f"/workspaces/{workspace_id}/chat", status_code=303)
+
+
+@app.get("/workspaces/{workspace_id}/projects", response_class=HTMLResponse)
+async def workspace_projects(request: Request, workspace_id: str) -> HTMLResponse:
+    with Session(get_engine()) as s:
+        ws = s.get(Workspace, workspace_id)
+        if not ws:
+            raise HTTPException(404, "workspace not found")
+        projects = s.exec(
+            select(WorkspaceProject).where(WorkspaceProject.workspace_id == workspace_id)
+            .order_by(WorkspaceProject.created_at.desc())
+        ).all()
+    return templates.TemplateResponse(request, "workspace_projects.html", {
+        "ws": ws,
+        "projects": projects,
+    })
+
+
+@app.post("/workspaces/{workspace_id}/projects")
+async def workspace_project_create(workspace_id: str, name: str = Form(...),
+                                   brief: str = Form(""),
+                                   client_name: str = Form("")) -> RedirectResponse:
+    with Session(get_engine()) as s:
+        ws = s.get(Workspace, workspace_id)
+        if not ws:
+            raise HTTPException(404, "workspace not found")
+        project = WorkspaceProject(
+            id=str(uuid.uuid4()),
+            workspace_id=workspace_id,
+            name=name.strip() or "Untitled Project",
+            brief=brief.strip(),
+            client_name=client_name.strip() or None,
+            status="estimating",
+        )
+        s.add(project)
+        s.commit()
+        s.refresh(project)
+
+        plan = workspace_spawn.plan_team(project.brief)
+        estimate = estimate_project_cost(project.brief, plan.team_size)
+        project.estimate_json = estimate.to_json()
+        s.add(project)
+        s.commit()
+
+        workspace_spawn.spawn_project_team(s, workspace_id, project, plan=plan)
+        project.status = "staffed"
+        project.updated_at = utcnow()
+        s.add(project)
+        s.commit()
+
+        workspace_memory.add_entry(
+            s, workspace_id, author="CEO", kind="decision",
+            content=(f"Opened project '{project.name}' for "
+                     f"{project.client_name or 'internal'}. Estimated cost "
+                     f"${estimate.cost_usd} ({plan.team_size}-agent team)."),
+            tags=["project", "estimate"],
+        )
+        pid = project.id
+    return RedirectResponse(url=f"/workspaces/{workspace_id}/projects/{pid}", status_code=303)
+
+
+@app.get("/workspaces/{workspace_id}/projects/{project_id}", response_class=HTMLResponse)
+async def workspace_project_detail(request: Request, workspace_id: str,
+                                   project_id: str) -> HTMLResponse:
+    with Session(get_engine()) as s:
+        project = s.get(WorkspaceProject, project_id)
+        if project is None or project.workspace_id != workspace_id:
+            raise HTTPException(404, "project not found")
+        ws = s.get(Workspace, workspace_id)
+        team = s.exec(
+            select(WorkspaceMember).where(
+                (WorkspaceMember.workspace_id == workspace_id)
+                & (WorkspaceMember.origin == "spawned")
+            ).order_by(WorkspaceMember.order_index)
+        ).all()
+        agents = {a.id: a for a in s.exec(
+            select(Agent).where(Agent.id.in_([m.agent_id for m in team]))
+        ).all()} if team else {}
+    estimate = CostEstimate.from_json(project.estimate_json) if project.estimate_json else None
+    pm = next((m for m in team if m.id == project.pm_member_id), None)
+    reports = [m for m in team if pm and m.parent_member_id == pm.id]
+    return templates.TemplateResponse(request, "workspace_project_detail.html", {
+        "ws": ws,
+        "project": project,
+        "estimate": estimate,
+        "pm": pm,
+        "reports": reports,
+        "agents": agents,
+    })
+
+
+@app.post("/workspaces/{workspace_id}/projects/{project_id}/archive")
+async def workspace_project_archive(workspace_id: str, project_id: str) -> RedirectResponse:
+    with Session(get_engine()) as s:
+        project = s.get(WorkspaceProject, project_id)
+        if project is None or project.workspace_id != workspace_id:
+            raise HTTPException(404, "project not found")
+        project.status = "archived"
+        project.updated_at = utcnow()
+        s.add(project)
+        s.commit()
+    return RedirectResponse(url=f"/workspaces/{workspace_id}/projects", status_code=303)
 
 
 @app.post("/agents/{agent_id}/delete")

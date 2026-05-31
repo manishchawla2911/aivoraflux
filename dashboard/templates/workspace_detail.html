@@ -9,6 +9,7 @@
       {% if ws.company_description %}<p class="text-slate-400 text-sm">{{ ws.company_description }}</p>{% endif %}
     </div>
     <div class="flex items-center gap-2">
+      <a href="/workspaces/{{ ws.id }}/projects" class="text-xs text-cyan-300 border border-cyan-500/30 px-3 py-1.5 rounded-md hover:bg-cyan-500/10 transition">Projects →</a>
       <a href="/workspaces/{{ ws.id }}/chat" class="text-xs text-violet-300 border border-violet-500/30 px-3 py-1.5 rounded-md hover:bg-violet-500/10 transition">Team chat →</a>
       {% if ws.status == 'active' %}
         <form method="post" action="/workspaces/{{ ws.id }}/archive">

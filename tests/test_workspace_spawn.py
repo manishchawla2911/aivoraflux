@@ -190,3 +190,66 @@ def test_estimate_json_roundtrip():
     assert back.input_tokens == est.input_tokens
     assert back.cost_usd == est.cost_usd
     assert back.assumptions["assumed_turns"] == est.assumptions["assumed_turns"]
+
+
+from fastapi.testclient import TestClient
+
+
+@pytest.fixture()
+def client(db):
+    import dashboard.main as dash
+    return TestClient(dash.app)
+
+
+def _ws_with_ceo(db):
+    with Session(db) as s:
+        ws = wf.create_workspace(
+            s, owner_email="o@x.com", name="Acme", company_description="",
+            mission="Win", selected_roles=["ceo"],
+        )
+        return ws.id
+
+
+def test_project_create_flow_spawns_team_and_quotes(db, client):
+    ws_id = _ws_with_ceo(db)
+    r = client.get(f"/workspaces/{ws_id}/projects")
+    assert r.status_code == 200
+
+    r = client.post(f"/workspaces/{ws_id}/projects", data={
+        "name": "Landing Page", "brief": "x" * 200, "client_name": "Globex",
+    }, follow_redirects=False)
+    assert r.status_code == 303
+    detail_url = r.headers["location"]
+
+    detail = client.get(detail_url)
+    assert detail.status_code == 200
+    assert "Landing Page" in detail.text
+    assert "Globex" in detail.text
+    assert "Project Manager" in detail.text or "PM ·" in detail.text
+
+    with Session(db) as s:
+        proj = s.exec(select(WorkspaceProject).where(
+            WorkspaceProject.workspace_id == ws_id)).one()
+        assert proj.status == "staffed"
+        assert proj.estimate_json is not None
+        spawned = s.exec(select(WorkspaceMember).where(
+            (WorkspaceMember.workspace_id == ws_id)
+            & (WorkspaceMember.origin == "spawned"))).all()
+        assert len(spawned) == 4    # PM + 2 devs + auditor
+
+
+def test_project_create_missing_workspace_404(db, client):
+    r = client.post("/workspaces/ghost/projects", data={"name": "X", "brief": "y"},
+                    follow_redirects=False)
+    assert r.status_code == 404
+
+
+def test_project_archive(db, client):
+    ws_id = _ws_with_ceo(db)
+    r = client.post(f"/workspaces/{ws_id}/projects", data={"name": "P", "brief": "short"},
+                    follow_redirects=False)
+    pid = r.headers["location"].rsplit("/", 1)[-1]
+    r = client.post(f"/workspaces/{ws_id}/projects/{pid}/archive", follow_redirects=False)
+    assert r.status_code == 303
+    with Session(db) as s:
+        assert s.get(WorkspaceProject, pid).status == "archived"
