@@ -41,3 +41,32 @@ def test_project_and_member_hierarchy_columns(db):
         assert m.parent_member_id == "ceo1" and m.origin == "spawned"
         assert p.status == "estimating" and p.pm_member_id == "m1"
         assert p.estimate_json is None
+
+
+from core.workspace_factory import instantiate_member, _default_guardrail_profile_id
+from core.workspace_roles import get_role
+
+
+def test_instantiate_member_sets_origin_and_parent(db):
+    with Session(db) as s:
+        s.add(Workspace(id="w1", owner_email="o@x.com", name="Acme"))
+        s.commit()
+        gid = _default_guardrail_profile_id(s)
+        member = instantiate_member(
+            s, "w1", get_role("ceo"), workspace_name="Acme",
+            order_index=0, origin="seed", guardrail_id=gid, owner_email="o@x.com",
+        )
+        assert member.role == "ceo"
+        assert member.origin == "seed"
+        assert member.parent_member_id is None
+        agent = s.get(Agent, member.agent_id)
+        assert agent is not None and agent.name == "CEO"
+
+        spawned = instantiate_member(
+            s, "w1", get_role("cto"), workspace_name="Acme",
+            display_name="Custom CTO", order_index=1, parent_member_id=member.id,
+            origin="spawned", guardrail_id=gid, owner_email="o@x.com",
+        )
+        assert spawned.origin == "spawned"
+        assert spawned.parent_member_id == member.id
+        assert spawned.display_name == "Custom CTO"

@@ -35,6 +35,69 @@ def _default_guardrail_profile_id(session: Session) -> str:
     return gp.id
 
 
+def instantiate_member(
+    session: Session,
+    workspace_id: str,
+    role_def: Dict,
+    *,
+    workspace_name: str = "",
+    display_name: Optional[str] = None,
+    system_prompt: Optional[str] = None,
+    model_provider: Optional[str] = None,
+    model_name: Optional[str] = None,
+    avatar_emoji: Optional[str] = None,
+    order_index: int = 0,
+    parent_member_id: Optional[str] = None,
+    origin: str = "seed",
+    guardrail_id: Optional[str] = None,
+    owner_email: Optional[str] = None,
+) -> WorkspaceMember:
+    """Instantiate one catalog role into a real Agent + WorkspaceMember.
+
+    Shared by create_workspace (origin="seed") and workspace_spawn (origin="spawned").
+    `role_def` is any catalog dict from ROLE_CATALOG or SPAWN_ROLE_CATALOG.
+    """
+    display_name = (display_name or role_def["label"]).strip()
+    description = f"{role_def['label']} of {workspace_name}" if workspace_name else role_def["label"]
+
+    spec = AgentSpec(
+        name=display_name,
+        description=description,
+        category=role_def["category"],
+        system_prompt=system_prompt or role_def["default_system_prompt"],
+        model_provider=model_provider or "anthropic",
+        model_name=model_name or role_def["default_model"],
+        temperature=0.7,
+        max_tokens=2048,
+        tools=list(role_def["suggested_tools"]),
+        avatar_emoji=avatar_emoji or role_def["avatar_emoji"],
+        crafted_mode="manual",
+    )
+    kwargs = spec.to_db_kwargs()
+    kwargs["guardrail_profile_id"] = guardrail_id
+    kwargs["owner_email"] = owner_email
+    agent = Agent(**kwargs)
+    session.add(agent)
+    session.commit()
+    session.refresh(agent)
+
+    member = WorkspaceMember(
+        id=str(uuid.uuid4()),
+        workspace_id=workspace_id,
+        agent_id=agent.id,
+        role=role_def["id"],
+        display_name=display_name,
+        order_index=order_index,
+        parent_member_id=parent_member_id,
+        origin=origin,
+        created_at=utcnow(),
+    )
+    session.add(member)
+    session.commit()
+    session.refresh(member)
+    return member
+
+
 def create_workspace(
     session: Session,
     *,
@@ -68,39 +131,18 @@ def create_workspace(
         if role is None:
             continue
         ov = member_overrides.get(role_id, {})
-        display_name = (ov.get("display_name") or role["label"]).strip()
-
-        spec = AgentSpec(
-            name=display_name,
-            description=f"{role['label']} of {ws.name}",
-            category=role["category"],
-            system_prompt=ov.get("system_prompt") or role["default_system_prompt"],
-            model_provider=ov.get("model_provider") or "anthropic",
-            model_name=ov.get("model_name") or role["default_model"],
-            temperature=0.7,
-            max_tokens=2048,
-            tools=list(role["suggested_tools"]),
-            avatar_emoji=ov.get("avatar_emoji") or role["avatar_emoji"],
-            crafted_mode="manual",
-        )
-        kwargs = spec.to_db_kwargs()
-        kwargs["guardrail_profile_id"] = guardrail_id
-        kwargs["owner_email"] = owner_email
-        agent = Agent(**kwargs)
-        session.add(agent)
-        session.commit()
-        session.refresh(agent)
-
-        session.add(WorkspaceMember(
-            id=str(uuid.uuid4()),
-            workspace_id=ws.id,
-            agent_id=agent.id,
-            role=role_id,
-            display_name=display_name,
+        instantiate_member(
+            session, ws.id, role, workspace_name=ws.name,
+            display_name=ov.get("display_name"),
+            system_prompt=ov.get("system_prompt"),
+            model_provider=ov.get("model_provider"),
+            model_name=ov.get("model_name"),
+            avatar_emoji=ov.get("avatar_emoji"),
             order_index=order,
-            created_at=utcnow(),
-        ))
-        session.commit()
+            origin="seed",
+            guardrail_id=guardrail_id,
+            owner_email=owner_email,
+        )
         order += 1
 
     if ws.mission:
