@@ -70,3 +70,89 @@ def test_instantiate_member_sets_origin_and_parent(db):
         assert spawned.origin == "spawned"
         assert spawned.parent_member_id == member.id
         assert spawned.display_name == "Custom CTO"
+
+
+from core.agent_factory import CATEGORIES, TOOL_CATALOG
+from core import workspace_spawn as ws_spawn
+from core import workspace_factory as wf
+
+
+def test_spawn_role_catalog_well_formed():
+    assert {r["id"] for r in ws_spawn.SPAWN_ROLE_CATALOG} == {
+        "project_manager", "developer", "auditor"}
+    tool_ids = {t["id"] for t in TOOL_CATALOG}
+    for r in ws_spawn.SPAWN_ROLE_CATALOG:
+        assert r["label"] and r["avatar_emoji"]
+        assert r["category"] in CATEGORIES
+        assert len(r["default_system_prompt"]) > 40
+        assert set(r["suggested_tools"]).issubset(tool_ids)
+
+
+def test_spawn_member_creates_spawned_member(db):
+    with Session(db) as s:
+        ws = wf.create_workspace(
+            s, owner_email="o@x.com", name="Acme", company_description="",
+            mission="Win", selected_roles=["ceo"],
+        )
+        ceo = s.exec(select(WorkspaceMember).where(
+            WorkspaceMember.workspace_id == ws.id)).one()
+        pm = ws_spawn.spawn_member(s, ws.id, "project_manager",
+                                   parent_member_id=ceo.id, display_name="PM A")
+        assert pm.role == "project_manager"
+        assert pm.origin == "spawned"
+        assert pm.parent_member_id == ceo.id
+        assert pm.order_index == 1     # after the seed CEO at 0
+        agent = s.get(Agent, pm.agent_id)
+        assert agent is not None and agent.name == "PM A"
+
+
+def test_spawn_member_unknown_role_raises(db):
+    with Session(db) as s:
+        s.add(Workspace(id="w9", owner_email="o@x.com", name="Acme"))
+        s.commit()
+        with pytest.raises(ValueError):
+            ws_spawn.spawn_member(s, "w9", "wizard")
+
+
+def test_plan_team_scales_with_brief():
+    assert ws_spawn.plan_team("short").num_developers == 1
+    assert ws_spawn.plan_team("x" * 200).num_developers == 2
+    assert ws_spawn.plan_team("x" * 500).num_developers == 3
+    assert ws_spawn.plan_team("anything").with_auditor is True
+
+
+def test_spawn_project_team_builds_hierarchy(db):
+    with Session(db) as s:
+        ws = wf.create_workspace(
+            s, owner_email="o@x.com", name="Acme", company_description="",
+            mission="Win", selected_roles=["ceo"],
+        )
+        ceo = s.exec(select(WorkspaceMember).where(
+            WorkspaceMember.workspace_id == ws.id)).one()
+        project = WorkspaceProject(id="p1", workspace_id=ws.id, name="Launch",
+                                   brief="x" * 200)   # 2 developers + auditor
+        s.add(project)
+        s.commit()
+        team = ws_spawn.spawn_project_team(s, ws.id, project)
+        assert team["pm"].role == "project_manager"
+        assert team["pm"].parent_member_id == ceo.id
+        assert len(team["developers"]) == 2
+        assert len(team["auditors"]) == 1
+        for dev in team["developers"] + team["auditors"]:
+            assert dev.parent_member_id == team["pm"].id
+            assert dev.origin == "spawned"
+        assert s.get(WorkspaceProject, "p1").pm_member_id == team["pm"].id
+
+
+def test_spawn_project_team_without_ceo_uses_none_parent(db):
+    with Session(db) as s:
+        ws = wf.create_workspace(
+            s, owner_email="o@x.com", name="Acme", company_description="",
+            mission="", selected_roles=["cfo"],
+        )
+        project = WorkspaceProject(id="p2", workspace_id=ws.id, name="X", brief="short")
+        s.add(project)
+        s.commit()
+        team = ws_spawn.spawn_project_team(s, ws.id, project)
+        assert team["pm"].parent_member_id is None
+        assert len(team["developers"]) == 1
