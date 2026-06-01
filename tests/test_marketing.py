@@ -71,3 +71,80 @@ def test_email_smtp_without_config_failopen(monkeypatch):
     monkeypatch.delenv("SMTP_HOST", raising=False)
     # No SMTP config: returns False, never raises.
     assert email_sender.send_email("a@b.com", "Hi", "Body") is False
+
+
+from datetime import timedelta
+
+from core import marketing
+from core import workspace_factory as wf
+from core.llm_providers import CompletionResponse
+
+
+def _echo_complete(req, provider):
+    return CompletionResponse(text=f"BODY[{req.system[:12]}]", provider=provider,
+                              model=req.model, stubbed=True)
+
+
+def _ws_with_marketing(db):
+    with Session(db) as s:
+        ws = wf.create_workspace(
+            s, owner_email="o@x.com", name="Acme", company_description="",
+            mission="Win", selected_roles=["marketing"],
+        )
+        member = s.exec(select(WorkspaceMember).where(
+            WorkspaceMember.workspace_id == ws.id)).one()
+        contact = MarketingContact(id="ct1", workspace_id=ws.id, name="Lee",
+                                   email="lee@globex.com", company="Globex")
+        s.add(contact)
+        s.commit()
+        return ws.id, member.id, "ct1"
+
+
+def test_send_outreach_persists_and_schedules(db, monkeypatch):
+    monkeypatch.setattr("core.llm_providers.complete", _echo_complete)
+    monkeypatch.setenv("EMAIL_BACKEND", "stub")
+    ws_id, member_id, ct_id = _ws_with_marketing(db)
+    with Session(db) as s:
+        member = s.get(WorkspaceMember, member_id)
+        contact = s.get(MarketingContact, ct_id)
+        msg = marketing.send_outreach(s, ws_id, member, contact, "demo our product",
+                                      followup_days=3)
+        assert msg.send_status == "sent"
+        assert msg.kind == "outreach"
+        assert msg.next_followup_at is not None
+        assert msg.body.startswith("BODY[")
+        assert s.get(MarketingContact, ct_id).status == "contacted"
+
+
+def test_followup_cadence_bounded(db, monkeypatch):
+    monkeypatch.setattr("core.llm_providers.complete", _echo_complete)
+    monkeypatch.setenv("EMAIL_BACKEND", "stub")
+    monkeypatch.setenv("MARKETING_MAX_FOLLOWUPS", "2")
+    ws_id, member_id, ct_id = _ws_with_marketing(db)
+    with Session(db) as s:
+        member = s.get(WorkspaceMember, member_id)
+        contact = s.get(MarketingContact, ct_id)
+        outreach = marketing.send_outreach(s, ws_id, member, contact, "demo", followup_days=3)
+        outreach.next_followup_at = utcnow() - timedelta(days=1)
+        s.add(outreach); s.commit()
+
+        due = marketing.due_followups(s, ws_id)
+        assert len(due) == 1
+
+        f1 = marketing.send_followup(s, member, due[0], followup_days=0)
+        assert f1.kind == "followup" and f1.send_status == "sent"
+        s.refresh(outreach)
+        assert outreach.followup_count == 1
+
+        due2 = marketing.due_followups(s, ws_id)
+        marketing.send_followup(s, member, due2[0], followup_days=0)
+        s.refresh(outreach)
+        assert outreach.followup_count == 2
+        assert marketing.due_followups(s, ws_id) == []   # capped out
+
+
+def test_find_marketing_member(db):
+    ws_id, member_id, ct_id = _ws_with_marketing(db)
+    with Session(db) as s:
+        m = marketing.find_marketing_member(s, ws_id)
+        assert m is not None and m.role == "marketing"
