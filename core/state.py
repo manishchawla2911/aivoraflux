@@ -277,6 +277,38 @@ class WorkspaceChannel(SQLModel, table=True):
     created_at: datetime = Field(default_factory=_utcnow)
 
 
+class MarketingContact(SQLModel, table=True):
+    """A lead/client the marketing agent reaches out to (subsystem F)."""
+    __tablename__ = "marketing_contact"
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    name: str
+    email: Optional[str] = None
+    company: Optional[str] = None
+    notes: Optional[str] = None
+    status: str = "lead"                        # lead | contacted | replied | won | lost
+    created_at: datetime = Field(default_factory=_utcnow)
+
+
+class OutreachMessage(SQLModel, table=True):
+    """One outreach or follow-up email drafted by the marketing agent (subsystem F)."""
+    __tablename__ = "outreach_message"
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    contact_id: str = Field(foreign_key="marketing_contact.id", index=True)
+    member_id: Optional[str] = None             # Marketing WorkspaceMember.id
+    kind: str = "outreach"                      # outreach | followup
+    subject: str = ""
+    body: str = ""
+    channel: str = "email"
+    send_status: str = "drafted"               # drafted | sent | failed
+    followup_count: int = 0
+    next_followup_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=_utcnow)
+
+
 # ─────────────────────────────────────────────────────────────
 # Observability — append-only telemetry for the agent fleet & studio.
 # ─────────────────────────────────────────────────────────────
