@@ -56,3 +56,18 @@ def test_voice_unknown_backend_falls_back(monkeypatch):
     monkeypatch.setenv("VOICE_BACKEND", "nope")
     assert isinstance(voice.synthesize("x"), bytes)
     assert isinstance(voice.transcribe(b"abc"), str)
+
+
+from core import email_sender
+
+
+def test_email_stub_returns_true_and_never_raises(monkeypatch):
+    monkeypatch.setenv("EMAIL_BACKEND", "stub")
+    assert email_sender.send_email("a@b.com", "Hi", "Body") is True
+
+
+def test_email_smtp_without_config_failopen(monkeypatch):
+    monkeypatch.setenv("EMAIL_BACKEND", "smtp")
+    monkeypatch.delenv("SMTP_HOST", raising=False)
+    # No SMTP config: returns False, never raises.
+    assert email_sender.send_email("a@b.com", "Hi", "Body") is False
