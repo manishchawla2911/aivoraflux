@@ -149,6 +149,118 @@
   </script>
 </section>
 
+<!-- STATEMENT — pinned scroll-driven sequence -->
+<section id="however" class="pin relative bg-paper" style="height:340vh">
+  <div class="pin__sticky sticky top-0 h-screen flex items-center overflow-hidden">
+    <div class="max-w-screen-xl mx-auto px-6 lg:px-8 w-full">
+
+      <div class="flex items-center justify-between">
+        <div class="text-xs uppercase tracking-[0.18em] text-stone-400 font-medium">However it starts</div>
+        <div class="text-xs font-mono text-stone-400"><span data-step>01</span>&nbsp;/&nbsp;03</div>
+      </div>
+
+      <!-- stage -->
+      <div class="pin__stage relative mt-10 h-[42vh] lg:h-[46vh]">
+        <!-- giant ghost index behind the words -->
+        <div aria-hidden="true" data-ghost
+             class="pointer-events-none select-none absolute top-1/2 right-0 -translate-y-1/2 text-[40vw] lg:text-[24vw] font-semibold tracking-tightest text-stone-100 leading-none">01</div>
+
+        <div class="phrase absolute inset-x-0 top-1/2" data-phrase="0">
+          <div class="flex items-baseline gap-4 lg:gap-8">
+            <span class="text-stone-300 text-2xl lg:text-4xl font-medium tabular-nums">01</span>
+            <span class="text-6xl sm:text-7xl lg:text-9xl font-semibold tracking-tightest text-ink leading-none">an&nbsp;Idea<span class="text-stone-300">.</span></span>
+          </div>
+        </div>
+        <div class="phrase absolute inset-x-0 top-1/2" data-phrase="1">
+          <div class="flex items-baseline gap-4 lg:gap-8">
+            <span class="text-stone-300 text-2xl lg:text-4xl font-medium tabular-nums">02</span>
+            <span class="text-6xl sm:text-7xl lg:text-9xl font-semibold tracking-tightest text-ink leading-none">a&nbsp;Business<span class="text-stone-300">.</span></span>
+          </div>
+        </div>
+        <div class="phrase absolute inset-x-0 top-1/2" data-phrase="2">
+          <div class="flex items-baseline gap-4 lg:gap-8">
+            <span class="text-stone-300 text-2xl lg:text-4xl font-medium tabular-nums">03</span>
+            <span class="text-6xl sm:text-7xl lg:text-9xl font-semibold tracking-tightest text-ink leading-none">a&nbsp;Project<span class="text-stone-300">.</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- progress + caption -->
+      <div class="mt-8 lg:mt-12">
+        <div class="h-px bg-black/10 relative overflow-hidden rounded-full">
+          <div data-progress class="absolute inset-y-0 left-0 bg-ink" style="width:0%"></div>
+        </div>
+        <p class="mt-6 max-w-xl text-base lg:text-lg text-stone-500 leading-relaxed">
+          Whatever you start with, aivoraflux carries it through — turning intent into tested, deployed software with a fleet of AI agents that never stop.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    var sec = document.getElementById('however');
+    if (!sec) return;
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var phrases = Array.prototype.slice.call(sec.querySelectorAll('.phrase'));
+    var ghost = sec.querySelector('[data-ghost]');
+    var bar = sec.querySelector('[data-progress]');
+    var stepEl = sec.querySelector('[data-step]');
+    var N = phrases.length;
+    var labels = ['01', '02', '03'];
+    function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+
+    if (reduce) {
+      phrases.forEach(function (el) { el.style.position = 'static'; el.style.opacity = 1; el.style.transform = 'none'; });
+      return;
+    }
+
+    phrases.forEach(function (el) {
+      el.style.willChange = 'transform, opacity, filter';
+      el.style.transformOrigin = 'left center';
+    });
+
+    function render(p) {
+      var span = 1 / (N - 1);                    // distance between phrase centres
+      var active = clamp(Math.round(p * (N - 1)), 0, N - 1);
+      for (var i = 0; i < N; i++) {
+        var d = (p - i * span) / span;           // 0 at this phrase's peak, ±1 at neighbours
+        var ad = Math.abs(d);
+        var op = clamp(1 - ad * 1.6, 0, 1);
+        var ty = clamp(-d, -1, 1) * 90;          // px — rises as it passes centre
+        var sc = 1 - clamp(ad, 0, 1) * 0.10;     // shrink away from centre
+        var bl = clamp(ad - 0.18, 0, 0.5) * 12;  // blur distant phrases
+        var el = phrases[i];
+        el.style.opacity = op.toFixed(3);
+        el.style.transform = 'translateY(calc(-50% + ' + ty.toFixed(1) + 'px)) scale(' + sc.toFixed(3) + ')';
+        el.style.filter = bl > 0.05 ? 'blur(' + bl.toFixed(1) + 'px)' : 'none';
+        el.style.zIndex = (op * 100) | 0;
+      }
+      if (ghost) ghost.textContent = labels[active];
+      if (stepEl) stepEl.textContent = labels[active];
+      if (bar) bar.style.width = (p * 100).toFixed(1) + '%';
+    }
+
+    var ticking = false;
+    function update() {
+      var rect = sec.getBoundingClientRect();
+      var scrollable = sec.offsetHeight - window.innerHeight;
+      var passed = clamp(-rect.top, 0, scrollable);
+      var p = scrollable > 0 ? passed / scrollable : 0;
+      render(p);
+      ticking = false;
+    }
+    function onScroll() { if (ticking) return; ticking = true; requestAnimationFrame(update); }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    window.addEventListener('load', update);
+    update();
+    setTimeout(update, 300);
+  })();
+  </script>
+</section>
+
 <!-- STATS -->
 <section class="relative border-y border-black/5 bg-stone-50">
   <div class="max-w-screen-xl mx-auto px-6 lg:px-8">
