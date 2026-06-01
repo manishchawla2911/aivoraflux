@@ -37,7 +37,7 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Awaitable, Callable, List, Union
 
-from fastapi import FastAPI, Form, HTTPException, Request
+from fastapi import FastAPI, Form, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func
@@ -53,11 +53,12 @@ from core.agent_runtime import run_agent_completion
 from core import chat_bridge
 from core.chat_bridge import BRIDGE_PLATFORMS
 from core.state import (
-    Agent, AgentRun, GuardrailProfile, HumanDecision, Project,
-    ProviderConfig, Workspace, WorkspaceChannel, WorkspaceChatMessage, WorkspaceMember,
+    Agent, AgentRun, GuardrailProfile, HumanDecision, MarketingContact, OutreachMessage,
+    Project, ProviderConfig, Workspace, WorkspaceChannel, WorkspaceChatMessage, WorkspaceMember,
     WorkspaceMemory, WorkspaceProject,
     get_engine, init_db, utcnow,
 )
+from core import marketing, voice
 from core import workspace_memory
 from core import workspace_chat
 from core import workspace_spawn
@@ -665,6 +666,77 @@ async def workspace_channel_remove(workspace_id: str, channel_id: str) -> Redire
         s.add(ch)
         s.commit()
     return RedirectResponse(url=f"/workspaces/{workspace_id}/channels", status_code=303)
+
+
+@app.get("/workspaces/{workspace_id}/marketing", response_class=HTMLResponse)
+async def workspace_marketing(request: Request, workspace_id: str) -> HTMLResponse:
+    with Session(get_engine()) as s:
+        ws = s.get(Workspace, workspace_id)
+        if not ws:
+            raise HTTPException(404, "workspace not found")
+        contacts = s.exec(
+            select(MarketingContact).where(MarketingContact.workspace_id == workspace_id)
+            .order_by(MarketingContact.created_at.desc())
+        ).all()
+        messages = s.exec(
+            select(OutreachMessage).where(OutreachMessage.workspace_id == workspace_id)
+            .order_by(OutreachMessage.created_at.desc()).limit(50)
+        ).all()
+        has_marketing = marketing.find_marketing_member(s, workspace_id) is not None
+    return templates.TemplateResponse(request, "workspace_marketing.html", {
+        "ws": ws,
+        "contacts": contacts,
+        "messages": messages,
+        "has_marketing": has_marketing,
+    })
+
+
+@app.post("/workspaces/{workspace_id}/marketing/contacts")
+async def workspace_marketing_add_contact(workspace_id: str, name: str = Form(...),
+                                          email: str = Form(""),
+                                          company: str = Form(""),
+                                          notes: str = Form("")) -> RedirectResponse:
+    with Session(get_engine()) as s:
+        if s.get(Workspace, workspace_id) is None:
+            raise HTTPException(404, "workspace not found")
+        if name.strip():
+            s.add(MarketingContact(
+                id=str(uuid.uuid4()), workspace_id=workspace_id, name=name.strip(),
+                email=email.strip() or None, company=company.strip() or None,
+                notes=notes.strip() or None,
+            ))
+            s.commit()
+    return RedirectResponse(url=f"/workspaces/{workspace_id}/marketing", status_code=303)
+
+
+@app.post("/workspaces/{workspace_id}/marketing/outreach")
+async def workspace_marketing_outreach(workspace_id: str, contact_id: str = Form(...),
+                                       goal: str = Form(...)) -> RedirectResponse:
+    with Session(get_engine()) as s:
+        if s.get(Workspace, workspace_id) is None:
+            raise HTTPException(404, "workspace not found")
+        member = marketing.find_marketing_member(s, workspace_id)
+        contact = s.get(MarketingContact, contact_id)
+        if member is not None and contact is not None and contact.workspace_id == workspace_id:
+            marketing.send_outreach(s, workspace_id, member, contact, goal.strip())
+    return RedirectResponse(url=f"/workspaces/{workspace_id}/marketing", status_code=303)
+
+
+@app.post("/workspaces/{workspace_id}/marketing/followups/run")
+async def workspace_marketing_run_followups(workspace_id: str) -> RedirectResponse:
+    with Session(get_engine()) as s:
+        member = marketing.find_marketing_member(s, workspace_id)
+        if member is not None:
+            for outreach in marketing.due_followups(s, workspace_id):
+                marketing.send_followup(s, member, outreach)
+    return RedirectResponse(url=f"/workspaces/{workspace_id}/marketing", status_code=303)
+
+
+@app.post("/workspaces/{workspace_id}/marketing/voice/preview")
+async def workspace_marketing_voice_preview(workspace_id: str,
+                                            text: str = Form(...)) -> Response:
+    audio = voice.synthesize(text.strip() or "Hello")
+    return Response(content=audio, media_type="application/octet-stream")
 
 
 @app.post("/agents/{agent_id}/delete")

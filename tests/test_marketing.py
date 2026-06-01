@@ -148,3 +148,57 @@ def test_find_marketing_member(db):
     with Session(db) as s:
         m = marketing.find_marketing_member(s, ws_id)
         assert m is not None and m.role == "marketing"
+
+
+from fastapi.testclient import TestClient
+
+
+@pytest.fixture()
+def client(db, monkeypatch):
+    import dashboard.main as dash
+    monkeypatch.setattr("core.llm_providers.complete", _echo_complete)
+    monkeypatch.setenv("EMAIL_BACKEND", "stub")
+    return TestClient(dash.app)
+
+
+def test_marketing_page_and_contact_and_outreach(db, client):
+    ws_id, member_id, ct_id = _ws_with_marketing(db)
+    r = client.get(f"/workspaces/{ws_id}/marketing")
+    assert r.status_code == 200
+
+    r = client.post(f"/workspaces/{ws_id}/marketing/contacts", data={
+        "name": "Dana", "email": "dana@x.com", "company": "X"}, follow_redirects=False)
+    assert r.status_code == 303
+
+    r = client.post(f"/workspaces/{ws_id}/marketing/outreach", data={
+        "contact_id": ct_id, "goal": "demo our product"}, follow_redirects=False)
+    assert r.status_code == 303
+    with Session(db) as s:
+        msgs = s.exec(select(OutreachMessage).where(
+            OutreachMessage.workspace_id == ws_id)).all()
+        assert len(msgs) == 1 and msgs[0].send_status == "sent"
+
+
+def test_run_followups_route(db, client):
+    ws_id, member_id, ct_id = _ws_with_marketing(db)
+    client.post(f"/workspaces/{ws_id}/marketing/outreach", data={
+        "contact_id": ct_id, "goal": "demo"}, follow_redirects=False)
+    with Session(db) as s:
+        om = s.exec(select(OutreachMessage).where(
+            OutreachMessage.workspace_id == ws_id)).one()
+        om.next_followup_at = utcnow() - timedelta(days=1)
+        s.add(om); s.commit()
+    r = client.post(f"/workspaces/{ws_id}/marketing/followups/run", follow_redirects=False)
+    assert r.status_code == 303
+    with Session(db) as s:
+        followups = s.exec(select(OutreachMessage).where(
+            OutreachMessage.kind == "followup")).all()
+        assert len(followups) == 1
+
+
+def test_voice_preview_returns_audio(db, client):
+    ws_id, member_id, ct_id = _ws_with_marketing(db)
+    r = client.post(f"/workspaces/{ws_id}/marketing/voice/preview",
+                    data={"text": "Hello there"})
+    assert r.status_code == 200
+    assert len(r.content) > 0
