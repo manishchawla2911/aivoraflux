@@ -735,7 +735,8 @@ async def workspace_marketing_run_followups(workspace_id: str) -> RedirectRespon
 @app.post("/workspaces/{workspace_id}/marketing/voice/preview")
 async def workspace_marketing_voice_preview(workspace_id: str,
                                             text: str = Form(...)) -> Response:
-    audio = voice.synthesize(text.strip() or "Hello")
+    # Clamp input before synthesis — guards a real TTS backend from unbounded cost.
+    audio = voice.synthesize((text.strip() or "Hello")[:MAX_RUN_INPUT_CHARS])
     return Response(content=audio, media_type="application/octet-stream")
 
 

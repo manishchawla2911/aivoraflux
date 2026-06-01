@@ -47,9 +47,11 @@ def draft_outreach(session: Session, member: WorkspaceMember, contact: Marketing
     memory_block = build_memory_context(
         session, member.workspace_id, goal, k=int(os.getenv("WORKSPACE_MEMORY_K", "5"))
     )
-    instr = f"Write a concise, friendly {'follow-up ' if kind == 'followup' else ''}outreach email to {contact.name}"
-    if contact.company:
-        instr += f" at {contact.company}"
+    contact_name = contact.name if contact else "there"
+    contact_company = contact.company if contact else None
+    instr = f"Write a concise, friendly {'follow-up ' if kind == 'followup' else ''}outreach email to {contact_name}"
+    if contact_company:
+        instr += f" at {contact_company}"
     instr += f" about: {goal}."
     if prior_body:
         instr += f"\n\nPrior email you sent:\n{prior_body}\n\nWrite a brief, value-adding follow-up."
