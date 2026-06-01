@@ -38,3 +38,21 @@ def test_marketing_tables_roundtrip(db):
         assert ct.status == "lead" and ct.email == "lee@globex.com"
         assert om.kind == "outreach" and om.followup_count == 0
         assert om.next_followup_at is None
+
+
+from core import voice
+
+
+def test_voice_stub_synthesize_and_transcribe(monkeypatch):
+    monkeypatch.setenv("VOICE_BACKEND", "stub")
+    audio = voice.synthesize("hello world")
+    assert isinstance(audio, bytes) and len(audio) > 0
+    assert voice.synthesize("hello world") == audio          # deterministic
+    text = voice.transcribe(audio)
+    assert isinstance(text, str) and text
+
+
+def test_voice_unknown_backend_falls_back(monkeypatch):
+    monkeypatch.setenv("VOICE_BACKEND", "nope")
+    assert isinstance(voice.synthesize("x"), bytes)
+    assert isinstance(voice.transcribe(b"abc"), str)
