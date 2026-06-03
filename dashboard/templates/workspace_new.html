@@ -1,0 +1,41 @@
+{% extends "_base.html" %}
+{% block title %}New workspace — Agent Studio{% endblock %}
+{% block content %}
+<section class="max-w-3xl mx-auto px-6 lg:px-8 py-12">
+  <h1 class="text-2xl font-semibold text-white mb-1">New workspace</h1>
+  <p class="text-slate-400 text-sm mb-8">Name your company, set a mission, and pick the roles to staff it. You can customize each agent's name now and refine prompts later.</p>
+
+  <form method="post" action="/workspaces" class="space-y-6">
+    <div>
+      <label class="block text-sm text-slate-300 mb-1">Company name</label>
+      <input name="name" required class="w-full bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-white" placeholder="Acme Analytics">
+    </div>
+    <div>
+      <label class="block text-sm text-slate-300 mb-1">Description</label>
+      <input name="company_description" class="w-full bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-white" placeholder="B2B analytics for mid-market SaaS">
+    </div>
+    <div>
+      <label class="block text-sm text-slate-300 mb-1">Mission</label>
+      <textarea name="mission" rows="2" class="w-full bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-white" placeholder="Become the #1 analytics tool for SaaS by 2027"></textarea>
+      <p class="text-xs text-slate-500 mt-1">Seeded as the first shared-memory entry so every agent stays aligned.</p>
+    </div>
+
+    <div>
+      <label class="block text-sm text-slate-300 mb-3">Roles</label>
+      <div class="grid sm:grid-cols-2 gap-3">
+        {% for r in roles %}
+          <label class="flex items-start gap-3 border border-white/10 rounded-lg p-3 hover:border-violet-500/50 transition cursor-pointer">
+            <input type="checkbox" name="roles" value="{{ r.id }}" class="mt-1" checked>
+            <div class="flex-1">
+              <div class="text-white text-sm font-medium">{{ r.avatar_emoji }} {{ r.label }}</div>
+              <input name="name_{{ r.id }}" placeholder="Custom name (optional)" class="mt-2 w-full bg-ink-900 border border-white/10 rounded px-2 py-1 text-xs text-white">
+            </div>
+          </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <button type="submit" class="inline-flex items-center gap-1.5 text-sm font-medium bg-grad-brand text-ink-950 px-5 py-2.5 rounded-md shadow-glow-v hover:shadow-glow-c transition">Create workspace</button>
+  </form>
+</section>
+{% endblock %}

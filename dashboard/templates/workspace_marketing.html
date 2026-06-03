@@ -1,0 +1,74 @@
+{% extends "_base.html" %}
+{% block title %}{{ ws.name }} · Marketing{% endblock %}
+{% block content %}
+<section class="max-w-4xl mx-auto px-6 lg:px-8 py-12">
+  <a href="/workspaces/{{ ws.id }}" class="text-xs text-slate-500 hover:text-white">← {{ ws.name }}</a>
+  <h1 class="text-2xl font-semibold text-white mt-1 mb-1">Marketing</h1>
+  {% if not has_marketing %}
+    <p class="text-amber-300 text-sm mb-6">No Marketing agent in this workspace — add the Marketing role to draft and send outreach.</p>
+  {% else %}
+    <p class="text-slate-400 text-sm mb-6">Your Marketing agent drafts outreach grounded in shared memory, sends it, and follows up automatically.</p>
+  {% endif %}
+
+  <div class="grid lg:grid-cols-2 gap-8">
+    <div>
+      <h2 class="text-sm uppercase tracking-wide text-slate-400 mb-3">Contacts</h2>
+      <form method="post" action="/workspaces/{{ ws.id }}/marketing/contacts" class="space-y-2 mb-4">
+        <input name="name" required placeholder="Name" class="w-full bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-sm text-white">
+        <input name="email" placeholder="Email" class="w-full bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-sm text-white">
+        <input name="company" placeholder="Company" class="w-full bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-sm text-white">
+        <button class="text-sm font-medium bg-grad-brand text-ink-950 px-4 py-1.5 rounded-md">Add contact</button>
+      </form>
+      <div class="space-y-2">
+        {% for c in contacts %}
+          <div class="border border-white/10 rounded-lg p-3">
+            <div class="flex items-center justify-between">
+              <div class="text-white text-sm font-medium">{{ c.name }} <span class="text-slate-500 text-xs">{{ c.company or '' }}</span></div>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-white/5 text-slate-300">{{ c.status }}</span>
+            </div>
+            <div class="text-slate-500 text-xs">{{ c.email or 'no email' }}</div>
+            {% if has_marketing and c.email %}
+            <form method="post" action="/workspaces/{{ ws.id }}/marketing/outreach" class="mt-2 flex gap-2">
+              <input type="hidden" name="contact_id" value="{{ c.id }}">
+              <input name="goal" required placeholder="Outreach goal…" class="flex-1 bg-ink-900 border border-white/10 rounded px-2 py-1 text-xs text-white">
+              <button class="text-xs bg-grad-brand text-ink-950 px-3 rounded">Reach out</button>
+            </form>
+            {% endif %}
+          </div>
+        {% else %}
+          <p class="text-slate-500 text-sm">No contacts yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm uppercase tracking-wide text-slate-400">Outreach log</h2>
+        <form method="post" action="/workspaces/{{ ws.id }}/marketing/followups/run">
+          <button class="text-xs text-violet-300 border border-violet-500/30 px-3 py-1 rounded-md hover:bg-violet-500/10 transition">Run due follow-ups</button>
+        </form>
+      </div>
+      <div class="space-y-2 max-h-[28rem] overflow-y-auto scrollbar-thin">
+        {% for m in messages %}
+          <div class="border border-white/10 rounded-lg p-3">
+            <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
+              <span class="px-1.5 py-0.5 rounded bg-white/5 text-slate-300">{{ m.kind }}</span>
+              <span>{{ m.send_status }}</span>
+            </div>
+            <div class="text-white text-sm font-medium">{{ m.subject }}</div>
+            <p class="text-slate-300 text-xs mt-1 whitespace-pre-wrap">{{ m.body[:240] }}</p>
+          </div>
+        {% else %}
+          <p class="text-slate-500 text-sm">No outreach yet.</p>
+        {% endfor %}
+      </div>
+
+      <h2 class="text-sm uppercase tracking-wide text-slate-400 mt-6 mb-2">Voice preview (TTS)</h2>
+      <form method="post" action="/workspaces/{{ ws.id }}/marketing/voice/preview" class="flex gap-2">
+        <input name="text" required placeholder="Type a line to synthesize…" class="flex-1 bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-sm text-white">
+        <button class="text-sm bg-grad-brand text-ink-950 px-4 rounded-md">Synthesize</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

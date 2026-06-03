@@ -1,0 +1,80 @@
+{% extends "_base.html" %}
+{% block title %}{{ ws.name }} — Workspace{% endblock %}
+{% block content %}
+<section class="max-w-5xl mx-auto px-6 lg:px-8 py-12">
+  <div class="flex items-start justify-between mb-2">
+    <div>
+      <a href="/workspaces" class="text-xs text-slate-500 hover:text-white">← Workspaces</a>
+      <h1 class="text-2xl font-semibold text-white mt-1">{{ ws.name }}</h1>
+      {% if ws.company_description %}<p class="text-slate-400 text-sm">{{ ws.company_description }}</p>{% endif %}
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="/workspaces/{{ ws.id }}/projects" class="text-xs text-cyan-300 border border-cyan-500/30 px-3 py-1.5 rounded-md hover:bg-cyan-500/10 transition">Projects →</a>
+      <a href="/workspaces/{{ ws.id }}/channels" class="text-xs text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-md hover:bg-emerald-500/10 transition">Channels →</a>
+      <a href="/workspaces/{{ ws.id }}/marketing" class="text-xs text-pink-300 border border-pink-500/30 px-3 py-1.5 rounded-md hover:bg-pink-500/10 transition">Marketing →</a>
+      <a href="/workspaces/{{ ws.id }}/chat" class="text-xs text-violet-300 border border-violet-500/30 px-3 py-1.5 rounded-md hover:bg-violet-500/10 transition">Team chat →</a>
+      {% if ws.status == 'active' %}
+        <form method="post" action="/workspaces/{{ ws.id }}/archive">
+          <button class="text-xs text-slate-400 border border-white/10 px-3 py-1.5 rounded-md hover:text-white hover:border-white/30 transition">Archive</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if ws.mission %}
+    <div class="border border-violet-500/30 bg-grad-soft rounded-xl p-4 my-6">
+      <div class="text-xs uppercase tracking-wide text-violet-300 mb-1">Mission</div>
+      <p class="text-white">{{ ws.mission }}</p>
+    </div>
+  {% endif %}
+
+  <div class="grid lg:grid-cols-2 gap-8 mt-8">
+    <!-- Roster -->
+    <div>
+      <h2 class="text-sm uppercase tracking-wide text-slate-400 mb-3">Roster</h2>
+      <div class="space-y-3">
+        {% for m in members %}
+          {% set a = agents.get(m.agent_id) %}
+          <a href="/agents/{{ m.agent_id }}" class="flex items-center gap-3 border border-white/10 rounded-lg p-3 hover:border-violet-500/50 hover:bg-white/5 transition">
+            <span class="text-2xl">{{ a.avatar_emoji if a else '🤖' }}</span>
+            <div class="flex-1">
+              <div class="text-white text-sm font-medium">{{ m.display_name or (a.name if a else m.role) }}</div>
+              <div class="text-slate-500 text-xs uppercase tracking-wide">{{ m.role }}</div>
+            </div>
+            <span class="text-xs text-violet-400">Open →</span>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Shared memory -->
+    <div>
+      <h2 class="text-sm uppercase tracking-wide text-slate-400 mb-3">Shared memory</h2>
+      <form method="post" action="/workspaces/{{ ws.id }}/memory" class="space-y-2 mb-5">
+        <div class="flex gap-2">
+          <select name="kind" class="bg-ink-800 border border-white/10 rounded-md px-2 py-2 text-sm text-white">
+            {% for k in memory_kinds %}<option value="{{ k }}">{{ k }}</option>{% endfor %}
+          </select>
+          <input name="tags" placeholder="tags (comma-sep)" class="flex-1 bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-sm text-white">
+        </div>
+        <textarea name="content" rows="2" required placeholder="Add a fact, decision, or note the whole team should know…" class="w-full bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-sm text-white"></textarea>
+        <button class="text-sm font-medium bg-grad-brand text-ink-950 px-4 py-1.5 rounded-md">Add to memory</button>
+      </form>
+
+      <div class="space-y-2 max-h-96 overflow-y-auto scrollbar-thin">
+        {% for e in memories %}
+          <div class="border border-white/10 rounded-lg p-3">
+            <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
+              <span class="px-1.5 py-0.5 rounded bg-white/5 text-slate-300">{{ e.kind }}</span>
+              <span>{{ e.author or 'unknown' }}</span>
+            </div>
+            <p class="text-slate-200 text-sm">{{ e.content }}</p>
+          </div>
+        {% else %}
+          <p class="text-slate-500 text-sm">No memory entries yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NexaFlow · Workspace Foundation — Data Model</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --new: #1f6feb;
+    --new-soft: #132b54;
+    --exist: #6e7681;
+    --exist-soft: #21262d;
+    --ext: #8957e5;
+    --ext-soft: #2a1f47;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --pk: #f0883e;
+    --fk: #3fb950;
+    --line: #30363d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px;
+    background: radial-gradient(1200px 800px at 70% -10%, #15233b 0%, var(--bg) 55%);
+    color: var(--text);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: .3px; }
+  .sub { color: var(--muted); margin: 0 0 28px; font-size: 13px; }
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 30px; font-size: 12px; }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); }
+  .dot { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(240px, 1fr));
+    gap: 26px 48px;
+    align-items: start;
+    max-width: 1180px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 26px rgba(0,0,0,.35);
+  }
+  .card .hd {
+    padding: 11px 14px;
+    font-weight: 650;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+  }
+  .tag { font-size: 10px; font-weight: 700; letter-spacing: .6px; padding: 2px 7px; border-radius: 20px; }
+  .card.new   .hd { background: var(--new-soft); }
+  .card.new   { border-color: #265db5; }
+  .card.new   .tag { background: var(--new); color: #fff; }
+  .card.exist .hd { background: var(--exist-soft); }
+  .card.exist .tag { background: var(--exist); color: #fff; }
+  .card.ext   .hd { background: var(--ext-soft); }
+  .card.ext   { border-color: #4a3a7a; }
+  .card.ext   .tag { background: var(--ext); color: #fff; }
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 6px 14px; border-top: 1px solid #1f242c; vertical-align: top; }
+  tr:first-child td { border-top: none; }
+  .col { font-family: "SF Mono", ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 12.5px; }
+  .type { color: var(--muted); font-size: 11.5px; text-align: right; white-space: nowrap; }
+  .pk { color: var(--pk); font-weight: 700; }
+  .fk { color: var(--fk); }
+  .note { color: var(--muted); font-style: italic; font-size: 11.5px; padding: 8px 14px; background: #11151b; }
+  .rel { max-width: 1180px; margin-top: 30px; }
+  .rel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 0 0 10px; }
+  .rel ul { margin: 0; padding-left: 18px; color: var(--text); }
+  .rel li { margin: 5px 0; }
+  .rel code { background: #1f242c; padding: 1px 6px; border-radius: 5px; color: #79c0ff; font-size: 12.5px; }
+  .chip { font-weight: 700; }
+  .chip.one::before { content: "1"; }
+  .chip.many::before { content: "∞"; }
+</style>
+</head>
+<body>
+  <h1>Workspace Foundation — Data Model</h1>
+  <p class="sub">Option C: <strong>Workspace</strong> + <strong>WorkspaceMember</strong> (join) → reuse the existing <strong>Agent</strong>. Shared memory canonical in SQLite, semantically indexed in ChromaDB.</p>
+
+  <div class="legend">
+    <span><i class="dot" style="background:var(--new)"></i> New table (this cycle)</span>
+    <span><i class="dot" style="background:var(--exist)"></i> Existing table (reused)</span>
+    <span><i class="dot" style="background:var(--ext)"></i> External store</span>
+    <span><i class="dot" style="background:var(--pk)"></i> Primary key</span>
+    <span><i class="dot" style="background:var(--fk)"></i> Foreign key</span>
+  </div>
+
+  <div class="grid">
+    <!-- Workspace -->
+    <div class="card new">
+      <div class="hd">Workspace <span class="tag">NEW</span></div>
+      <table>
+        <tr><td class="col pk">id</td><td class="type">str · PK</td></tr>
+        <tr><td class="col">owner_email</td><td class="type">str (idx)</td></tr>
+        <tr><td class="col">name</td><td class="type">str</td></tr>
+        <tr><td class="col">company_description</td><td class="type">str</td></tr>
+        <tr><td class="col">mission</td><td class="type">text</td></tr>
+        <tr><td class="col">status</td><td class="type">active · archived</td></tr>
+        <tr><td class="col">created_at</td><td class="type">datetime</td></tr>
+        <tr><td class="col">updated_at</td><td class="type">datetime</td></tr>
+      </table>
+    </div>
+
+    <!-- WorkspaceMember -->
+    <div class="card new">
+      <div class="hd">WorkspaceMember <span class="tag">NEW</span></div>
+      <table>
+        <tr><td class="col pk">id</td><td class="type">str · PK</td></tr>
+        <tr><td class="col fk">workspace_id</td><td class="type">FK → Workspace</td></tr>
+        <tr><td class="col fk">agent_id</td><td class="type">FK → Agent</td></tr>
+        <tr><td class="col">role</td><td class="type">catalog id</td></tr>
+        <tr><td class="col">display_name</td><td class="type">str</td></tr>
+        <tr><td class="col">order_index</td><td class="type">int</td></tr>
+        <tr><td class="col">created_at</td><td class="type">datetime</td></tr>
+      </table>
+      <div class="note">Holds only workspace-specific data; behavior lives on the Agent.</div>
+    </div>
+
+    <!-- WorkspaceMemory -->
+    <div class="card new">
+      <div class="hd">WorkspaceMemory <span class="tag">NEW</span></div>
+      <table>
+        <tr><td class="col pk">id</td><td class="type">str · PK</td></tr>
+        <tr><td class="col fk">workspace_id</td><td class="type">FK → Workspace (idx)</td></tr>
+        <tr><td class="col">author</td><td class="type">member · owner</td></tr>
+        <tr><td class="col">kind</td><td class="type">goal·decision·fact·note</td></tr>
+        <tr><td class="col">content</td><td class="type">text</td></tr>
+        <tr><td class="col">tags</td><td class="type">JSON list</td></tr>
+        <tr><td class="col">created_at</td><td class="type">datetime</td></tr>
+      </table>
+      <div class="note">Source of truth; id also keys the Chroma doc.</div>
+    </div>
+
+    <!-- Agent -->
+    <div class="card exist">
+      <div class="hd">Agent <span class="tag">EXISTING</span></div>
+      <table>
+        <tr><td class="col pk">id</td><td class="type">str · PK</td></tr>
+        <tr><td class="col">name</td><td class="type">str</td></tr>
+        <tr><td class="col">system_prompt</td><td class="type">text</td></tr>
+        <tr><td class="col">model_provider</td><td class="type">str</td></tr>
+        <tr><td class="col">model_name</td><td class="type">str</td></tr>
+        <tr><td class="col fk">guardrail_profile_id</td><td class="type">FK → GuardrailProfile</td></tr>
+        <tr><td class="col type" style="text-align:left;color:var(--muted)">… temperature, tools, status …</td><td></td></tr>
+      </table>
+      <div class="note">Reused as-is: run console, guardrails, providers, observability.</div>
+    </div>
+
+    <!-- GuardrailProfile -->
+    <div class="card exist">
+      <div class="hd">GuardrailProfile <span class="tag">EXISTING</span></div>
+      <table>
+        <tr><td class="col pk">id</td><td class="type">str · PK</td></tr>
+        <tr><td class="col">name</td><td class="type">str</td></tr>
+        <tr><td class="col type" style="text-align:left;color:var(--muted)">… safety toggles …</td><td></td></tr>
+      </table>
+    </div>
+
+    <!-- ChromaDB -->
+    <div class="card ext">
+      <div class="hd">ChromaDB <span class="tag">EXTERNAL</span></div>
+      <table>
+        <tr><td class="col">collection</td><td class="type">per workspace_id</td></tr>
+        <tr><td class="col">doc id</td><td class="type">= WorkspaceMemory.id</td></tr>
+        <tr><td class="col">embedding</td><td class="type">embed(content)</td></tr>
+        <tr><td class="col">metadata</td><td class="type">kind · author · tags</td></tr>
+        <tr><td class="col">persist</td><td class="type">$CHROMA_DIR</td></tr>
+      </table>
+      <div class="note">Semantic retrieval; SQL fallback if unavailable.</div>
+    </div>
+  </div>
+
+  <div class="rel">
+    <h2>Relationships</h2>
+    <ul>
+      <li><span class="chip one"></span> <code>Workspace</code> &nbsp;→&nbsp; <span class="chip many"></span> <code>WorkspaceMember</code> &nbsp;(a workspace has many members)</li>
+      <li><span class="chip one"></span> <code>Workspace</code> &nbsp;→&nbsp; <span class="chip many"></span> <code>WorkspaceMemory</code> &nbsp;(a workspace has many memory entries)</li>
+      <li><span class="chip many"></span> <code>WorkspaceMember</code> &nbsp;→&nbsp; <span class="chip one"></span> <code>Agent</code> &nbsp;(each member <em>is</em> one reused Agent — option C)</li>
+      <li><span class="chip many"></span> <code>Agent</code> &nbsp;→&nbsp; <span class="chip one"></span> <code>GuardrailProfile</code> &nbsp;(existing link — members are guardrailed for free)</li>
+      <li><code>WorkspaceMemory.id</code> &nbsp;=&nbsp; ChromaDB document id &nbsp;(SQLite = truth, Chroma = semantic index)</li>
+      <li><code>owner_email</code> matched by string across Workspace / Agent (no FK, mirrors existing code)</li>
+    </ul>
+  </div>
+</body>
+</html>

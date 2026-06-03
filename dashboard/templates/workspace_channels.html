@@ -1,0 +1,42 @@
+{% extends "_base.html" %}
+{% block title %}{{ ws.name }} · Channels{% endblock %}
+{% block content %}
+<section class="max-w-3xl mx-auto px-6 lg:px-8 py-12">
+  <a href="/workspaces/{{ ws.id }}" class="text-xs text-slate-500 hover:text-white">← {{ ws.name }}</a>
+  <h1 class="text-2xl font-semibold text-white mt-1 mb-1">External channels</h1>
+  <p class="text-slate-400 text-sm mb-6">Link a Telegram chat, Slack channel, or WhatsApp number. Messages addressed with <code class="text-violet-300">/agent</code> route to your team; replies come back here.</p>
+
+  <div class="space-y-2 mb-8">
+    {% for c in channels %}
+      <div class="flex items-center justify-between border border-white/10 rounded-lg p-3 {{ 'opacity-50' if not c.active else '' }}">
+        <div>
+          <div class="text-white text-sm font-medium">{{ platforms[c.platform].label if c.platform in platforms else c.platform }} · {{ c.label or c.external_id }}</div>
+          <div class="text-slate-500 text-xs">id {{ c.external_id }} · token env {{ c.token_env or '—' }} {{ '· inactive' if not c.active else '' }}</div>
+        </div>
+        {% if c.active %}
+          <form method="post" action="/workspaces/{{ ws.id }}/channels/{{ c.id }}/remove">
+            <button class="text-xs text-slate-400 border border-white/10 px-3 py-1.5 rounded-md hover:text-white transition">Remove</button>
+          </form>
+        {% endif %}
+      </div>
+    {% else %}
+      <p class="text-slate-500 text-sm">No channels linked yet.</p>
+    {% endfor %}
+  </div>
+
+  <h2 class="text-lg font-semibold text-white mb-3">Link a channel</h2>
+  <form method="post" action="/workspaces/{{ ws.id }}/channels" class="space-y-3">
+    <select name="platform" class="w-full bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-white">
+      {% for pid, p in platforms.items() %}<option value="{{ pid }}">{{ p.label }}</option>{% endfor %}
+    </select>
+    <input name="external_id" required placeholder="Chat / channel / phone id" class="w-full bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-white">
+    <input name="label" placeholder="Label (optional)" class="w-full bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-white">
+    <input name="token_env" placeholder="Token env var (optional, e.g. TELEGRAM_BOT_TOKEN)" class="w-full bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-white">
+    <button class="text-sm font-medium bg-grad-brand text-ink-950 px-5 py-2 rounded-md shadow-glow-v hover:shadow-glow-c transition">Link channel</button>
+  </form>
+
+  <div class="mt-8 text-xs text-slate-500">
+    Webhook URLs: <code>POST /bridge/telegram/webhook</code>, <code>/bridge/slack/webhook</code>, <code>/bridge/whatsapp/webhook</code>.
+  </div>
+</section>
+{% endblock %}

@@ -185,6 +185,131 @@ class GuardrailProfile(SQLModel, table=True):
 
 
 # ─────────────────────────────────────────────────────────────
+# Workspace layer — an "AI company": a roster of role agents that
+# share a common memory. Members reuse the existing Agent row.
+# ─────────────────────────────────────────────────────────────
+
+class Workspace(SQLModel, table=True):
+    """An owner's AI company — a named container for a roster + shared memory."""
+    __tablename__ = "workspace"
+
+    id: str = Field(primary_key=True)
+    owner_email: Optional[str] = Field(default=None, index=True)
+    name: str
+    company_description: Optional[str] = None
+    mission: Optional[str] = None
+    status: str = "active"                      # active | archived
+    created_at: datetime = Field(default_factory=_utcnow)
+    updated_at: datetime = Field(default_factory=_utcnow)
+
+
+class WorkspaceMember(SQLModel, table=True):
+    """Join row: places an existing Agent into a workspace under a role."""
+    __tablename__ = "workspace_member"
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    agent_id: str = Field(foreign_key="agent.id", index=True)
+    role: str                                   # catalog role id, e.g. "ceo"
+    display_name: Optional[str] = None
+    order_index: int = 0
+    parent_member_id: Optional[str] = None     # member that spawned this one
+    origin: str = "seed"                        # seed | spawned
+    created_at: datetime = Field(default_factory=_utcnow)
+
+
+class WorkspaceMemory(SQLModel, table=True):
+    """One shared-memory entry. Canonical here; mirrored into ChromaDB by id."""
+    __tablename__ = "workspace_memory"
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    author: Optional[str] = None                # member display name or "owner"
+    kind: str = "note"                          # goal | decision | fact | note
+    content: str = ""
+    tags: Optional[str] = None                  # JSON list
+    created_at: datetime = Field(default_factory=_utcnow)
+
+
+class WorkspaceChatMessage(SQLModel, table=True):
+    """One message in a workspace's single internal chat channel."""
+    __tablename__ = "workspace_chat_message"
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    author_kind: str = "owner"                  # owner | agent
+    author_member_id: Optional[str] = None      # WorkspaceMember.id when agent-authored
+    author_name: str = "Owner"                  # display label in the transcript
+    content: str = ""
+    mentions: Optional[str] = None              # JSON list of resolved member ids
+    triggered_by_id: Optional[str] = None       # message id that caused this one
+    pinned_memory_id: Optional[str] = None      # WorkspaceMemory.id once pinned
+    created_at: datetime = Field(default_factory=_utcnow)
+
+
+class WorkspaceProject(SQLModel, table=True):
+    """A unit of work in a workspace; anchors a spawned team + a cost quote."""
+    __tablename__ = "workspace_project"
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    name: str
+    brief: str = ""
+    client_name: Optional[str] = None
+    status: str = "estimating"                  # estimating | staffed | archived
+    pm_member_id: Optional[str] = None          # spawned PM's WorkspaceMember.id
+    estimate_json: Optional[str] = None         # JSON CostEstimate (client quote)
+    created_at: datetime = Field(default_factory=_utcnow)
+    updated_at: datetime = Field(default_factory=_utcnow)
+
+
+class WorkspaceChannel(SQLModel, table=True):
+    """Links a workspace to an external chat platform channel (subsystem E)."""
+    __tablename__ = "workspace_channel"
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    platform: str                               # telegram | slack | whatsapp
+    external_id: str = Field(index=True)        # chat / channel / phone id
+    label: Optional[str] = None
+    token_env: Optional[str] = None             # env var name holding the bot token
+    active: bool = True
+    created_at: datetime = Field(default_factory=_utcnow)
+
+
+class MarketingContact(SQLModel, table=True):
+    """A lead/client the marketing agent reaches out to (subsystem F)."""
+    __tablename__ = "marketing_contact"
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    name: str
+    email: Optional[str] = None
+    company: Optional[str] = None
+    notes: Optional[str] = None
+    status: str = "lead"                        # lead | contacted | replied | won | lost
+    created_at: datetime = Field(default_factory=_utcnow)
+
+
+class OutreachMessage(SQLModel, table=True):
+    """One outreach or follow-up email drafted by the marketing agent (subsystem F)."""
+    __tablename__ = "outreach_message"
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    contact_id: str = Field(foreign_key="marketing_contact.id", index=True)
+    member_id: Optional[str] = None             # Marketing WorkspaceMember.id
+    kind: str = "outreach"                      # outreach | followup
+    subject: str = ""
+    body: str = ""
+    channel: str = "email"
+    send_status: str = "drafted"               # drafted | sent | failed
+    followup_count: int = 0
+    next_followup_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=_utcnow)
+
+
+# ─────────────────────────────────────────────────────────────
 # Observability — append-only telemetry for the agent fleet & studio.
 # ─────────────────────────────────────────────────────────────
 

@@ -1,0 +1,32 @@
+{% extends "_base.html" %}
+{% block title %}Workspaces — Agent Studio{% endblock %}
+{% block content %}
+<section class="max-w-5xl mx-auto px-6 lg:px-8 py-12">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-semibold text-white">Workspaces</h1>
+      <p class="text-slate-400 text-sm mt-1">Each workspace is an AI company — a roster of role agents that share memory.</p>
+    </div>
+    <a href="/workspaces/new" class="inline-flex items-center gap-1.5 text-sm font-medium bg-grad-brand text-ink-950 px-4 py-2 rounded-md shadow-glow-v hover:shadow-glow-c transition">New workspace</a>
+  </div>
+
+  {% if not workspaces %}
+    <div class="border border-white/10 rounded-xl p-10 text-center text-slate-400">
+      No workspaces yet. <a href="/workspaces/new" class="text-violet-400 hover:text-white">Create your first AI company →</a>
+    </div>
+  {% else %}
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {% for w in workspaces %}
+        <a href="/workspaces/{{ w.id }}" class="block border border-white/10 rounded-xl p-5 hover:border-violet-500/50 hover:bg-white/5 transition">
+          <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-white">{{ w.name }}</h2>
+            <span class="text-xs px-2 py-0.5 rounded-full {{ 'bg-emerald-500/15 text-emerald-300' if w.status == 'active' else 'bg-slate-500/15 text-slate-400' }}">{{ w.status }}</span>
+          </div>
+          {% if w.mission %}<p class="text-slate-400 text-sm mt-2 line-clamp-2">{{ w.mission }}</p>{% endif %}
+          <p class="text-slate-500 text-xs mt-4">{{ member_counts[w.id] }} member(s)</p>
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

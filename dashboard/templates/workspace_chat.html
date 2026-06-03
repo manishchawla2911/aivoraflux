@@ -1,0 +1,36 @@
+{% extends "_base.html" %}
+{% block title %}{{ ws.name }} · Team chat{% endblock %}
+{% block content %}
+<section class="max-w-4xl mx-auto px-6 lg:px-8 py-12">
+  <a href="/workspaces/{{ ws.id }}" class="text-xs text-slate-500 hover:text-white">← {{ ws.name }}</a>
+  <h1 class="text-2xl font-semibold text-white mt-1 mb-1">Team chat</h1>
+  <p class="text-slate-400 text-sm mb-6">Address an agent with <code class="text-violet-300">@Name</code> or <code class="text-violet-300">/name</code>. Agents can mention each other — replies cascade, bounded so they can't loop.</p>
+
+  <div class="space-y-3 mb-6">
+    {% for m in messages %}
+      <div class="flex {{ 'justify-end' if m.author_kind == 'owner' else 'justify-start' }} {{ 'pl-8' if m.triggered_by_id else '' }}">
+        <div class="max-w-[80%] border border-white/10 rounded-xl p-3 {{ 'bg-violet-500/10' if m.author_kind == 'owner' else 'bg-white/5' }}">
+          <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
+            <span class="font-medium text-slate-300">{{ m.author_name }}</span>
+            {% if m.pinned_memory_id %}<span class="text-amber-300">📌 pinned</span>{% endif %}
+          </div>
+          <p class="text-slate-100 text-sm whitespace-pre-wrap">{{ m.content }}</p>
+          {% if m.author_kind == 'agent' and not m.pinned_memory_id %}
+            <form method="post" action="/workspaces/{{ ws.id }}/chat/{{ m.id }}/pin" class="mt-2">
+              <input type="hidden" name="kind" value="decision">
+              <button class="text-xs text-slate-500 hover:text-amber-300 transition">📌 Pin to memory</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <p class="text-slate-500 text-sm">No messages yet. Say hello to your team.</p>
+    {% endfor %}
+  </div>
+
+  <form method="post" action="/workspaces/{{ ws.id }}/chat" class="space-y-2">
+    <textarea name="content" rows="3" required placeholder="Message your team… e.g. @CEO what should we prioritize this quarter?" class="w-full bg-ink-800 border border-white/10 rounded-md px-3 py-2 text-white"></textarea>
+    <button class="text-sm font-medium bg-grad-brand text-ink-950 px-5 py-2 rounded-md shadow-glow-v hover:shadow-glow-c transition">Send</button>
+  </form>
+</section>
+{% endblock %}
