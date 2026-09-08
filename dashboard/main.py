@@ -43,6 +43,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func
 from sqlmodel import Session, select
+from dotenv import load_dotenv
 
 from core.agent_factory import (
     AgentSpec, CATEGORIES, TOOL_CATALOG, _slugify, auto_craft,
@@ -51,6 +52,7 @@ from core.guardrails import GUARDRAIL_FEATURES
 from core.llm_providers import list_providers
 from core.observability import WINDOWS, compute_metrics, detect_anomalies
 from core.agent_runtime import run_agent_completion
+from core.email_sender import send_email
 from core import chat_bridge
 from core.chat_bridge import BRIDGE_PLATFORMS
 from core.state import (
@@ -70,6 +72,9 @@ from dataclasses import asdict
 
 logger = logging.getLogger(__name__)
 
+# Load local .env for runtime configuration in development.
+load_dotenv()
+
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 PROJECTS_DIR = Path(os.getenv("PROJECTS_BASE_PATH", "./projects"))
@@ -77,6 +82,8 @@ PROJECTS_DIR = Path(os.getenv("PROJECTS_BASE_PATH", "./projects"))
 # Maximum characters accepted by the agent run endpoint (SEC-2). Override via env.
 MAX_RUN_INPUT_CHARS = int(os.getenv("MAX_RUN_INPUT_CHARS", "20000"))
 WORKSPACE_MEMORY_K = int(os.getenv("WORKSPACE_MEMORY_K", "5"))
+CONTACT_FORM_ACTION = os.getenv("CONTACT_FORM_ACTION", "")
+CONTACT_INBOX_EMAIL = os.getenv("CONTACT_INBOX_EMAIL", "")
 
 # Startup-hook registry — lets `main.py` attach the orchestrator boot to the
 # same lifespan without a second (deprecated) on_event handler (DEP-2).
@@ -184,6 +191,79 @@ async def landing(request: Request) -> HTMLResponse:
 @app.get("/pricing", response_class=HTMLResponse)
 async def pricing(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(request, "pricing.html", {})
+
+
+@app.get("/services", response_class=HTMLResponse)
+async def services(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(request, "services.html", {})
+
+
+@app.get("/industries", response_class=HTMLResponse)
+async def industries(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(request, "industries.html", {})
+
+
+@app.get("/case-studies", response_class=HTMLResponse)
+async def case_studies(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(request, "case_studies.html", {})
+
+
+@app.get("/about", response_class=HTMLResponse)
+async def about(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(request, "about.html", {})
+
+
+@app.get("/faqs", response_class=HTMLResponse)
+async def faqs(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(request, "faqs.html", {})
+
+
+@app.get("/contact", response_class=HTMLResponse)
+async def contact(request: Request, submitted: int = 0, error: int = 0) -> HTMLResponse:
+    smtp_ready = (
+        os.getenv("EMAIL_BACKEND", "stub") == "smtp"
+        and bool(os.getenv("SMTP_HOST", "").strip())
+        and bool(os.getenv("SMTP_USER", "").strip())
+    )
+    return templates.TemplateResponse(request, "contact.html", {
+        "submitted": bool(submitted),
+        "error": bool(error),
+        "smtp_ready": smtp_ready,
+        "base_url": str(request.base_url).rstrip("/"),
+    })
+
+
+@app.post("/contact/inquiry")
+async def contact_inquiry(
+    name: str = Form(...),
+    email: str = Form(...),
+    company: str = Form(""),
+    message: str = Form(...),
+) -> RedirectResponse:
+    safe_name = (name or "").strip()[:120]
+    safe_email = (email or "").strip()[:160]
+    safe_company = (company or "").strip()[:160]
+    safe_message = (message or "").strip()[:5000]
+    if not safe_name or not safe_email or not safe_message:
+        return RedirectResponse(url="/contact?error=1", status_code=303)
+
+    recipient = CONTACT_INBOX_EMAIL.strip() or os.getenv("SMTP_USER", "").strip()
+    if not recipient:
+        return RedirectResponse(url="/contact?error=1", status_code=303)
+
+    subject = f"New AI consultancy inquiry from {safe_name}"
+    body = "\n".join([
+        "New inquiry received from aivoraflux.com",
+        "",
+        f"Name: {safe_name}",
+        f"Email: {safe_email}",
+        f"Company: {safe_company or 'N/A'}",
+        "",
+        "Inquiry:",
+        safe_message,
+    ])
+    ok = send_email(recipient, subject, body, backend=os.getenv("EMAIL_BACKEND", "smtp"))
+    return RedirectResponse(url="/contact?submitted=1" if ok else "/contact?error=1", status_code=303)
 
 
 # ─────────────────────────────────────────────────────────────

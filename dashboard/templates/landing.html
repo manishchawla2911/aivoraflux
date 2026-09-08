@@ -1,68 +1,37 @@
 {% extends "_base.html" %}
-{% block title %}aivoraflux — intelligent flow, always on{% endblock %}
+{% block title %}aivoraflux — AI consultancy for business{% endblock %}
 
 {% block content %}
-<!-- HERO -->
 <section class="relative overflow-hidden bg-[#08080a] text-white">
-  <!-- Animated particle vortex background -->
   <canvas id="vortex" class="absolute inset-0 w-full h-full block" aria-hidden="true"></canvas>
-  <!-- Vignette to keep the headline legible over the swirl -->
   <div class="absolute inset-0 pointer-events-none"
        style="background:
          radial-gradient(90% 90% at 68% 50%, transparent 55%, rgba(8,8,10,.45) 82%, #08080a 100%),
-         linear-gradient(90deg, rgba(8,8,10,.92) 0%, rgba(8,8,10,.55) 26%, transparent 46%);"></div>
-
-  <div class="relative z-10 max-w-screen-xl mx-auto px-6 lg:px-8 pt-24 pb-20 lg:pt-32 lg:pb-28 min-h-[88vh] flex flex-col justify-center">
+         linear-gradient(90deg, rgba(8,8,10,.92) 0%, rgba(8,8,10,.60) 28%, transparent 48%);"></div>
+  <div class="relative z-10 max-w-screen-xl mx-auto px-6 lg:px-8 pt-24 pb-24 lg:pt-32 lg:pb-32 min-h-[84vh] flex items-center">
     <div class="max-w-4xl">
       <div class="anim-rise anim-d1 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/15 text-xs text-stone-300 backdrop-blur-sm">
         <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-        Intelligent flow, always on
+        AI consultancy for business growth and operations
       </div>
-      <h1 class="mt-8 text-5xl lg:text-7xl font-semibold tracking-tightest text-white leading-[1.02]">
-        <span class="block anim-rise anim-d2">Intelligent flow.</span>
-        <span class="block anim-rise anim-d3">Always on.</span>
+      <h1 class="mt-8 text-5xl lg:text-7xl font-semibold tracking-tightest text-white leading-[1.03]">
+        <span class="block anim-rise anim-d2">From strategy to AI automation.</span>
+        <span class="block anim-rise anim-d3">Built for real business outcomes.</span>
       </h1>
       <p class="anim-rise anim-d4 mt-8 text-lg lg:text-xl text-stone-300 max-w-2xl leading-relaxed">
-        aivoraflux is the studio for building production AI agents — design them by hand, or describe what you want and we'll generate the prompt, tools and guardrails. Switch between Claude, GPT, Gemini, Mistral, or local Ollama with one click.
+        aivoraflux helps teams identify high-value AI opportunities, design practical workflows, and deploy secure AI systems that reduce manual work and improve decision-making.
       </p>
       <div class="anim-rise anim-d5 mt-10 flex flex-wrap items-center gap-3">
-        <a href="/studio" class="group inline-flex items-center gap-2 px-6 py-3 rounded-md bg-white text-ink font-medium hover:bg-stone-200 transition">
-          Start building
+        <a href="/contact" class="group inline-flex items-center gap-2 px-6 py-3 rounded-md bg-white text-ink font-medium hover:bg-stone-200 transition">
+          Book a strategy call
           <svg class="w-4 h-4 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
         </a>
-        <a href="/dashboard" class="inline-flex items-center gap-2 px-6 py-3 rounded-md border border-white/20 text-white font-medium hover:bg-white/10 transition">
-          See live demo
+        <a href="/services" class="inline-flex items-center gap-2 px-6 py-3 rounded-md border border-white/20 text-white font-medium hover:bg-white/10 transition">
+          Explore services
         </a>
-      </div>
-    </div>
-
-    <!-- Logo strip (infinite marquee) -->
-    <div class="mt-20 border-t border-white/10 pt-10" data-reveal>
-      <div class="text-xs uppercase tracking-[0.18em] text-stone-400 mb-5">Runs on the best models</div>
-      <div class="marquee-mask marquee-pause overflow-hidden">
-        <div class="marquee gap-x-12 text-stone-300 font-medium text-lg">
-          {% for _ in range(2) %}
-          <span class="shrink-0">Anthropic</span>
-          <span class="shrink-0 text-stone-600">/</span>
-          <span class="shrink-0">OpenAI</span>
-          <span class="shrink-0 text-stone-600">/</span>
-          <span class="shrink-0">Google Gemini</span>
-          <span class="shrink-0 text-stone-600">/</span>
-          <span class="shrink-0">Mistral</span>
-          <span class="shrink-0 text-stone-600">/</span>
-          <span class="shrink-0">Groq</span>
-          <span class="shrink-0 text-stone-600">/</span>
-          <span class="shrink-0">Ollama</span>
-          <span class="shrink-0 text-stone-600">/</span>
-          <span class="shrink-0">LM Studio</span>
-          <span class="shrink-0 text-stone-600">/</span>
-          {% endfor %}
-        </div>
       </div>
     </div>
   </div>
-
-  <!-- Particle vortex engine -->
   <script>
   (function () {
     var c = document.getElementById('vortex');
@@ -70,48 +39,33 @@
     var ctx = c.getContext('2d');
     var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var DPR = Math.min(window.devicePixelRatio || 1, 2);
-    var W = 0, H = 0, cx = 0, cy = 0, scale = 0, P = [], t = 0, raf = 0;
-    var COUNT = reduce ? 0 : (window.innerWidth < 768 ? 420 : 900);
-
+    var W = 0, H = 0, cx = 0, cy = 0, scale = 0, P = [], t = 0;
+    var COUNT = reduce ? 0 : (window.innerWidth < 768 ? 380 : 780);
     function rand(a, b) { return a + Math.random() * (b - a); }
-
-    function resize() {
-      var r = c.getBoundingClientRect();
-      W = Math.max(1, r.width); H = Math.max(1, r.height);
-      c.width = Math.round(W * DPR); c.height = Math.round(H * DPR);
-      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-      // Swirl sits center-right on wide screens (clear of the headline), centred on mobile
-      cx = W * (W < 768 ? 0.5 : 0.68); cy = H * 0.5; scale = Math.min(W, H);
-      ctx.fillStyle = '#08080a'; ctx.fillRect(0, 0, W, H);
-    }
-
-    function init() {
-      P = [];
-      for (var i = 0; i < COUNT; i++) {
-        P.push({
-          a: Math.random() * Math.PI * 2,            // angle around centre
-          r: scale * rand(0.10, 0.34),               // orbit radius (annulus)
-          s: rand(0.0012, 0.0042) * (Math.random() < 0.5 ? 1 : -1), // spin dir/speed
-          n: Math.random() * 1000,                   // per-particle phase
-          w: rand(0.4, 1.5)                          // weight (width + alpha)
-        });
-      }
-    }
-
-    // Cheap layered-sine "flow noise" — organic, dependency-free
     function flow(x, y, tm) {
       return Math.sin(x * 0.0042 + tm * 0.00065)
            + Math.cos(y * 0.0049 - tm * 0.00055)
            + Math.sin((x + y) * 0.0029 + tm * 0.0009);
     }
-
+    function resize() {
+      var r = c.getBoundingClientRect();
+      W = Math.max(1, r.width); H = Math.max(1, r.height);
+      c.width = Math.round(W * DPR); c.height = Math.round(H * DPR);
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      cx = W * (W < 768 ? 0.52 : 0.70); cy = H * 0.5; scale = Math.min(W, H);
+      ctx.fillStyle = '#08080a'; ctx.fillRect(0, 0, W, H);
+    }
+    function init() {
+      P = [];
+      for (var i = 0; i < COUNT; i++) {
+        P.push({ a: Math.random() * Math.PI * 2, r: scale * rand(0.10, 0.34), s: rand(0.0012, 0.0042) * (Math.random() < 0.5 ? 1 : -1), n: Math.random() * 1000, w: rand(0.4, 1.5) });
+      }
+    }
     function frame() {
       t += 16;
-      // translucent wash → silky motion-blur trails that fade to bg
       ctx.globalCompositeOperation = 'source-over';
       ctx.fillStyle = 'rgba(8,8,10,0.06)';
       ctx.fillRect(0, 0, W, H);
-
       ctx.globalCompositeOperation = 'lighter';
       var minR = scale * 0.05, maxR = scale * 0.44;
       for (var i = 0; i < P.length; i++) {
@@ -119,156 +73,36 @@
         var x = cx + Math.cos(p.a) * p.r;
         var y = cy + Math.sin(p.a) * p.r;
         var f = flow(x, y, t + p.n * 60);
-        p.a += p.s + f * 0.0011;                     // orbit + swirl
-        p.r += Math.sin(t * 0.0006 + p.n) * 0.35 + f * 0.55; // breathe
+        p.a += p.s + f * 0.0011;
+        p.r += Math.sin(t * 0.0006 + p.n) * 0.35 + f * 0.55;
         if (p.r < minR) p.r = minR; if (p.r > maxR) p.r = maxR;
         var nx = cx + Math.cos(p.a) * p.r;
         var ny = cy + Math.sin(p.a) * p.r;
         var alpha = 0.10 + 0.20 * p.w;
-        // faint warm glints, like the video
-        var warm = (i % 19 === 0);
-        ctx.strokeStyle = warm
-          ? 'rgba(255,220,160,' + (alpha * 1.25) + ')'
-          : 'rgba(255,255,255,' + alpha + ')';
+        var warm = (i % 21 === 0);
+        ctx.strokeStyle = warm ? 'rgba(255,220,160,' + (alpha * 1.2) + ')' : 'rgba(255,255,255,' + alpha + ')';
         ctx.lineWidth = p.w * 0.85;
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(nx, ny);
         ctx.stroke();
       }
-      raf = requestAnimationFrame(frame);
+      requestAnimationFrame(frame);
     }
-
     resize(); init();
     var rt;
-    window.addEventListener('resize', function () {
-      clearTimeout(rt); rt = setTimeout(function () { resize(); init(); }, 150);
-    });
-    if (!reduce) raf = requestAnimationFrame(frame);
+    window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { resize(); init(); }, 150); });
+    if (!reduce) requestAnimationFrame(frame);
   })();
   </script>
 </section>
 
-<!-- STATEMENT — pinned scroll-driven sequence -->
-<section id="however" class="pin relative bg-paper" style="height:340vh">
-  <div class="pin__sticky sticky top-0 h-screen flex items-center overflow-hidden">
-    <div class="max-w-screen-xl mx-auto px-6 lg:px-8 w-full">
-
-      <div class="flex items-center justify-between">
-        <div class="text-xs uppercase tracking-[0.18em] text-stone-400 font-medium">However it starts</div>
-        <div class="text-xs font-mono text-stone-400"><span data-step>01</span>&nbsp;/&nbsp;03</div>
-      </div>
-
-      <!-- stage -->
-      <div class="pin__stage relative mt-10 h-[42vh] lg:h-[46vh]">
-        <!-- giant ghost index behind the words -->
-        <div aria-hidden="true" data-ghost
-             class="pointer-events-none select-none absolute top-1/2 right-0 -translate-y-1/2 text-[40vw] lg:text-[24vw] font-semibold tracking-tightest text-stone-100 leading-none">01</div>
-
-        <div class="phrase absolute inset-x-0 top-1/2" data-phrase="0">
-          <div class="flex items-baseline gap-4 lg:gap-8">
-            <span class="text-stone-300 text-2xl lg:text-4xl font-medium tabular-nums">01</span>
-            <span class="text-6xl sm:text-7xl lg:text-9xl font-semibold tracking-tightest text-ink leading-none">an&nbsp;Idea<span class="text-stone-300">.</span></span>
-          </div>
-        </div>
-        <div class="phrase absolute inset-x-0 top-1/2" data-phrase="1">
-          <div class="flex items-baseline gap-4 lg:gap-8">
-            <span class="text-stone-300 text-2xl lg:text-4xl font-medium tabular-nums">02</span>
-            <span class="text-6xl sm:text-7xl lg:text-9xl font-semibold tracking-tightest text-ink leading-none">a&nbsp;Business<span class="text-stone-300">.</span></span>
-          </div>
-        </div>
-        <div class="phrase absolute inset-x-0 top-1/2" data-phrase="2">
-          <div class="flex items-baseline gap-4 lg:gap-8">
-            <span class="text-stone-300 text-2xl lg:text-4xl font-medium tabular-nums">03</span>
-            <span class="text-6xl sm:text-7xl lg:text-9xl font-semibold tracking-tightest text-ink leading-none">a&nbsp;Project<span class="text-stone-300">.</span></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- progress + caption -->
-      <div class="mt-8 lg:mt-12">
-        <div class="h-px bg-black/10 relative overflow-hidden rounded-full">
-          <div data-progress class="absolute inset-y-0 left-0 bg-ink" style="width:0%"></div>
-        </div>
-        <p class="mt-6 max-w-xl text-base lg:text-lg text-stone-500 leading-relaxed">
-          Whatever you start with, aivoraflux carries it through — turning intent into tested, deployed software with a fleet of AI agents that never stop.
-        </p>
-      </div>
-
-    </div>
-  </div>
-
-  <script>
-  (function () {
-    var sec = document.getElementById('however');
-    if (!sec) return;
-    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var phrases = Array.prototype.slice.call(sec.querySelectorAll('.phrase'));
-    var ghost = sec.querySelector('[data-ghost]');
-    var bar = sec.querySelector('[data-progress]');
-    var stepEl = sec.querySelector('[data-step]');
-    var N = phrases.length;
-    var labels = ['01', '02', '03'];
-    function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
-
-    if (reduce) {
-      phrases.forEach(function (el) { el.style.position = 'static'; el.style.opacity = 1; el.style.transform = 'none'; });
-      return;
-    }
-
-    phrases.forEach(function (el) {
-      el.style.willChange = 'transform, opacity, filter';
-      el.style.transformOrigin = 'left center';
-    });
-
-    function render(p) {
-      var span = 1 / (N - 1);                    // distance between phrase centres
-      var active = clamp(Math.round(p * (N - 1)), 0, N - 1);
-      for (var i = 0; i < N; i++) {
-        var d = (p - i * span) / span;           // 0 at this phrase's peak, ±1 at neighbours
-        var ad = Math.abs(d);
-        var op = clamp(1 - ad * 1.6, 0, 1);
-        var ty = clamp(-d, -1, 1) * 90;          // px — rises as it passes centre
-        var sc = 1 - clamp(ad, 0, 1) * 0.10;     // shrink away from centre
-        var bl = clamp(ad - 0.18, 0, 0.5) * 12;  // blur distant phrases
-        var el = phrases[i];
-        el.style.opacity = op.toFixed(3);
-        el.style.transform = 'translateY(calc(-50% + ' + ty.toFixed(1) + 'px)) scale(' + sc.toFixed(3) + ')';
-        el.style.filter = bl > 0.05 ? 'blur(' + bl.toFixed(1) + 'px)' : 'none';
-        el.style.zIndex = (op * 100) | 0;
-      }
-      if (ghost) ghost.textContent = labels[active];
-      if (stepEl) stepEl.textContent = labels[active];
-      if (bar) bar.style.width = (p * 100).toFixed(1) + '%';
-    }
-
-    var ticking = false;
-    function update() {
-      var rect = sec.getBoundingClientRect();
-      var scrollable = sec.offsetHeight - window.innerHeight;
-      var passed = clamp(-rect.top, 0, scrollable);
-      var p = scrollable > 0 ? passed / scrollable : 0;
-      render(p);
-      ticking = false;
-    }
-    function onScroll() { if (ticking) return; ticking = true; requestAnimationFrame(update); }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    window.addEventListener('load', update);
-    update();
-    setTimeout(update, 300);
-  })();
-  </script>
-</section>
-
-<!-- STATS -->
-<section class="relative border-y border-black/5 bg-stone-50">
+<section class="border-y border-black/5 bg-stone-50">
   <div class="max-w-screen-xl mx-auto px-6 lg:px-8">
     <div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-black/5" data-reveal-group>
-      {% for s in [('7', '+', 'LLM providers'), ('12', '', 'built-in tools'), ('7', '', 'safety layers'), ('200', 'ms', 'p50 guardrail latency')] %}
+      {% for s in [('45', '%', 'Manual ops time reduced'), ('3', 'x', 'Faster process cycles'), ('12', 'wk', 'Typical transformation sprint'), ('24', 'h', 'Executive response window')] %}
       <div class="px-6 py-10 text-center" data-reveal>
-        <div class="text-4xl font-semibold tracking-tight text-ink"
-             data-count="{{ s[0] }}" {% if s[1] %}data-suffix="{{ s[1] }}"{% endif %} {% if loop.index == 4 %}data-prefix="<"{% endif %}>{% if loop.index == 4 %}&lt;{% endif %}{{ s[0] }}{{ s[1] }}</div>
+        <div class="text-4xl font-semibold tracking-tight text-ink" data-count="{{ s[0] }}" data-suffix="{{ s[1] }}">{{ s[0] }}{{ s[1] }}</div>
         <div class="text-xs uppercase tracking-wider text-stone-400 mt-2">{{ s[2] }}</div>
       </div>
       {% endfor %}
@@ -276,116 +110,246 @@
   </div>
 </section>
 
-<!-- FEATURES -->
-<section id="features" class="relative">
-  <div class="max-w-screen-xl mx-auto px-6 lg:px-8 py-28">
-    <div class="max-w-2xl" data-reveal-group>
-      <div class="text-xs uppercase tracking-[0.18em] text-stone-400 font-medium" data-reveal>The studio</div>
-      <h2 class="mt-4 text-4xl lg:text-5xl font-semibold text-ink tracking-tightest" data-reveal>Two ways to craft. One way to ship.</h2>
-      <p class="mt-5 text-lg text-stone-500 leading-relaxed" data-reveal>Whether you want full control over every token or you want to describe an agent and walk away, aivoraflux has a path for you.</p>
+<section class="relative border-b border-black/5 bg-paper">
+  <div class="max-w-screen-xl mx-auto px-6 lg:px-8 py-20 lg:py-24" data-reveal-group>
+    <div class="max-w-2xl">
+      <div class="text-xs uppercase tracking-[0.18em] text-stone-400 font-medium" data-reveal>Why teams choose aivoraflux</div>
+      <h2 class="mt-4 text-4xl lg:text-5xl font-semibold text-ink tracking-tightest" data-reveal>Built for measurable business impact.</h2>
     </div>
-
-    <div class="mt-16 grid md:grid-cols-2 gap-6" data-reveal-group>
-      <div class="lift bg-paper p-10 rounded-2xl border border-black/10" data-reveal>
-        <div class="w-12 h-12 rounded-xl border border-black/10 flex items-center justify-center text-2xl">🛠</div>
-        <h3 class="mt-6 text-2xl font-semibold text-ink tracking-tight">Manual builder</h3>
-        <p class="mt-3 text-stone-500 leading-relaxed">Write the system prompt yourself, pick the model, attach tools, set temperature, choose a guardrail profile. Every knob exposed.</p>
-        <ul class="mt-6 space-y-3 text-sm text-stone-700">
-          <li class="flex gap-2"><span class="text-stone-400">—</span> Live token &amp; cost estimate per provider</li>
-          <li class="flex gap-2"><span class="text-stone-400">—</span> Versioned prompts with diff view</li>
-          <li class="flex gap-2"><span class="text-stone-400">—</span> 12 plug-and-play tools out of the box</li>
-        </ul>
-      </div>
-
-      <div class="lift bg-paper p-10 rounded-2xl border border-black/10" data-reveal>
-        <div class="w-12 h-12 rounded-xl border border-black/10 flex items-center justify-center text-2xl">✨</div>
-        <h3 class="mt-6 text-2xl font-semibold text-ink tracking-tight">Auto-craft</h3>
-        <p class="mt-3 text-stone-500 leading-relaxed">Describe what you want in one sentence. We synthesize the prompt, pick the right tools, recommend guardrails, and you can run it instantly.</p>
-        <ul class="mt-6 space-y-3 text-sm text-stone-700">
-          <li class="flex gap-2"><span class="text-stone-400">—</span> Powered by Claude Sonnet 4.6 by default</li>
-          <li class="flex gap-2"><span class="text-stone-400">—</span> Editable after generation — nothing is locked</li>
-          <li class="flex gap-2"><span class="text-stone-400">—</span> Cold-start fallback if no API key is configured</li>
-        </ul>
-      </div>
+    <div class="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <article class="rounded-xl border border-black/10 p-6 bg-stone-50" data-reveal>
+        <h3 class="text-lg font-semibold text-ink">Outcome-first planning</h3>
+        <p class="mt-2 text-stone-500 text-sm leading-relaxed">Every AI initiative is tied to clear KPIs before implementation begins.</p>
+      </article>
+      <article class="rounded-xl border border-black/10 p-6 bg-stone-50" data-reveal>
+        <h3 class="text-lg font-semibold text-ink">Fast execution cycles</h3>
+        <p class="mt-2 text-stone-500 text-sm leading-relaxed">We ship in short cycles so your team sees real improvements in weeks.</p>
+      </article>
+      <article class="rounded-xl border border-black/10 p-6 bg-stone-50" data-reveal>
+        <h3 class="text-lg font-semibold text-ink">Secure by design</h3>
+        <p class="mt-2 text-stone-500 text-sm leading-relaxed">Governance and controls are integrated into every automation workflow.</p>
+      </article>
+      <article class="rounded-xl border border-black/10 p-6 bg-stone-50" data-reveal>
+        <h3 class="text-lg font-semibold text-ink">Team enablement</h3>
+        <p class="mt-2 text-stone-500 text-sm leading-relaxed">Your internal teams are trained to own and scale AI operations after launch.</p>
+      </article>
     </div>
   </div>
 </section>
 
-<!-- SAFETY -->
-<section id="safety" class="relative border-t border-black/5 bg-stone-50">
-  <div class="relative max-w-screen-xl mx-auto px-6 lg:px-8 py-28">
-    <div class="max-w-2xl" data-reveal-group>
-      <div class="text-xs uppercase tracking-[0.18em] text-stone-400 font-medium" data-reveal>Safety</div>
-      <h2 class="mt-4 text-4xl lg:text-5xl font-semibold text-ink tracking-tightest" data-reveal>SOTA guardrails, on by default.</h2>
-      <p class="mt-5 text-lg text-stone-500 leading-relaxed" data-reveal>Every agent ships with seven layers of defense — input filtering, dialog policy, output moderation, and audit logs. Tune per agent, not per request.</p>
+<section class="relative">
+  <div class="max-w-screen-xl mx-auto px-6 lg:px-8 py-24 lg:py-28" data-reveal-group>
+    <div class="max-w-2xl">
+      <div class="text-xs uppercase tracking-[0.18em] text-stone-400 font-medium" data-reveal>How we help</div>
+      <h2 class="mt-4 text-4xl lg:text-5xl font-semibold text-ink tracking-tightest" data-reveal>Consulting and implementation that ships.</h2>
+      <p class="mt-5 text-lg text-stone-500 leading-relaxed" data-reveal>We partner with leadership, operations, and product teams to turn AI ideas into deployed systems with measurable business impact.</p>
     </div>
-
-    <div class="mt-16 grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-black/5 border border-black/5 rounded-2xl overflow-hidden" data-reveal-group>
-      {% for f in guardrail_features %}
-      <div class="bg-paper p-7 hover:bg-stone-50 transition" data-reveal>
-        <div class="flex items-start gap-3">
-          <div class="w-9 h-9 shrink-0 rounded-lg border border-black/10 flex items-center justify-center">
-            <span>🛡</span>
-          </div>
-          <div>
-            <div class="font-semibold text-ink">{{ f[1] }}</div>
-            <p class="mt-1.5 text-sm text-stone-500 leading-relaxed">{{ f[2] }}</p>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
+    <div class="mt-14 grid md:grid-cols-3 gap-6">
+      <article class="lift rounded-2xl border border-black/10 p-8 bg-paper" data-reveal>
+        <h3 class="text-2xl font-semibold text-ink">AI strategy</h3>
+        <p class="mt-3 text-stone-500 leading-relaxed">Prioritization workshops, opportunity mapping, and ROI-led AI roadmaps.</p>
+      </article>
+      <article class="lift rounded-2xl border border-black/10 p-8 bg-paper" data-reveal>
+        <h3 class="text-2xl font-semibold text-ink">Workflow automation</h3>
+        <p class="mt-3 text-stone-500 leading-relaxed">Automate repetitive operational workflows with human-in-the-loop controls.</p>
+      </article>
+      <article class="lift rounded-2xl border border-black/10 p-8 bg-paper" data-reveal>
+        <h3 class="text-2xl font-semibold text-ink">Secure deployment</h3>
+        <p class="mt-3 text-stone-500 leading-relaxed">Guardrails, governance, and integration into your existing systems and data stack.</p>
+      </article>
     </div>
-  </div>
-</section>
-
-<!-- PROVIDERS -->
-<section id="providers" class="relative">
-  <div class="max-w-screen-xl mx-auto px-6 lg:px-8 py-28">
-    <div class="max-w-2xl" data-reveal-group>
-      <div class="text-xs uppercase tracking-[0.18em] text-stone-400 font-medium" data-reveal>Providers</div>
-      <h2 class="mt-4 text-4xl lg:text-5xl font-semibold text-ink tracking-tightest" data-reveal>Bring your own LLM. Or use ours.</h2>
-      <p class="mt-5 text-lg text-stone-500 leading-relaxed" data-reveal>Swap models per agent or per run. Compare cost, latency and quality side-by-side. Run completely local with Ollama or LM Studio — no data leaves your machine.</p>
-    </div>
-
-    <div class="mt-16 grid md:grid-cols-2 lg:grid-cols-4 gap-px bg-black/5 border border-black/5 rounded-2xl overflow-hidden" data-reveal-group>
-      {% for p in providers %}
-      <div class="bg-paper p-6 hover:bg-stone-50 transition" data-reveal>
-        <div class="flex items-center justify-between">
-          <div class="font-semibold text-ink">{{ p.label }}</div>
-          {% if p.kind == 'local' %}
-          <span class="text-[10px] px-1.5 py-0.5 rounded border border-black/15 text-stone-600 uppercase">Local</span>
-          {% else %}
-          <span class="text-[10px] px-1.5 py-0.5 rounded border border-black/15 text-stone-600 uppercase">Cloud</span>
-          {% endif %}
-        </div>
-        <div class="mt-4 space-y-2">
-          {% for m in p.models[:3] %}
-          <div class="flex justify-between text-xs text-stone-500">
-            <span class="font-mono">{{ m.name }}</span>
-            {% if m['in'] > 0 %}<span>${{ m['in'] }}/M</span>{% else %}<span class="text-ink font-medium">free</span>{% endif %}
-          </div>
-          {% endfor %}
-        </div>
-        <div class="mt-4 text-[11px] text-stone-400">
-          {% if p.available %}<span class="text-ink">●</span> ready{% else %}<span class="text-stone-300">○</span> needs {{ p.env or 'config' }}{% endif %}
-        </div>
-      </div>
-      {% endfor %}
+    <div class="mt-8" data-reveal>
+      <a href="/services" class="inline-flex items-center gap-2 text-ink font-medium link-underline">See all services</a>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
 <section class="relative border-t border-black/5">
-  <div class="max-w-screen-xl mx-auto px-6 lg:px-8 py-28">
-    <div class="rounded-3xl bg-ink text-paper p-12 lg:p-20 text-center lift" data-reveal>
-      <h2 class="text-4xl lg:text-5xl font-semibold tracking-tightest">Your first agent in 60 seconds.</h2>
-      <p class="mt-5 text-lg text-stone-400 max-w-xl mx-auto leading-relaxed">Describe what you want done. Get a working, guarded agent. Run it, share it, sell it.</p>
-      <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
-        <a href="/studio" class="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-paper text-ink font-medium hover:bg-stone-200 transition">Open the studio</a>
-        <a href="/pricing" class="inline-flex items-center gap-2 px-6 py-3 rounded-md border border-white/20 text-paper font-medium hover:bg-white/10 transition">See pricing</a>
+  <div class="max-w-screen-xl mx-auto px-6 lg:px-8 py-24 lg:py-28" data-reveal-group>
+    <div class="max-w-2xl">
+      <div class="text-xs uppercase tracking-[0.18em] text-stone-400 font-medium" data-reveal>What happens in the first 30 days</div>
+      <h2 class="mt-4 text-4xl lg:text-5xl font-semibold text-ink tracking-tightest" data-reveal>Your AI transformation sprint.</h2>
+    </div>
+    <div class="mt-12 grid lg:grid-cols-4 gap-4">
+      <article class="rounded-xl border border-black/10 p-6 bg-paper" data-reveal>
+        <div class="text-xs text-stone-400 font-mono">Week 1</div>
+        <h3 class="mt-2 text-xl font-semibold text-ink">Audit</h3>
+        <p class="mt-2 text-stone-500 text-sm">Map workflows, identify bottlenecks, and baseline current performance.</p>
+      </article>
+      <article class="rounded-xl border border-black/10 p-6 bg-paper" data-reveal>
+        <div class="text-xs text-stone-400 font-mono">Week 2</div>
+        <h3 class="mt-2 text-xl font-semibold text-ink">Prioritize</h3>
+        <p class="mt-2 text-stone-500 text-sm">Select highest-ROI use cases and define implementation scope.</p>
+      </article>
+      <article class="rounded-xl border border-black/10 p-6 bg-paper" data-reveal>
+        <div class="text-xs text-stone-400 font-mono">Week 3</div>
+        <h3 class="mt-2 text-xl font-semibold text-ink">Build</h3>
+        <p class="mt-2 text-stone-500 text-sm">Deploy pilot workflows with guardrails, ownership, and success metrics.</p>
+      </article>
+      <article class="rounded-xl border border-black/10 p-6 bg-paper" data-reveal>
+        <div class="text-xs text-stone-400 font-mono">Week 4</div>
+        <h3 class="mt-2 text-xl font-semibold text-ink">Scale</h3>
+        <p class="mt-2 text-stone-500 text-sm">Transfer playbooks, optimize, and prepare expansion across teams.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="relative border-t border-black/5 bg-stone-50">
+  <div class="max-w-screen-xl mx-auto px-6 lg:px-8 py-24 lg:py-28" data-reveal-group>
+    <div class="max-w-2xl">
+      <div class="text-xs uppercase tracking-[0.18em] text-stone-400 font-medium" data-reveal>Operating model</div>
+      <h2 class="mt-4 text-4xl lg:text-5xl font-semibold text-ink tracking-tightest" data-reveal>an Idea / a Business / a Project</h2>
+    </div>
+    <div class="mt-12 grid md:grid-cols-3 gap-4">
+      <div class="rounded-xl border border-black/10 p-6 bg-paper" data-reveal>
+        <div class="text-sm text-stone-400 font-mono">01</div>
+        <h3 class="mt-2 text-2xl font-semibold">Discovery</h3>
+        <p class="mt-2 text-stone-500">Clarify priorities, constraints, and target outcomes with stakeholders.</p>
+      </div>
+      <div class="rounded-xl border border-black/10 p-6 bg-paper" data-reveal>
+        <div class="text-sm text-stone-400 font-mono">02</div>
+        <h3 class="mt-2 text-2xl font-semibold">Design</h3>
+        <p class="mt-2 text-stone-500">Define architecture, safeguards, data flow, and delivery milestones.</p>
+      </div>
+      <div class="rounded-xl border border-black/10 p-6 bg-paper" data-reveal>
+        <div class="text-sm text-stone-400 font-mono">03</div>
+        <h3 class="mt-2 text-2xl font-semibold">Deploy</h3>
+        <p class="mt-2 text-stone-500">Launch, measure outcomes, and continuously optimize business performance.</p>
       </div>
     </div>
   </div>
 </section>
+
+<section class="relative border-t border-black/5">
+  <div class="max-w-screen-xl mx-auto px-6 lg:px-8 py-24 lg:py-28" data-reveal-group>
+    <div class="max-w-3xl">
+      <div class="text-xs uppercase tracking-[0.18em] text-stone-400 font-medium" data-reveal>FAQs</div>
+      <h2 class="mt-4 text-4xl lg:text-5xl font-semibold text-ink tracking-tightest" data-reveal>Questions we hear before teams start.</h2>
+    </div>
+    <div class="mt-10 max-w-4xl space-y-4">
+      <details class="group rounded-xl border border-black/10 bg-paper p-6" data-reveal>
+        <summary class="cursor-pointer list-none font-semibold text-ink flex items-center justify-between">How quickly can we start?<span class="text-stone-400 group-open:rotate-45 transition">+</span></summary>
+        <p class="mt-3 text-stone-500 leading-relaxed">Most clients begin with a discovery call, then start a strategy sprint within 1-2 weeks.</p>
+      </details>
+      <details class="group rounded-xl border border-black/10 bg-paper p-6" data-reveal>
+        <summary class="cursor-pointer list-none font-semibold text-ink flex items-center justify-between">Do you only provide strategy, or implementation too?<span class="text-stone-400 group-open:rotate-45 transition">+</span></summary>
+        <p class="mt-3 text-stone-500 leading-relaxed">We do both. We design the roadmap and can implement AI automation and integrations with your team.</p>
+      </details>
+      <details class="group rounded-xl border border-black/10 bg-paper p-6" data-reveal>
+        <summary class="cursor-pointer list-none font-semibold text-ink flex items-center justify-between">How do you handle security and governance?<span class="text-stone-400 group-open:rotate-45 transition">+</span></summary>
+        <p class="mt-3 text-stone-500 leading-relaxed">Each workflow includes guardrails, human review checkpoints, and observability so systems remain reliable in production.</p>
+      </details>
+      <details class="group rounded-xl border border-black/10 bg-paper p-6" data-reveal>
+        <summary class="cursor-pointer list-none font-semibold text-ink flex items-center justify-between">Can you work with our existing tools and data stack?<span class="text-stone-400 group-open:rotate-45 transition">+</span></summary>
+        <p class="mt-3 text-stone-500 leading-relaxed">Yes. Our delivery model is integration-first, so we adapt to your current systems instead of replacing them.</p>
+      </details>
+    </div>
+    <div class="mt-8" data-reveal>
+      <a href="/faqs" class="inline-flex items-center gap-2 text-ink font-medium link-underline">See all FAQs</a>
+    </div>
+  </div>
+</section>
+
+<section class="relative border-t border-black/5 bg-stone-50">
+  <div class="max-w-screen-xl mx-auto px-6 lg:px-8 py-24 lg:py-28" data-reveal-group>
+    <div class="max-w-3xl">
+      <div class="text-xs uppercase tracking-[0.18em] text-stone-400 font-medium" data-reveal>Delivery standards</div>
+      <h2 class="mt-4 text-4xl lg:text-5xl font-semibold text-ink tracking-tightest" data-reveal>What you can expect in every engagement.</h2>
+    </div>
+    <div class="mt-10 grid md:grid-cols-3 gap-5">
+      <article class="rounded-xl border border-black/10 bg-paper p-6" data-reveal>
+        <h3 class="text-xl font-semibold text-ink">Executive visibility</h3>
+        <p class="mt-3 text-stone-500 leading-relaxed">Weekly updates covering scope, progress, risks, and business impact against target KPIs.</p>
+      </article>
+      <article class="rounded-xl border border-black/10 bg-paper p-6" data-reveal>
+        <h3 class="text-xl font-semibold text-ink">Operational reliability</h3>
+        <p class="mt-3 text-stone-500 leading-relaxed">Guardrails, quality checks, and human-review gates are built into every production workflow.</p>
+      </article>
+      <article class="rounded-xl border border-black/10 bg-paper p-6" data-reveal>
+        <h3 class="text-xl font-semibold text-ink">Capability transfer</h3>
+        <p class="mt-3 text-stone-500 leading-relaxed">Documentation and enablement sessions ensure your internal team can run and scale the systems.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="relative border-t border-black/5">
+  <div class="max-w-screen-xl mx-auto px-6 lg:px-8 py-24 lg:py-28" data-reveal-group x-data="{hours: 160, rate: 35, automate: 30}">
+    <div class="max-w-3xl">
+      <div class="text-xs uppercase tracking-[0.18em] text-stone-400 font-medium" data-reveal>ROI snapshot</div>
+      <h2 class="mt-4 text-4xl lg:text-5xl font-semibold text-ink tracking-tightest" data-reveal>Estimate what automation could return.</h2>
+      <p class="mt-4 text-stone-500 leading-relaxed" data-reveal>Use this quick model to estimate monthly savings from reducing manual work.</p>
+    </div>
+    <div class="mt-10 grid lg:grid-cols-2 gap-6 items-start">
+      <div class="rounded-2xl border border-black/10 p-8 bg-paper space-y-5" data-reveal>
+        <div>
+          <label class="block text-sm text-stone-600 mb-2">Monthly manual hours</label>
+          <input type="range" min="40" max="600" step="10" x-model.number="hours" class="w-full">
+          <div class="mt-1 text-sm text-stone-500"><span x-text="hours"></span> hours</div>
+        </div>
+        <div>
+          <label class="block text-sm text-stone-600 mb-2">Average hourly cost (USD)</label>
+          <input type="range" min="15" max="150" step="5" x-model.number="rate" class="w-full">
+          <div class="mt-1 text-sm text-stone-500">$<span x-text="rate"></span> / hour</div>
+        </div>
+        <div>
+          <label class="block text-sm text-stone-600 mb-2">Process automation potential</label>
+          <input type="range" min="10" max="80" step="5" x-model.number="automate" class="w-full">
+          <div class="mt-1 text-sm text-stone-500"><span x-text="automate"></span>% of workload</div>
+        </div>
+      </div>
+      <div class="rounded-2xl bg-ink text-paper p-8" data-reveal>
+        <div class="text-stone-400 text-sm">Estimated monthly savings</div>
+        <div class="mt-2 text-5xl font-semibold tracking-tight">
+          $<span x-text="Math.round(hours * rate * automate / 100).toLocaleString()"></span>
+        </div>
+        <p class="mt-4 text-stone-300 leading-relaxed">This simple model excludes second-order gains like faster cycle time, reduced errors, and improved customer response speed.</p>
+        <a href="/contact" class="mt-7 inline-flex items-center px-5 py-2.5 rounded-md bg-paper text-ink font-medium hover:bg-stone-200 transition">Get a custom ROI assessment</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="relative border-t border-black/5">
+  <div class="max-w-screen-xl mx-auto px-6 lg:px-8 py-24 lg:py-28">
+    <div class="rounded-3xl bg-ink text-paper p-12 lg:p-20 text-center lift" data-reveal>
+      <h2 class="text-4xl lg:text-5xl font-semibold tracking-tightest">Build your AI roadmap with experts.</h2>
+      <p class="mt-5 text-lg text-stone-400 max-w-2xl mx-auto leading-relaxed">Start with a focused discovery call. We will identify your highest-impact automation opportunities and define a practical implementation plan.</p>
+      <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+        <a href="/contact" class="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-paper text-ink font-medium hover:bg-stone-200 transition">Book discovery call</a>
+        <a href="/case-studies" class="inline-flex items-center gap-2 px-6 py-3 rounded-md border border-white/20 text-paper font-medium hover:bg-white/10 transition">View case studies</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="sticky-cta" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[min(92vw,780px)] rounded-xl border border-black/10 bg-paper/95 backdrop-blur px-4 py-3 shadow-lg hidden">
+  <div class="flex items-center justify-between gap-3">
+    <div class="text-sm text-stone-600">
+      Ready to map your first high-impact AI automation?
+    </div>
+    <a href="/contact" class="inline-flex items-center whitespace-nowrap px-4 py-2 rounded-md bg-ink text-paper text-sm font-medium hover:bg-stone-800 transition">Book a call</a>
+  </div>
+</div>
+
+<script>
+(function () {
+  var bar = document.getElementById('sticky-cta');
+  if (!bar) return;
+  var shown = false;
+  var onScroll = function () {
+    var y = window.scrollY || document.documentElement.scrollTop || 0;
+    if (y > 900 && !shown) {
+      bar.classList.remove('hidden');
+      shown = true;
+    } else if (y <= 900 && shown) {
+      bar.classList.add('hidden');
+      shown = false;
+    }
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+</script>
 {% endblock %}

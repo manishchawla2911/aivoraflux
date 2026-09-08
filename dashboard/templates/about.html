@@ -1,0 +1,58 @@
+{% extends "_base.html" %}
+{% block title %}About — aivoraflux{% endblock %}
+
+{% block content %}
+<section class="max-w-screen-xl mx-auto px-6 lg:px-8 pt-24 pb-12">
+  <div class="max-w-3xl" data-reveal-group>
+    <div class="text-xs uppercase tracking-[0.18em] text-stone-400 font-medium" data-reveal>About</div>
+    <h1 class="mt-4 text-5xl lg:text-6xl font-semibold tracking-tightest text-ink" data-reveal>A consultancy focused on practical AI execution.</h1>
+    <p class="mt-6 text-lg text-stone-500 leading-relaxed" data-reveal>aivoraflux was built to close the gap between AI ambition and business implementation. We combine strategy, delivery, and governance in one operating model.</p>
+  </div>
+</section>
+
+<section class="max-w-screen-xl mx-auto px-6 lg:px-8 pb-24">
+  <div class="grid lg:grid-cols-2 gap-8" data-reveal-group>
+    <article class="rounded-2xl border border-black/10 p-8 bg-paper" data-reveal>
+      <h2 class="text-2xl font-semibold text-ink">What we believe</h2>
+      <ul class="mt-4 space-y-3 text-stone-600 leading-relaxed">
+        <li>- AI should improve measurable business outcomes, not just demos.</li>
+        <li>- Every automation needs clear ownership and quality controls.</li>
+        <li>- Human judgment remains central in high-impact workflows.</li>
+        <li>- Security and reliability must be built in from day one.</li>
+      </ul>
+    </article>
+    <article class="rounded-2xl border border-black/10 p-8 bg-paper" data-reveal>
+      <h2 class="text-2xl font-semibold text-ink">How we work</h2>
+      <ul class="mt-4 space-y-3 text-stone-600 leading-relaxed">
+        <li>- Diagnose current process constraints and data realities.</li>
+        <li>- Prioritize opportunities by ROI, speed, and implementation risk.</li>
+        <li>- Build and deploy in short, measurable delivery cycles.</li>
+        <li>- Transfer capability to your internal teams.</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<section class="border-t border-black/5">
+  <div class="max-w-screen-xl mx-auto px-6 lg:px-8 py-20" data-reveal-group>
+    <h2 class="text-4xl font-semibold tracking-tightest text-ink" data-reveal>Engagement principles</h2>
+    <div class="mt-8 grid md:grid-cols-3 gap-6">
+      <div class="rounded-xl bg-stone-50 p-6" data-reveal>
+        <div class="text-sm text-stone-400">01</div>
+        <h3 class="mt-2 text-xl font-semibold text-ink">Business first</h3>
+        <p class="mt-2 text-stone-500">Every technical decision maps to a business outcome and KPI.</p>
+      </div>
+      <div class="rounded-xl bg-stone-50 p-6" data-reveal>
+        <div class="text-sm text-stone-400">02</div>
+        <h3 class="mt-2 text-xl font-semibold text-ink">Ship in weeks</h3>
+        <p class="mt-2 text-stone-500">Short delivery cycles that reach production fast and safely.</p>
+      </div>
+      <div class="rounded-xl bg-stone-50 p-6" data-reveal>
+        <div class="text-sm text-stone-400">03</div>
+        <h3 class="mt-2 text-xl font-semibold text-ink">Build internal capability</h3>
+        <p class="mt-2 text-stone-500">Your team leaves stronger, with clear playbooks and ownership.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
