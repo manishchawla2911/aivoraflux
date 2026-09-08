@@ -1,0 +1,69 @@
+{% extends "_base.html" %}
+{% block title %}Contact — aivoraflux{% endblock %}
+
+{% block content %}
+<section class="max-w-screen-xl mx-auto px-6 lg:px-8 pt-24 pb-12">
+  <div class="max-w-3xl" data-reveal-group>
+    <div class="text-xs uppercase tracking-[0.18em] text-stone-400 font-medium" data-reveal>Contact</div>
+    <h1 class="mt-4 text-5xl lg:text-6xl font-semibold tracking-tightest text-ink" data-reveal>Tell us what you want to automate.</h1>
+    <p class="mt-6 text-lg text-stone-500 leading-relaxed" data-reveal>Share your current process and goals. We will follow up with a focused recommendation and next steps.</p>
+  </div>
+</section>
+
+<section class="max-w-screen-xl mx-auto px-6 lg:px-8 pb-24">
+  <div class="grid lg:grid-cols-2 gap-8 items-start">
+    <div class="rounded-2xl border border-black/10 p-8 bg-paper" data-reveal-group>
+      <h2 class="text-2xl font-semibold text-ink" data-reveal>Book a discovery conversation</h2>
+      <p class="mt-3 text-stone-500 leading-relaxed" data-reveal>Typical topics include process bottlenecks, use-case prioritization, automation scope, and implementation timeline.</p>
+      <ul class="mt-6 space-y-2 text-stone-600" data-reveal>
+        <li>- 30 to 45 minute focused call</li>
+        <li>- Practical recommendations, no generic pitch</li>
+        <li>- Follow-up summary with suggested next steps</li>
+      </ul>
+    </div>
+
+    <div class="rounded-2xl border border-black/10 p-8 bg-paper" data-reveal-group>
+      <h2 class="text-2xl font-semibold text-ink" data-reveal>Send an inquiry</h2>
+      {% if submitted %}
+      <div class="mt-4 rounded-md border border-emerald-200 bg-emerald-50 text-emerald-900 px-4 py-3 text-sm" data-reveal>
+        Thanks. Your inquiry was sent successfully. We will get back to you shortly.
+      </div>
+      {% endif %}
+      {% if error %}
+      <div class="mt-4 rounded-md border border-rose-200 bg-rose-50 text-rose-900 px-4 py-3 text-sm" data-reveal>
+        We could not submit your inquiry right now. Please try again in a few minutes.
+      </div>
+      {% endif %}
+      {% if not smtp_ready %}
+      <div class="mt-4 rounded-md border border-amber-200 bg-amber-50 text-amber-900 px-4 py-3 text-sm" data-reveal>
+        Inquiry email is not configured yet. Set <code>EMAIL_BACKEND=smtp</code> and SMTP credentials in your environment.
+      </div>
+      {% endif %}
+
+      <form class="mt-6 space-y-4" method="POST" action="/contact/inquiry" data-reveal>
+        <div>
+          <label class="block text-sm text-stone-600 mb-1">Name</label>
+          <input name="name" required class="w-full rounded-md border border-black/15 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-black/15">
+        </div>
+        <div>
+          <label class="block text-sm text-stone-600 mb-1">Work email</label>
+          <input type="email" name="email" required class="w-full rounded-md border border-black/15 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-black/15">
+        </div>
+        <div>
+          <label class="block text-sm text-stone-600 mb-1">Company</label>
+          <input name="company" class="w-full rounded-md border border-black/15 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-black/15">
+        </div>
+        <div>
+          <label class="block text-sm text-stone-600 mb-1">What do you want to automate?</label>
+          <textarea name="message" rows="5" required class="w-full rounded-md border border-black/15 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-black/15"></textarea>
+        </div>
+        <button {% if not smtp_ready %}disabled{% endif %}
+                class="inline-flex items-center px-5 py-2.5 rounded-md bg-ink text-paper font-medium hover:bg-stone-800 transition disabled:opacity-50 disabled:cursor-not-allowed">
+          Send inquiry
+        </button>
+      </form>
+      <p class="mt-3 text-xs text-stone-400" data-reveal>Typical response time: within 24 business hours. This form sends directly to our inbox.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

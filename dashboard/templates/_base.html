@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}aivoraflux — intelligent flow, always on{% endblock %}</title>
-  <meta name="description" content="{% block description %}aivoraflux — intelligent flow, always on. Build production AI agents manually or auto-generated, with SOTA safety, multi-LLM switching, and a one-click run surface.{% endblock %}">
+  <title>{% block title %}aivoraflux — AI consultancy for business{% endblock %}</title>
+  <meta name="description" content="{% block description %}aivoraflux helps businesses design, automate, and deploy practical AI systems that improve operations, growth, and decision-making.{% endblock %}">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -39,6 +39,7 @@
   </script>
 
   <style>
+    [x-cloak] { display: none !important; }
     html, body { font-family: 'Inter var', Inter, ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
     code, pre, .font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; }
     .hairline { border-color: rgba(0,0,0,.08); }
@@ -133,27 +134,59 @@
   </style>
   {% block head_extra %}{% endblock %}
 </head>
-<body class="bg-paper text-ink min-h-screen antialiased">
+<body class="bg-paper text-ink min-h-screen antialiased" x-data="{ mobileNavOpen: false }" @keydown.escape.window="mobileNavOpen = false">
 
-  <header class="sticky top-0 z-40 bg-paper/80 backdrop-blur-md border-b border-black/5">
-    <div class="max-w-screen-xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+  <header class="sticky top-0 z-40 bg-paper/85 backdrop-blur-md border-b border-black/5">
+    <div class="max-w-screen-xl mx-auto px-6 lg:px-8 h-16 lg:h-[4.5rem] flex items-center justify-between gap-4">
       <a href="/" class="flex items-center group">
         <img src="/static/logo.png" alt="aivoraflux — intelligent flow, always on" class="h-9 w-auto" />
       </a>
-      <nav class="hidden md:flex items-center gap-8 text-sm text-stone-600">
-        <a href="/#features"  class="hover:text-ink transition">Product</a>
-        <a href="/#safety"    class="hover:text-ink transition">Safety</a>
-        <a href="/#providers" class="hover:text-ink transition">Providers</a>
-        <a href="/pricing"    class="hover:text-ink transition">Pricing</a>
-        <a href="/dashboard"  class="hover:text-ink transition">Dashboard</a>
-        <a href="/workspaces" class="hover:text-ink transition">Workspaces</a>
+      <nav class="hidden md:flex items-center gap-6 text-sm text-stone-600 whitespace-nowrap">
+        <a href="/" class="font-medium transition {% if request.url.path == '/' %}text-ink{% else %}hover:text-ink{% endif %}">Home</a>
+        <a href="/services" class="font-medium transition {% if request.url.path == '/services' %}text-ink{% else %}hover:text-ink{% endif %}">Services</a>
+        <a href="/about" class="font-medium transition {% if request.url.path == '/about' %}text-ink{% else %}hover:text-ink{% endif %}">About</a>
+        <a href="/faqs" class="font-medium transition {% if request.url.path == '/faqs' %}text-ink{% else %}hover:text-ink{% endif %}">FAQs</a>
+        <a href="/contact" class="font-medium transition {% if request.url.path == '/contact' %}text-ink{% else %}hover:text-ink{% endif %}">Contact</a>
       </nav>
-      <div class="flex items-center gap-2">
-        <a href="/dashboard" class="hidden sm:inline-flex text-sm px-3 py-1.5 rounded-md text-stone-700 hover:text-ink transition">Sign in</a>
-        <a href="/studio" class="inline-flex items-center gap-1.5 text-sm font-medium bg-ink text-paper px-4 py-2 rounded-md hover:bg-stone-800 transition">
-          Get started
+      <div class="hidden sm:flex items-center gap-2">
+        <a href="/contact" class="inline-flex items-center gap-1.5 text-sm font-medium bg-ink text-paper px-4 py-2 rounded-md hover:bg-stone-800 transition whitespace-nowrap">
+          Book a strategy call
         </a>
       </div>
+      <button
+        type="button"
+        class="sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-md border border-black/10 text-stone-700 hover:text-ink hover:bg-stone-100 transition"
+        @click="mobileNavOpen = !mobileNavOpen"
+        :aria-expanded="mobileNavOpen.toString()"
+        aria-controls="mobile-nav"
+        aria-label="Toggle navigation"
+      >
+        <svg x-show="!mobileNavOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/>
+        </svg>
+        <svg x-show="mobileNavOpen" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div
+      id="mobile-nav"
+      class="sm:hidden border-t border-black/5"
+      x-show="mobileNavOpen"
+      x-transition.opacity.duration.150ms
+      x-cloak
+    >
+      <nav class="max-w-screen-xl mx-auto px-6 py-4 flex flex-col gap-3 text-sm text-stone-700">
+        <a @click="mobileNavOpen = false" href="/" class="py-1.5 hover:text-ink transition">Home</a>
+        <a @click="mobileNavOpen = false" href="/services" class="py-1.5 hover:text-ink transition">Services</a>
+        <a @click="mobileNavOpen = false" href="/about" class="py-1.5 hover:text-ink transition">About</a>
+        <a @click="mobileNavOpen = false" href="/faqs" class="py-1.5 hover:text-ink transition">FAQs</a>
+        <a @click="mobileNavOpen = false" href="/contact" class="py-1.5 hover:text-ink transition">Contact</a>
+        <a @click="mobileNavOpen = false" href="/contact" class="mt-2 inline-flex items-center justify-center text-sm font-medium bg-ink text-paper px-4 py-2 rounded-md hover:bg-stone-800 transition">
+          Book a strategy call
+        </a>
+      </nav>
     </div>
   </header>
 
@@ -167,33 +200,32 @@
         <div class="mb-4">
           <img src="/static/logo.png" alt="aivoraflux" class="h-9 w-auto" />
         </div>
-        <p class="text-stone-500 max-w-sm leading-relaxed"><span class="text-ink font-medium">Intelligent flow, always on.</span> Production AI agents with SOTA safety, multi-LLM switching, and one-click runs.</p>
+        <p class="text-stone-500 max-w-sm leading-relaxed"><span class="text-ink font-medium">Intelligent flow, always on.</span> We are an AI consultancy helping business teams move from ideas to reliable AI automation in production.</p>
         <p class="text-stone-400 text-xs mt-6">© {{ '2026' }} aivoraflux. All rights reserved.</p>
       </div>
       <div>
-        <div class="font-medium text-ink mb-4">Product</div>
+        <div class="font-medium text-ink mb-4">Company</div>
         <ul class="space-y-3 text-stone-500">
-          <li><a href="/studio" class="hover:text-ink transition">Studio</a></li>
-          <li><a href="/dashboard" class="hover:text-ink transition">Dashboard</a></li>
-          <li><a href="/pricing" class="hover:text-ink transition">Pricing</a></li>
+          <li><a href="/about" class="hover:text-ink transition">About</a></li>
+          <li><a href="/case-studies" class="hover:text-ink transition">Case Studies</a></li>
+          <li><a href="/faqs" class="hover:text-ink transition">FAQs</a></li>
+          <li><a href="/contact" class="hover:text-ink transition">Contact</a></li>
         </ul>
       </div>
       <div>
-        <div class="font-medium text-ink mb-4">Safety</div>
+        <div class="font-medium text-ink mb-4">Solutions</div>
         <ul class="space-y-3 text-stone-500">
-          <li>NeMo Guardrails</li>
-          <li>Llama Guard 4</li>
-          <li>PII redaction</li>
-          <li>Jailbreak shield</li>
+          <li><a href="/services" class="hover:text-ink transition">AI Strategy</a></li>
+          <li><a href="/services" class="hover:text-ink transition">Workflow Automation</a></li>
+          <li><a href="/services" class="hover:text-ink transition">Agent Development</a></li>
+          <li><a href="/industries" class="hover:text-ink transition">Industry Playbooks</a></li>
         </ul>
       </div>
       <div>
-        <div class="font-medium text-ink mb-4">Providers</div>
+        <div class="font-medium text-ink mb-4">Get started</div>
         <ul class="space-y-3 text-stone-500">
-          <li>Anthropic · OpenAI</li>
-          <li>Google · Mistral</li>
-          <li>Groq · Together</li>
-          <li>Ollama · LM Studio</li>
+          <li><a href="/pricing" class="hover:text-ink transition">Engagement models</a></li>
+          <li><a href="/contact" class="hover:text-ink transition">Book discovery call</a></li>
         </ul>
       </div>
     </div>
