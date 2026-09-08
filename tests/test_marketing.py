@@ -1,5 +1,12 @@
 """Tests for the voice marketing agent (subsystem F)."""
 from __future__ import annotations
+from fastapi.testclient import TestClient
+from core.llm_providers import CompletionResponse
+from core import workspace_factory as wf
+from core import marketing
+from datetime import timedelta
+from core import email_sender
+from core import voice
 
 import pytest
 from sqlmodel import Session, select
@@ -40,9 +47,6 @@ def test_marketing_tables_roundtrip(db):
         assert om.next_followup_at is None
 
 
-from core import voice
-
-
 def test_voice_stub_synthesize_and_transcribe(monkeypatch):
     monkeypatch.setenv("VOICE_BACKEND", "stub")
     audio = voice.synthesize("hello world")
@@ -58,9 +62,6 @@ def test_voice_unknown_backend_falls_back(monkeypatch):
     assert isinstance(voice.transcribe(b"abc"), str)
 
 
-from core import email_sender
-
-
 def test_email_stub_returns_true_and_never_raises(monkeypatch):
     monkeypatch.setenv("EMAIL_BACKEND", "stub")
     assert email_sender.send_email("a@b.com", "Hi", "Body") is True
@@ -73,11 +74,38 @@ def test_email_smtp_without_config_failopen(monkeypatch):
     assert email_sender.send_email("a@b.com", "Hi", "Body") is False
 
 
-from datetime import timedelta
+def test_email_smtp_uses_ssl_when_configured(monkeypatch):
+    class FakeSMTPSSL:
+        def __init__(self, host, port, timeout=None, context=None):
+            self.host = host
+            self.port = port
+            self.timeout = timeout
+            self.context = context
+            self.logged_in = None
+            self.messages = []
 
-from core import marketing
-from core import workspace_factory as wf
-from core.llm_providers import CompletionResponse
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def login(self, user, password):
+            self.logged_in = (user, password)
+
+        def send_message(self, msg):
+            self.messages.append(msg)
+
+    monkeypatch.setenv("EMAIL_BACKEND", "smtp")
+    monkeypatch.setenv("SMTP_HOST", "smtp.example.com")
+    monkeypatch.setenv("SMTP_PORT", "465")
+    monkeypatch.setenv("SMTP_USE_SSL", "true")
+    monkeypatch.setenv("SMTP_USER", "user@example.com")
+    monkeypatch.setenv("SMTP_PASSWORD", "secret")
+    monkeypatch.setenv("SMTP_FROM", "from@example.com")
+    monkeypatch.setattr(email_sender.smtplib, "SMTP_SSL", FakeSMTPSSL)
+
+    assert email_sender.send_email("to@example.com", "Hi", "Body") is True
 
 
 def _echo_complete(req, provider):
@@ -124,9 +152,11 @@ def test_followup_cadence_bounded(db, monkeypatch):
     with Session(db) as s:
         member = s.get(WorkspaceMember, member_id)
         contact = s.get(MarketingContact, ct_id)
-        outreach = marketing.send_outreach(s, ws_id, member, contact, "demo", followup_days=3)
+        outreach = marketing.send_outreach(
+            s, ws_id, member, contact, "demo", followup_days=3)
         outreach.next_followup_at = utcnow() - timedelta(days=1)
-        s.add(outreach); s.commit()
+        s.add(outreach)
+        s.commit()
 
         due = marketing.due_followups(s, ws_id)
         assert len(due) == 1
@@ -148,9 +178,6 @@ def test_find_marketing_member(db):
     with Session(db) as s:
         m = marketing.find_marketing_member(s, ws_id)
         assert m is not None and m.role == "marketing"
-
-
-from fastapi.testclient import TestClient
 
 
 @pytest.fixture()
@@ -187,8 +214,10 @@ def test_run_followups_route(db, client):
         om = s.exec(select(OutreachMessage).where(
             OutreachMessage.workspace_id == ws_id)).one()
         om.next_followup_at = utcnow() - timedelta(days=1)
-        s.add(om); s.commit()
-    r = client.post(f"/workspaces/{ws_id}/marketing/followups/run", follow_redirects=False)
+        s.add(om)
+        s.commit()
+    r = client.post(
+        f"/workspaces/{ws_id}/marketing/followups/run", follow_redirects=False)
     assert r.status_code == 303
     with Session(db) as s:
         followups = s.exec(select(OutreachMessage).where(

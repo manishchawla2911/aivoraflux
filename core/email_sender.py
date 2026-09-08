@@ -9,10 +9,18 @@ from __future__ import annotations
 import logging
 import os
 import smtplib
+import ssl
 from email.message import EmailMessage
 from typing import Optional
 
 logger = logging.getLogger(__name__)
+
+
+def _env_bool(name: str, default: bool) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
 def send_email(to: str, subject: str, body: str, *, backend: Optional[str] = None) -> bool:
@@ -35,8 +43,18 @@ def send_email(to: str, subject: str, body: str, *, backend: Optional[str] = Non
             msg["Subject"] = subject
             msg.set_content(body)
             port = int(os.getenv("SMTP_PORT", "587"))
-            with smtplib.SMTP(host, port, timeout=15) as server:
-                server.starttls()
+            timeout = float(os.getenv("SMTP_TIMEOUT_SECONDS", "15"))
+            use_ssl = _env_bool("SMTP_USE_SSL", port == 465)
+            use_starttls = _env_bool("SMTP_STARTTLS", not use_ssl)
+            context = ssl.create_default_context() if use_ssl or use_starttls else None
+            if use_ssl:
+                def server_factory(): return smtplib.SMTP_SSL(
+                    host, port, timeout=timeout, context=context)
+            else:
+                def server_factory(): return smtplib.SMTP(host, port, timeout=timeout)
+            with server_factory() as server:
+                if use_starttls:
+                    server.starttls(context=context)
                 user = os.getenv("SMTP_USER", "")
                 password = os.getenv("SMTP_PASSWORD", "")
                 if user:
@@ -44,7 +62,15 @@ def send_email(to: str, subject: str, body: str, *, backend: Optional[str] = Non
                 server.send_message(msg)
             return True
         except Exception:
-            logger.warning("email.smtp_send_failed", exc_info=True)
+            logger.warning(
+                "email.smtp_send_failed host=%s port=%s ssl=%s starttls=%s",
+                host,
+                os.getenv("SMTP_PORT", "587"),
+                _env_bool("SMTP_USE_SSL", os.getenv(
+                    "SMTP_PORT", "587") == "465"),
+                _env_bool("SMTP_STARTTLS", True),
+                exc_info=True,
+            )
             return False
 
     logger.warning("email.unknown_backend=%s — treating as stub", backend)
