@@ -346,6 +346,24 @@ class AgentEvent(SQLModel, table=True):
     meta_json: Optional[str] = None                # small JSON blob
 
 
+class Lead(SQLModel, table=True):
+    """Enquiry submitted through the public website contact form."""
+    __tablename__ = "lead"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    full_name: str
+    email: str = Field(index=True)
+    company: str = ""
+    country: str = ""
+    industry: str = ""
+    service: str = ""
+    budget: str = ""
+    message: str = ""
+    source_path: str = ""
+    email_sent: bool = False
+    created_at: datetime = Field(default_factory=_utcnow)
+
+
 _engine = None
 
 

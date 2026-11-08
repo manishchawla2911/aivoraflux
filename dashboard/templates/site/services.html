@@ -1,0 +1,45 @@
+{% extends "site/_layout.html" %}
+{% from "site/_macros.html" import icon, arrow, cta_block %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="hero__bg"></div>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span aria-current="page">Services</span></nav>
+    <span class="eyebrow mt-4" data-reveal>Services</span>
+    <h1 class="display" data-reveal>AI, automation and software, engineered end to end.</h1>
+    <p class="lead" data-reveal>Six practices that take you from identifying where AI creates value to running it reliably in production.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="rows" data-reveal-group>
+      {% for s in site.services %}
+      <a class="row" href="/services/{{ s.slug }}" data-reveal>
+        <span class="row__num">0{{ loop.index }}</span>
+        <h2 class="h3">{{ s.name }}</h2>
+        <p>{{ s.intro }}<small>{{ s.bullets | join(' · ') }}</small></p>
+        <span class="text-link">Learn more</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section--alt">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">How we work</span>
+      <h2 class="h2">The same disciplined process on every engagement.</h2>
+    </div>
+    <ol class="timeline" data-reveal-group style="list-style:none;margin:0;padding:0">
+      {% for name, text in process %}
+      <li class="step" data-reveal><span class="step__num">0{{ loop.index }}</span><h3>{{ name }}</h3><p>{{ text }}</p></li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{{ cta_block("Not sure which service fits?", "Tell us about the problem. We will recommend the smallest useful next step.", "Book a Strategy Call", site.booking_url) }}
+{% endblock %}

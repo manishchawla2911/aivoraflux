@@ -23,10 +23,10 @@ def client(tmp_path, monkeypatch):
 
 
 def test_index_empty(client):
-    # `/` is now the Agent Studio marketing page; project list moved to `/projects`.
+    # `/` is the public marketing homepage; project list lives at `/projects`.
     landing = client.get("/")
     assert landing.status_code == 200
-    assert "Agent Studio" in landing.text
+    assert "Engineering" in landing.text and "Next." in landing.text
 
     r = client.get("/projects")
     assert r.status_code == 200

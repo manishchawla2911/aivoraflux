@@ -1,0 +1,75 @@
+{% extends "site/_layout.html" %}
+{% from "site/_macros.html" import icon, arrow, cta_block %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="hero__bg"></div>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span aria-current="page">About Us</span></nav>
+    <span class="eyebrow mt-4" data-reveal>About Aivoraflux</span>
+    <h1 class="display" data-reveal>We engineer AI that does real work.</h1>
+    <p class="lead" data-reveal>Aivoraflux is an AI engineering and automation consultancy. We help businesses replace slow, manual processes with intelligent systems, and we build the software those systems run on.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container split">
+    <div data-reveal>
+      <span class="eyebrow">Our mission</span>
+      <h2 class="h2">Make AI practical, measurable and safe to rely on.</h2>
+    </div>
+    <div class="stack-sm" data-reveal>
+      <p class="lead">Most companies do not need more AI experiments. They need a few well-chosen systems that remove manual work, improve decisions and keep running reliably.</p>
+      <p class="muted">That is what we focus on: understanding the operational problem first, engineering a solution that fits existing systems and teams, and staying involved until it performs in production.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section section--alt">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">What we do</span>
+      <h2 class="h2">Capabilities</h2>
+    </div>
+    <div class="rows" data-reveal-group>
+      {% for s in site.services %}
+      <a class="row" href="/services/{{ s.slug }}" data-reveal>
+        <span class="row__num">0{{ loop.index }}</span>
+        <h3>{{ s.name }}</h3>
+        <p>{{ s.short }}</p>
+        <span class="text-link">Learn more</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">How we work</span>
+      <h2 class="h2">Principles behind every engagement</h2>
+    </div>
+    <div class="reasons" data-reveal-group>
+      {% for name, text in differentiators %}
+      <div data-reveal><h3>{{ name }}</h3><p>{{ text }}</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section--alt">
+  <div class="container split">
+    <div data-reveal>
+      <span class="eyebrow">Where we work</span>
+      <h2 class="h2">Remote-first, across time zones.</h2>
+    </div>
+    <div class="stack-sm" data-reveal>
+      <p class="lead">We work with businesses in the United States, the UAE, the UK and India, and with clients elsewhere on request.</p>
+      <p class="muted">Engagements run remotely with scheduled working sessions, shared documentation and regular demos, so progress is always visible.</p>
+    </div>
+  </div>
+</section>
+
+{{ cta_block("Let's talk about your operations.", "Bring one workflow that costs your team time. We will tell you honestly what is possible.", "Book a Strategy Call", site.booking_url) }}
+{% endblock %}

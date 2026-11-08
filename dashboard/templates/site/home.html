@@ -1,0 +1,303 @@
+{% extends "site/_layout.html" %}
+{% from "site/_macros.html" import icon, arrow, vendor_ui %}
+
+{% block schema %}
+<script type="application/ld+json">{{ {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Aivoraflux",
+  "url": site.url
+} | tojson }}</script>
+{% endblock %}
+
+{% macro words(text, start=0, cls="") -%}
+{%- for w in text.split(" ") -%}<span class="w"><span class="{{ cls }}" style="--i:{{ start + loop.index0 }}">{{ w }}</span></span>{{ " " if not loop.last }}{%- endfor -%}
+{%- endmacro %}
+
+{% block scripts %}<script src="/static/network.js?v={{ site.asset_version }}" defer></script>{% endblock %}
+
+{% block content %}
+{# ── 1. Hero ─────────────────────────────────────────────── #}
+<section class="hero" data-hero>
+  <div class="atmos" aria-hidden="true">
+    <div class="atmos__glow atmos__glow--a"></div>
+    <div class="atmos__glow atmos__glow--b"></div>
+    <div class="atmos__grid"></div>
+  </div>
+  <div class="container hero__inner">
+    <div class="hero__copy">
+      <span class="eyebrow fade-up" style="--delay:0ms">AI engineering &amp; technology consultancy</span>
+      <h1 class="display reveal-words">
+        {{ words("Building", 0) }} {{ words("Intelligence.", 1, "hl-glow") }}<br>
+        {{ words("Engineering", 2) }} {{ words("What's Next.", 3, "hl-glow") }}
+      </h1>
+      <p class="lead fade-up" style="--delay:650ms">We transform complex business challenges into intelligent solutions through AI, automation and digital engineering.</p>
+      <div class="hero__actions fade-up" style="--delay:800ms">
+        <a class="btn btn--primary btn--lg" href="{{ site.booking_url }}">Let's Build Something {{ arrow() }}</a>
+        <a class="btn btn--ghost btn--lg" href="#expertise">Explore Our Expertise</a>
+      </div>
+    </div>
+
+    <div class="hero__visual fade-up" style="--delay:300ms" role="img" aria-label="Abstract visual of an intelligent network: connected nodes exchanging data">
+      <div class="hero__visual-ring"></div>
+      <div class="hero__visual-ring hero__visual-ring--2"></div>
+      <canvas data-network></canvas>
+      <span class="hero__visual-label hero__visual-label--1"><b>●</b> Agents coordinating</span>
+      <span class="hero__visual-label hero__visual-label--2">Documents → structured data</span>
+      <span class="hero__visual-label hero__visual-label--3">Systems connected · ERP · CRM</span>
+    </div>
+  </div>
+
+  <div class="ticker fade-up" style="--delay:1000ms" aria-hidden="true">
+    <div class="ticker__track">
+      {% for _ in range(2) %}{% for t in ["AI Agents", "Machine Learning", "Document Intelligence", "Workflow Automation", "Predictive Analytics", "E-commerce Growth", "Custom Software", "AI Strategy", "ERP & CRM Integration"] %}<span>{{ t }}</span>{% endfor %}{% endfor %}
+    </div>
+  </div>
+</section>
+
+{# ── 2. Introduction ────────────────────────────────────── #}
+<section class="section section--tight">
+  <div class="container">
+    <div class="panel-mist" data-reveal>
+      <span class="eyebrow">Who we are</span>
+      <h2 class="intro__head scrub" data-scrub>Technology Should Do More Than Work. It Should Move Business Forward.</h2>
+      <div class="intro__grid">
+        <p>Aivoraflux brings AI, automation and software engineering together under one team. We start with the problem that costs you time or money, then design and build the system that solves it, connected to the tools you already use.</p>
+        <div class="intro__pillar"><span>01</span><h3>AI</h3><p>Models and agents that read, reason and decide, tested on your real data.</p></div>
+        <div class="intro__pillar"><span>02</span><h3>Automation</h3><p>Manual, repetitive workflows run end to end, with people kept in control.</p></div>
+        <div class="intro__pillar"><span>03</span><h3>Engineering</h3><p>Production-grade software, integrations and products that scale with you.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ── 3. Expertise ───────────────────────────────────────── #}
+{% set variants = {
+  "ai-machine-learning": "ml", "ai-agent-development": "agents", "business-process-automation": "auto",
+  "ecommerce-growth-optimization": "ecom", "web-software-development": "web", "ai-consulting-strategy": "consult"
+} %}
+<section class="section" id="expertise">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Our expertise</span>
+      <h2 class="h2">Six disciplines. <span class="soft">One engineering team.</span></h2>
+    </div>
+    <div class="bento" data-reveal-group>
+      {% for s in site.services %}
+      {% set v = variants[s.slug] %}
+      <a class="xcard xcard--{{ v }}" href="/services/{{ s.slug }}" data-reveal data-tilt>
+        {% if v == "consult" %}<div>{% endif %}
+        <div class="xcard__top">
+          <div class="xcard__icon">{{ icon(s.icon) }}</div>
+          <span class="xcard__num">0{{ loop.index }}</span>
+        </div>
+        {% if v != "consult" %}<div class="xcard__art" aria-hidden="true">
+          {% if v == "ml" %}
+          <svg class="art" viewBox="0 0 600 150">
+            {% for y in [20, 60, 100, 140] %}<line class="ln" x1="0" y1="{{ y }}" x2="600" y2="{{ y }}" style="stroke-opacity:.4"/>{% endfor %}
+            <path class="ln draw" style="stroke:var(--mist);stroke-width:2" d="M0 120 L60 104 L120 112 L180 84 L240 92 L300 66 L360 74"/>
+            <path class="ln-c draw" stroke-dasharray="6 7" d="M360 74 L420 56 L480 48 L540 30 L600 22"/>
+            <line x1="360" y1="10" x2="360" y2="145" class="ln" stroke-dasharray="3 5"/>
+            <text x="368" y="18">forecast</text>
+            <circle class="dot-c pulse" cx="540" cy="30" r="5"/><circle class="dot-c" cx="540" cy="30" r="5"/>
+          </svg>
+          {% elif v == "agents" %}
+          <svg class="art" viewBox="0 0 300 160">
+            <circle class="ln" cx="150" cy="80" r="40"/><circle class="ln" cx="150" cy="80" r="70" stroke-dasharray="3 6"/>
+            <g class="orbit"><circle class="dot" cx="190" cy="80" r="5"/><circle class="dot" cx="110" cy="80" r="4"/></g>
+            <g class="orbit orbit--rev"><circle class="dot" cx="150" cy="10" r="4"/><circle class="dot-c" cx="150" cy="150" r="5"/><circle class="dot" cx="80" cy="80" r="3"/></g>
+            <circle class="dot-c pulse" cx="150" cy="80" r="10"/><circle class="dot-c" cx="150" cy="80" r="10"/>
+          </svg>
+          {% elif v == "auto" %}
+          <svg class="art" viewBox="0 0 300 120">
+            <rect class="box" x="4" y="40" width="70" height="40" rx="10"/><text x="22" y="64">input</text>
+            <rect class="box" x="115" y="34" width="70" height="52" rx="12" style="fill:var(--coral);stroke:var(--coral)"/><text x="138" y="65" style="fill:var(--g-800);font-weight:700">AI</text>
+            <rect class="box" x="226" y="40" width="70" height="40" rx="10"/><text x="244" y="64">done</text>
+            <path class="ln flow" d="M74 60 H115 M185 60 H226" style="stroke-width:2"/>
+          </svg>
+          {% elif v == "ecom" %}
+          <svg class="art" viewBox="0 0 300 140" preserveAspectRatio="xMidYMax meet">
+            {% for h in [40, 58, 50, 74, 68, 92, 118] %}<rect class="bar {{ 'peak' if loop.last }}" x="{{ 12 + loop.index0 * 41 }}" y="{{ 136 - h }}" width="28" height="{{ h }}" rx="6"/>{% endfor %}
+          </svg>
+          {% elif v == "web" %}
+          <div class="code-lines"><span style="width:62%"></span><span style="width:44%;margin-left:8%"></span><span style="width:52%;margin-left:8%"></span><span style="width:70%;margin-left:16%"></span><span style="width:36%;margin-left:8%"></span><span style="width:24%"></span></div>
+          {% endif %}
+        </div>{% endif %}
+        <h3>{{ s.name }}</h3>
+        <p>{{ s.short }}</p>
+        <span class="text-link">Learn more {{ arrow() }}</span>
+        {% if v == "consult" %}</div>
+        <div class="xcard__art" aria-hidden="true">
+          <svg class="art" viewBox="0 0 600 150">
+            <path class="ln" d="M20 110 C 140 110, 160 40, 300 60 S 470 30, 580 30" style="stroke-width:2"/>
+            <path class="ln-c draw" d="M20 110 C 140 110, 160 40, 300 60"/>
+            {% for x, y, t in [(20,110,"Assess"),(170,72,"Prioritise"),(300,60,"Roadmap"),(450,40,"Build"),(580,30,"Scale")] %}
+            <circle class="{{ 'dot-c' if loop.index <= 3 else 'dot' }}" cx="{{ x }}" cy="{{ y }}" r="6"/>
+            <text x="{{ x - 18 }}" y="{{ y + 28 }}">{{ t }}</text>
+            {% endfor %}
+          </svg>
+        </div>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# ── 4. Approach ────────────────────────────────────────── #}
+<section class="section section--alt approach" data-approach>
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Our approach</span>
+      <h2 class="h2">From Complex Problems to <span class="hl">Intelligent Possibilities.</span></h2>
+    </div>
+    <div class="approach__track" role="list">
+      <span class="approach__fill" aria-hidden="true"></span>
+      {% for name, text in process %}
+      <div class="stage" role="listitem" data-stage>
+        <span class="stage__node">0{{ loop.index }}</span>
+        <h3>{{ name }}</h3>
+        <p>{{ text }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# ── 5. Work ────────────────────────────────────────────── #}
+<section class="section" id="work">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Our work</span>
+      <h2 class="h2">Intelligence <span class="hl">in Action.</span></h2>
+      <p class="lead">Our own products and platforms, plus anonymised demonstrations of what we deliver. Client engagements stay confidential, and every example is labelled for what it is.</p>
+    </div>
+
+    {% set flagship = projects[0] %}
+    <div class="feature">
+      <div class="feature__copy" data-reveal>
+        <span class="tag tag--accent">{{ flagship.label }}</span>
+        <h3 class="h2">AI-powered procurement intelligence</h3>
+        <p>{{ flagship.overview }}</p>
+        <ul class="feature__points">
+          <li><b>Problem</b>{{ flagship.problem }}</li>
+          <li><b>Solution</b>{{ flagship.solution }}</li>
+          <li><b>Implementation</b>{{ flagship.approach }}</li>
+        </ul>
+        <div class="hero__actions"><a class="btn btn--ghost" href="/contact?service={{ 'Vendor & procurement platform' | urlencode }}#enquiry">Request a walkthrough {{ arrow() }}</a></div>
+      </div>
+      <figure data-reveal>
+        {{ vendor_ui() }}
+        <figcaption>Interface sketch with sample data.</figcaption>
+      </figure>
+    </div>
+
+    {% set doc = projects[2] %}
+    <div class="feature feature--flip">
+      <div class="feature__copy" data-reveal>
+        <span class="tag">{{ doc.label }}</span>
+        <h3 class="h2">{{ doc.name }}</h3>
+        <p>{{ doc.overview }}</p>
+        <ul class="feature__points">
+          <li><b>Problem</b>{{ doc.problem }}</li>
+          <li><b>Solution</b>{{ doc.solution }}</li>
+          <li><b>Implementation</b>{{ doc.approach }}</li>
+        </ul>
+      </div>
+      <figure class="hero__example" data-reveal data-flow>
+        <div class="flow-head">
+          <div><h2>Live demonstration</h2><p>Processing a supplier invoice</p></div>
+          <span class="flow-status" data-flow-status aria-live="off">Waiting</span>
+        </div>
+        <ol>
+          <li data-label="Receiving"><div>Invoice arrives by email or vendor portal</div></li>
+          <li data-label="Reading"><div>AI reads supplier, amounts and line items<span>Scanned PDFs and digital files</span></div></li>
+          <li data-label="Matching PO"><div>Checked against the purchase order in your ERP</div></li>
+          <li data-label="Routing to review"><div>Mismatches go to your team <em class="who">human review</em><span>Nothing is approved outside your rules</span></div></li>
+          <li data-label="Posting"><div>Approved invoices are posted and logged</div></li>
+        </ol>
+      </figure>
+    </div>
+
+    <div class="cases" data-reveal-group>
+      {% for p in [projects[1], projects[3], projects[4]] %}
+      <article class="case" data-reveal>
+        <span class="tag {{ 'tag--accent' if p.kind != 'illustrative' else '' }}">{{ p.label }}</span>
+        <h3>{{ p.name }}</h3>
+        <dl>
+          <dt>Problem</dt><dd>{{ p.problem }}</dd>
+          <dt>Solution</dt><dd>{{ p.solution }}</dd>
+          <dt>Implementation</dt><dd>{{ p.stack | join(' · ') }}</dd>
+        </dl>
+      </article>
+      {% endfor %}
+    </div>
+    <div class="mt-8" data-reveal><a class="text-link" href="/work">Explore all work {{ arrow() }}</a></div>
+  </div>
+</section>
+
+{# ── 6. Industries ──────────────────────────────────────── #}
+<section class="section section--alt">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Industries</span>
+      <h2 class="h2">Built for the way <span class="soft">your industry works.</span></h2>
+    </div>
+    <div class="industries" data-industries data-reveal>
+      <div class="ind-tabs" role="tablist" aria-label="Industries">
+        {% for name, ic, uses in home_industries %}
+        <button class="ind-tab" role="tab" id="ind-tab-{{ loop.index }}" aria-controls="ind-panel-{{ loop.index }}" aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ '0' if loop.first else '-1' }}">{{ name }}</button>
+        {% endfor %}
+      </div>
+      <div>
+        {% for name, ic, uses in home_industries %}
+        <div class="ind-panel" role="tabpanel" id="ind-panel-{{ loop.index }}" aria-labelledby="ind-tab-{{ loop.index }}" {% if not loop.first %}hidden{% endif %}>
+          <div class="ind-panel__art" aria-hidden="true"><span class="ring"></span><span class="ring"></span><span class="ring"></span><span class="core">{{ icon(ic) }}</span></div>
+          <span class="eyebrow">Use cases</span>
+          <h3 class="mt-4">{{ name }}</h3>
+          <ul>{% for u in uses %}<li>{{ u }}</li>{% endfor %}</ul>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="mt-8" data-reveal><a class="text-link" href="/industries">All industries {{ arrow() }}</a></div>
+  </div>
+</section>
+
+{# ── 7. Why Aivoraflux ──────────────────────────────────── #}
+<section class="section">
+  <div class="container why">
+    <div class="why__head" data-reveal>
+      <span class="eyebrow">Why Aivoraflux</span>
+      <h2 class="h2">Engineered Around Your Business. <em>Powered by Intelligence.</em></h2>
+      <p class="lead">One accountable team from the first conversation to a system running in production.</p>
+      <div class="hero__actions"><a class="btn btn--primary" href="{{ site.booking_url }}">Start a Conversation {{ arrow() }}</a></div>
+    </div>
+    <div class="why__grid" data-reveal-group>
+      {% set why_icons = ["layers", "compass", "cpu", "flow", "bolt", "pulse"] %}
+      {% for name, text in differentiators %}
+      <div class="why__item" data-reveal>
+        <span class="n">0{{ loop.index }}</span>
+        <div class="ico">{{ icon(why_icons[loop.index0]) }}</div>
+        <h3>{{ name }}</h3>
+        <p>{{ text }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# ── 8. Final CTA ───────────────────────────────────────── #}
+<section class="section" style="padding-top:clamp(40px,6vw,80px)">
+  <div class="container">
+    <div class="cta" data-reveal>
+      <span class="eyebrow">Let's talk</span>
+      <h2 class="h2 mt-6">Let's Turn Your Next Big Idea <span class="hl">Into Reality.</span></h2>
+      <p class="lead">Have a challenge worth solving? Let's explore what intelligent technology can do for your business.</p>
+      <div class="cta__actions">
+        <a class="btn btn--primary btn--lg" href="{{ site.booking_url }}">Start a Conversation {{ arrow() }}</a>
+        <a class="btn btn--ghost btn--lg" href="mailto:{{ site.email }}">{{ site.email }}</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

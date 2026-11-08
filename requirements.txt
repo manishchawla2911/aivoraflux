@@ -4,7 +4,7 @@
 # Core
 anthropic>=0.40.0
 pydantic>=2.0.0
-sqlmodel>=0.0.18
+sqlmodel>=0.0.18,<0.0.25    # 0.0.48 rejects the naive UTC datetimes used in core/state.py
 fastapi>=0.115.0
 uvicorn[standard]>=0.32.0
 python-multipart>=0.0.9

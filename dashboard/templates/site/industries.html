@@ -1,0 +1,27 @@
+{% extends "site/_layout.html" %}
+{% from "site/_macros.html" import icon, arrow, cta_block %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="hero__bg"></div>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span aria-current="page">Industries</span></nav>
+    <span class="eyebrow mt-4" data-reveal>Industries</span>
+    <h1 class="display" data-reveal>AI that fits the way your industry works.</h1>
+    <p class="lead" data-reveal>The technology is similar across sectors; the workflows, data and rules are not. These are the use cases we most often see pay back first.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="ind-list ind-list--full" data-reveal-group>
+      {% for name, ic, uses in industries %}
+      <div data-reveal id="{{ name | lower | replace(' & ', '-') | replace(' ', '-') }}"><h2 class="h3">{{ name }}</h2><p>{{ uses | join('. ') }}.</p></div>
+      {% endfor %}
+    </div>
+    <p class="muted mt-8" data-reveal>Working in logistics, SaaS or another sector? The same methods apply. <a class="text-link" href="/contact#enquiry">Tell us about your workflow {{ arrow() }}</a></p>
+  </div>
+</section>
+
+{{ cta_block("Find the first use case worth automating.", "We map one workflow with you and tell you plainly whether AI, automation or neither is the right answer.", "Book a Strategy Call", site.booking_url) }}
+{% endblock %}

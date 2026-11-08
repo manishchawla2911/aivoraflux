@@ -1,0 +1,37 @@
+{% extends "site/_layout.html" %}
+{% from "site/_macros.html" import arrow, cta_block %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="hero__bg"></div>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span aria-current="page">Engagement Models</span></nav>
+    <span class="eyebrow mt-4" data-reveal>Engagement models</span>
+    <h1 class="display" data-reveal>Start small, scale what works.</h1>
+    <p class="lead" data-reveal>Every engagement is scoped to your goals. Pricing is agreed after a discovery call, once we understand the work.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="grid grid-3" data-reveal-group>
+      {% for label, name, text, items, featured in [
+        ('Assess', 'Strategy Sprint', 'A focused assessment that identifies the highest-value AI and automation opportunities.', ['Workflow and data review', 'Prioritised opportunity map', 'Solution architecture', 'Implementation roadmap'], false),
+        ('Build', 'Automation Program', 'A scoped project that designs, builds and deploys one or more production systems.', ['Fixed scope and milestones', 'Integration with your systems', 'Testing on real data', 'Deployment and handover'], true),
+        ('Scale', 'Embedded AI Team', 'An ongoing team that extends, monitors and improves your AI systems over time.', ['Dedicated engineering capacity', 'Monitoring and optimisation', 'New workflows each quarter', 'Priority support'], false)
+      ] %}
+      <div class="card plan {{ 'plan--featured' if featured }}" data-reveal>
+        <span class="plan__label">{{ label }}</span>
+        <h2 class="h3">{{ name }}</h2>
+        <p>{{ text }}</p>
+        <ul class="check-list">{% for i in items %}<li>{{ i }}</li>{% endfor %}</ul>
+        <a class="btn {{ 'btn--primary' if featured else 'btn--ghost' }} btn--block mt-6" href="{{ site.booking_url }}">Discuss this model</a>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="muted mt-8 center" data-reveal>Project budgets typically range from under $500 for small automations to $5,000+ for multi-system builds. <a class="text-link" href="/contact#enquiry">Share your budget range {{ arrow() }}</a></p>
+  </div>
+</section>
+
+{{ cta_block("Not sure where to start?", "Most clients begin with a short discovery call. There is no obligation.", "Book a Strategy Call", site.booking_url) }}
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "site/_layout.html" %}
+{% from "site/_macros.html" import arrow, cta_block, project_visual, vendor_ui %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="hero__bg"></div>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span aria-current="page">Our Work</span></nav>
+    <span class="eyebrow mt-4" data-reveal>Our Work</span>
+    <h1 class="display" data-reveal>Products, platforms and capabilities.</h1>
+    <p class="lead" data-reveal>Client engagements are confidential, so this page shows what we have built ourselves and anonymised demonstrations of what we deliver. Every entry is labelled.</p>
+    <div class="chips mt-6" data-reveal>
+      <span class="tag tag--accent">Aivoraflux product</span>
+      <span class="tag tag--accent">Internal platform</span>
+      <span class="tag">Illustrative capability: not a client project</span>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container stack-sm" style="gap:28px">
+    {% for p in projects %}
+    <article class="card project" id="{{ p.visual }}" data-reveal>
+      <div class="project__visual">{% if p.visual == "procurement" %}<figure style="margin:0;width:100%">{{ vendor_ui() }}<figcaption class="muted" style="font-size:12px;margin-top:8px">Interface sketch with sample data.</figcaption></figure>{% else %}{{ project_visual(p.visual) }}{% endif %}</div>
+      <div class="project__body">
+        <span class="tag {{ 'tag--accent' if p.kind != 'illustrative' else '' }}">{{ p.label }}</span>
+        <h2 class="h3">{{ p.name }}</h2>
+        <p>{{ p.overview }}</p>
+        <dl>
+          <dt>Problem</dt><dd>{{ p.problem }}</dd>
+          <dt>Solution</dt><dd>{{ p.solution }}</dd>
+          <dt>Approach</dt><dd>{{ p.approach }}</dd>
+          {% if p.outcome %}<dt>Outcome</dt><dd>{{ p.outcome }}</dd>{% endif %}
+        </dl>
+        <div class="chips">{% for t in p.stack %}<span class="chip">{{ t }}</span>{% endfor %}</div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+{{ cta_block("Want to see a capability on your own data?", "We can walk through a relevant demonstration and discuss what a pilot would involve.", "Book a Strategy Call", site.booking_url) }}
+{% endblock %}

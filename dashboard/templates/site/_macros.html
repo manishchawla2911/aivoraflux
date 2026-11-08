@@ -1,0 +1,152 @@
+{# Shared UI pieces for the public site. #}
+
+{% macro icon(name) -%}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+{%- if name == 'brain' -%}
+  <path d="M9 3a3 3 0 0 0-3 3v.5A3 3 0 0 0 4 9.3a3 3 0 0 0 .6 4.9A3 3 0 0 0 8 18.5V19a2 2 0 0 0 4 0V4.5A1.5 1.5 0 0 0 10.5 3H9z"/><path d="M15 3a3 3 0 0 1 3 3v.5a3 3 0 0 1 2 2.8 3 3 0 0 1-.6 4.9A3 3 0 0 1 16 18.5V19a2 2 0 0 1-4 0"/><path d="M12 8h2M12 13h3"/>
+{%- elif name == 'agent' -%}
+  <rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 3v4M9 12h.01M15 12h.01M9.5 16h5"/><circle cx="12" cy="3" r="1"/>
+{%- elif name == 'flow' -%}
+  <rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="15" y="15" width="6" height="6" rx="1.5"/><path d="M9 6h4a2 2 0 0 1 2 2v7"/><path d="m12.5 12.5 2.5 2.5 2.5-2.5"/>
+{%- elif name == 'cart' -%}
+  <path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6.2"/><circle cx="10" cy="20.5" r="1"/><circle cx="17" cy="20.5" r="1"/>
+{%- elif name == 'code' -%}
+  <path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/>
+{%- elif name == 'compass' -%}
+  <circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>
+{%- elif name == 'bank' -%}
+  <path d="M3 10 12 4l9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/>
+{%- elif name == 'pulse' -%}
+  <path d="M3 12h4l2-6 4 12 2-6h6"/>
+{%- elif name == 'factory' -%}
+  <path d="M3 20V10l6 4V10l6 4V6h6v14H3z"/><path d="M7 17h2M12 17h2M17 17h1"/>
+{%- elif name == 'bolt' -%}
+  <path d="M13 3 5 13h6l-1 8 8-10h-6z"/>
+{%- elif name == 'cap' -%}
+  <path d="m2 9 10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5M22 9v6"/>
+{%- elif name == 'briefcase' -%}
+  <rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/>
+{%- elif name == 'shield' -%}
+  <path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/>
+{%- elif name == 'layers' -%}
+  <path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/>
+{%- elif name == 'cpu' -%}
+  <rect x="6" y="6" width="12" height="12" rx="2"/><path d="M10 10h4v4h-4zM9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>
+{%- elif name == 'mail' -%}
+  <rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>
+{%- elif name == 'chat' -%}
+  <path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.1A8 8 0 1 1 20 12z"/>
+{%- elif name == 'calendar' -%}
+  <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/>
+{%- elif name == 'globe' -%}
+  <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/>
+{%- else -%}
+  <circle cx="12" cy="12" r="9"/>
+{%- endif -%}
+</svg>
+{%- endmacro %}
+
+{% macro arrow() -%}
+<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+{%- endmacro %}
+
+{% macro cta_block(headline, text, primary_label, booking_url) -%}
+<section class="section">
+  <div class="container">
+    <div class="cta" data-reveal>
+      <h2 class="h2">{{ headline }}</h2>
+      <p class="lead">{{ text }}</p>
+      <div class="cta__actions">
+        <a class="btn btn--primary" href="{{ booking_url }}">{{ primary_label }} {{ arrow() }}</a>
+        <a class="btn btn--ghost" href="/contact#enquiry">Send an enquiry</a>
+      </div>
+    </div>
+  </div>
+</section>
+{%- endmacro %}
+
+{# Abstract diagrams used for project cards. No client data is depicted. #}
+{% macro project_visual(kind) -%}
+{%- if kind == 'procurement' -%}
+<svg viewBox="0 0 360 220" role="img" aria-label="Diagram: vendor documents checked and routed for approval">
+  <rect x="10" y="20" width="110" height="34" rx="8" fill="#12151c" stroke="rgba(148,163,184,.25)"/><text x="24" y="42" fill="#cbd5e1" font-size="11">Registration</text>
+  <rect x="10" y="66" width="110" height="34" rx="8" fill="#12151c" stroke="rgba(148,163,184,.25)"/><text x="24" y="88" fill="#cbd5e1" font-size="11">Certificates</text>
+  <rect x="10" y="112" width="110" height="34" rx="8" fill="#12151c" stroke="rgba(148,163,184,.25)"/><text x="24" y="134" fill="#cbd5e1" font-size="11">Quotations</text>
+  <rect x="10" y="158" width="110" height="34" rx="8" fill="#12151c" stroke="rgba(148,163,184,.25)"/><text x="24" y="180" fill="#cbd5e1" font-size="11">Contracts</text>
+  <path d="M120 37 C 160 37, 160 106, 190 106 M120 83 C 160 83, 160 106, 190 106 M120 129 C 160 129, 160 106, 190 106 M120 175 C 160 175, 160 106, 190 106" stroke="rgba(255,255,255,.22)" fill="none" stroke-width="1.5"/>
+  <rect x="190" y="84" width="72" height="44" rx="10" fill="#161a22" stroke="#5b84ff"/><text x="208" y="111" fill="#fff" font-size="12" font-weight="600">AI check</text>
+  <path d="M262 106 H 290" stroke="rgba(91,132,255,.6)" stroke-width="1.5"/>
+  <rect x="290" y="60" width="62" height="28" rx="14" fill="rgba(52,211,153,.1)" stroke="rgba(52,211,153,.5)"/><text x="304" y="78" fill="#6ee7b7" font-size="10">Valid</text>
+  <rect x="290" y="124" width="62" height="28" rx="14" fill="rgba(251,191,36,.1)" stroke="rgba(251,191,36,.5)"/><text x="298" y="142" fill="#fcd34d" font-size="10">Expired</text>
+  <path d="M290 106 L 290 74 M290 106 L 290 138" stroke="rgba(148,163,184,.3)"/>
+</svg>
+{%- elif kind == 'agents' -%}
+<svg viewBox="0 0 360 220" role="img" aria-label="Diagram: an orchestrator coordinating specialised AI agents">
+  <circle cx="180" cy="110" r="34" fill="#161a22" stroke="#5b84ff"/><text x="152" y="114" fill="#fff" font-size="11" font-weight="600">Orchestrator</text>
+  {% for x, y, label in [(50,40,'Clarify'),(310,40,'Architect'),(30,110,'Plan'),(330,110,'Build'),(60,185,'Test'),(300,185,'Review')] %}
+  <line x1="180" y1="110" x2="{{ x }}" y2="{{ y }}" stroke="rgba(255,255,255,.18)" stroke-dasharray="4 5"/>
+  <circle cx="{{ x }}" cy="{{ y }}" r="22" fill="#12151c" stroke="rgba(148,163,184,.3)"/>
+  <text x="{{ x }}" y="{{ y + 4 }}" text-anchor="middle" fill="#cbd5e1" font-size="9.5">{{ label }}</text>
+  {% endfor %}
+</svg>
+{%- elif kind == 'documents' -%}
+<svg viewBox="0 0 360 220" role="img" aria-label="Diagram: fields extracted from a document and validated">
+  <rect x="24" y="24" width="120" height="164" rx="10" fill="#12151c" stroke="rgba(148,163,184,.3)"/>
+  {% for y in [50, 68, 86, 120, 138, 156] %}<rect x="40" y="{{ y }}" width="{{ 88 if y % 36 else 64 }}" height="7" rx="3" fill="rgba(148,163,184,.22)"/>{% endfor %}
+  <rect x="36" y="80" width="96" height="20" rx="4" fill="none" stroke="#5b84ff"/>
+  <path d="M144 90 H 200" stroke="#5b84ff" stroke-dasharray="4 4"/>
+  {% for y, k, v, ok in [(40,'Vendor','ACME-•••',1),(84,'Total','$ ••,•••',1),(128,'PO match','Pending',0)] %}
+  <rect x="200" y="{{ y }}" width="136" height="34" rx="8" fill="#12151c" stroke="{{ 'rgba(52,211,153,.45)' if ok else 'rgba(251,191,36,.45)' }}"/>
+  <text x="212" y="{{ y + 21 }}" fill="#8592a8" font-size="10">{{ k }}</text>
+  <text x="270" y="{{ y + 21 }}" fill="#e2e8f0" font-size="10.5">{{ v }}</text>
+  {% endfor %}
+</svg>
+{%- elif kind == 'analytics' -%}
+<svg viewBox="0 0 360 220" role="img" aria-label="Diagram: historical data and a forecast band">
+  {% for y in [50, 95, 140, 185] %}<line x1="30" y1="{{ y }}" x2="340" y2="{{ y }}" stroke="rgba(148,163,184,.12)"/>{% endfor %}
+  <path d="M30 160 L 70 140 L 110 150 L 150 115 L 190 125 L 220 95" stroke="#8592a8" stroke-width="2" fill="none"/>
+  <path d="M220 95 L 260 80 L 300 70 L 340 52 L 340 92 L 300 104 L 260 110 L 220 95 Z" fill="rgba(91,132,255,.12)"/>
+  <path d="M220 95 L 260 95 L 300 87 L 340 72" stroke="#5b84ff" stroke-width="2" stroke-dasharray="5 5" fill="none"/>
+  <line x1="220" y1="40" x2="220" y2="190" stroke="rgba(255,255,255,.22)" stroke-dasharray="3 4"/>
+  <text x="228" y="44" fill="#a9adb7" font-size="10">Forecast</text>
+</svg>
+{%- elif kind == 'automation' -%}
+<svg viewBox="0 0 360 220" role="img" aria-label="Diagram: requests classified by an agent and routed">
+  {% for y, t in [(36,'Request'),(96,'Request'),(156,'Request')] %}
+  <rect x="16" y="{{ y }}" width="84" height="30" rx="8" fill="#12151c" stroke="rgba(148,163,184,.3)"/><text x="30" y="{{ y + 19 }}" fill="#cbd5e1" font-size="10.5">{{ t }}</text>
+  <path d="M100 {{ y + 15 }} C 130 {{ y + 15 }}, 130 111, 150 111" stroke="rgba(255,255,255,.22)" fill="none"/>
+  {% endfor %}
+  <rect x="150" y="88" width="70" height="46" rx="10" fill="#161a22" stroke="#5b84ff"/><text x="168" y="115" fill="#fff" font-size="11" font-weight="600">Agent</text>
+  {% for y, t in [(40,'Reply drafted'),(96,'Record updated'),(152,'Human review')] %}
+  <path d="M220 111 C 245 111, 245 {{ y + 15 }}, 260 {{ y + 15 }}" stroke="rgba(255,255,255,.22)" fill="none"/>
+  <rect x="260" y="{{ y }}" width="90" height="30" rx="8" fill="#12151c" stroke="rgba(148,163,184,.3)"/><text x="270" y="{{ y + 19 }}" fill="#cbd5e1" font-size="10">{{ t }}</text>
+  {% endfor %}
+</svg>
+{%- endif -%}
+{%- endmacro %}
+
+
+{# Product-style interface sketch for the vendor platform. Sample data only. #}
+{% macro vendor_ui() -%}
+<div class="ui" role="img" aria-label="Interface sketch of the vendor and procurement platform with sample data">
+  <div class="ui__bar"><span class="ui__dots"><i></i><i></i><i></i></span><span>Vendors</span></div>
+  <div class="ui__body">
+    <aside class="ui__side">
+      <b>Workspace</b>
+      <span class="on">Vendors</span><span>Documents</span><span>Quotations</span><span>Approvals</span><span>Reports</span>
+    </aside>
+    <div class="ui__main">
+      <div class="ui__head"><strong>Vendor register</strong><span class="ui__btn">+ Invite vendor</span></div>
+      <table>
+        <thead><tr><th>Vendor</th><th>Trade licence</th><th>Insurance</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Vendor A</td><td>Valid</td><td>Valid</td><td><span class="pill pill--ok">Approved</span></td></tr>
+          <tr><td>Vendor B</td><td>Valid</td><td>Expired</td><td><span class="pill pill--warn">Action needed</span></td></tr>
+          <tr><td>Vendor C</td><td>Extracting…</td><td>—</td><td><span class="pill">In review</span></td></tr>
+          <tr><td>Vendor D</td><td>Valid</td><td>Valid</td><td><span class="pill pill--ok">Approved</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{%- endmacro %}

@@ -1,0 +1,139 @@
+{% extends "site/_layout.html" %}
+{% from "site/_macros.html" import icon, arrow, cta_block %}
+
+{% block schema %}
+<script type="application/ld+json">{{ {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": service.name,
+  "serviceType": service.name,
+  "description": service.meta,
+  "url": site.url ~ "/services/" ~ service.slug,
+  "provider": {"@type": "Organization", "name": "Aivoraflux", "url": site.url},
+  "areaServed": ["US", "AE", "GB", "IN"]
+} | tojson }}</script>
+{%- set faq_items = [] %}
+{%- for q, a in service.faqs %}{% set _ = faq_items.append({"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}) %}{% endfor %}
+<script type="application/ld+json">{{ {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": faq_items} | tojson }}</script>
+<script type="application/ld+json">{{ {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": site.url ~ "/"},
+    {"@type": "ListItem", "position": 2, "name": "Services", "item": site.url ~ "/services"},
+    {"@type": "ListItem", "position": 3, "name": service.name, "item": site.url ~ "/services/" ~ service.slug}
+  ]
+} | tojson }}</script>
+{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="hero__bg"></div>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><a href="/services">Services</a><span>/</span><span aria-current="page">{{ service.name }}</span></nav>
+    <span class="eyebrow mt-4" data-reveal>{{ service.name }}</span>
+    <h1 class="display" data-reveal>{{ service.hero }}</h1>
+    <p class="lead" data-reveal>{{ service.intro }}</p>
+    <div class="hero__actions" data-reveal>
+      <a class="btn btn--primary" href="{{ site.booking_url }}">Book a Strategy Call {{ arrow() }}</a>
+      <a class="btn btn--ghost" href="/contact?service={{ service.name | urlencode }}#enquiry">Send an enquiry</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container split">
+    <div data-reveal>
+      <span class="eyebrow">The problem</span>
+      <h2 class="h2">What usually gets in the way</h2>
+    </div>
+    <ul class="problem-list" data-reveal-group>
+      {% for p in service.problems %}<li data-reveal>{{ p }}</li>{% endfor %}
+    </ul>
+  </div>
+</section>
+
+<section class="section section--alt">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">What we deliver</span>
+      <h2 class="h2">Solutions</h2>
+    </div>
+    <div class="grid grid-2" data-reveal-group>
+      {% for name, text in service.solutions %}
+      <div class="card" data-reveal><h3 class="h3 mt-0">{{ name }}</h3><p>{{ text }}</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container split">
+    <div data-reveal>
+      <span class="eyebrow">Use cases</span>
+      <h2 class="h2">Where this applies</h2>
+      <p class="lead">Typical starting points. Your discovery session decides which one pays back first.</p>
+    </div>
+    <ul class="usecase-list" data-reveal-group>
+      {% for u in service.use_cases %}<li data-reveal>{{ u }}</li>{% endfor %}
+    </ul>
+  </div>
+</section>
+
+<section class="section section--alt">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Methodology</span>
+      <h2 class="h2">How the engagement runs</h2>
+    </div>
+    <ol class="timeline" data-reveal-group style="list-style:none;margin:0;padding:0">
+      {% for name, text in process %}
+      <li class="step" data-reveal><span class="step__num">0{{ loop.index }}</span><h3>{{ name }}</h3><p>{{ text }}</p></li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Technology</span>
+      <h2 class="h2">Typical stack</h2>
+      <p class="lead">We choose tools to fit your environment; these are the ones we use most often for this work.</p>
+    </div>
+    <div class="chips" data-reveal>{% for t in service.stack %}<span class="chip">{{ t }}</span>{% endfor %}</div>
+  </div>
+</section>
+
+<section class="section section--alt">
+  <div class="container split">
+    <div data-reveal>
+      <span class="eyebrow">FAQs</span>
+      <h2 class="h2">Common questions</h2>
+    </div>
+    <div class="faq" data-reveal>
+      {% for q, a in service.faqs %}
+      <details><summary>{{ q }}<span class="plus" aria-hidden="true">+</span></summary><p>{{ a }}</p></details>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head" data-reveal><span class="eyebrow">Related services</span></div>
+    <div class="grid grid-3 related" data-reveal-group>
+      {% for s in related %}
+      <a class="card card--link" href="/services/{{ s.slug }}" data-reveal>
+        <div class="card__icon">{{ icon(s.icon) }}</div>
+        <h3 class="h3">{{ s.name }}</h3>
+        <p>{{ s.short }}</p>
+        <span class="text-link">Learn more {{ arrow() }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{{ cta_block("Let's scope your " ~ service.name ~ " project.", "A short call is enough to tell whether there is a strong case and what a first phase would look like.", "Book a Strategy Call", site.booking_url) }}
+{% endblock %}

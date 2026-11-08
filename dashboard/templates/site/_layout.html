@@ -1,0 +1,115 @@
+{% from "site/_macros.html" import arrow %}<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {%- set page_title = (title ~ " | Aivoraflux") if title else "Aivoraflux | AI Engineering & Automation Consultancy" %}
+  {%- set page_description = description or site.default_description %}
+  {%- set canonical = site.url ~ (canonical_path if canonical_path is defined else request.url.path) %}
+  <title>{{ page_title }}</title>
+  <meta name="description" content="{{ page_description }}">
+  <link rel="canonical" href="{{ canonical }}">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#222526">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Aivoraflux">
+  <meta property="og:title" content="{{ page_title }}">
+  <meta property="og:description" content="{{ page_description }}">
+  <meta property="og:url" content="{{ canonical }}">
+  <meta property="og:image" content="{{ site.url }}/static/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ page_title }}">
+  <meta name="twitter:description" content="{{ page_description }}">
+  <meta name="twitter:image" content="{{ site.url }}/static/og-image.png">
+
+  <link rel="icon" type="image/png" href="/static/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/site.css?v={{ site.asset_version }}">
+
+  <script type="application/ld+json">{{ site.org_schema | tojson }}</script>
+  {% block schema %}{% endblock %}
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="header">
+    <div class="container header__inner">
+      <a class="header__logo" href="/" aria-label="Aivoraflux home">
+        <img src="/static/logo-white.png" alt="Aivoraflux" width="125" height="34">
+      </a>
+      <nav class="nav" aria-label="Primary">
+        {% for href, label in site.nav %}
+        <a href="{{ href }}" {% if request.url.path == href or (href != '/' and request.url.path.startswith(href)) %}aria-current="page"{% endif %}>{{ label }}</a>
+        {% endfor %}
+      </nav>
+      <div class="header__cta">
+        <a class="btn btn--primary btn--sm" href="{{ site.booking_url }}">Let's Talk {{ arrow() }}</a>
+        <button class="menu-btn" type="button" data-menu-toggle aria-controls="mobile-nav" aria-expanded="false" aria-label="Open menu">
+          <svg data-icon-open viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          <svg data-icon-close style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+  {# Outside <header>: its backdrop-filter would otherwise become the containing block for this fixed panel. #}
+  <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile">
+    {% for href, label in site.nav %}<a class="mobile-nav__link" href="{{ href }}" {% if request.url.path == href %}aria-current="page"{% endif %}>{{ label }}<span aria-hidden="true">→</span></a>{% endfor %}
+    <a class="btn btn--primary btn--block" href="{{ site.booking_url }}">Let's Build Something {{ arrow() }}</a>
+  </nav>
+
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <img src="/static/logo-white.png" alt="Aivoraflux" width="125" height="34" loading="lazy">
+          <p>AI engineering and technology consultancy. We turn complex business challenges into intelligent systems: AI agents, automation, machine learning and custom software.</p>
+          <div class="footer__social">
+            {% if site.linkedin %}<a href="{{ site.linkedin }}" target="_blank" rel="noopener" aria-label="Aivoraflux on LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.75h4V21H3zM9.5 9.75h3.8v1.54h.05c.53-.95 1.83-1.95 3.77-1.95 4.03 0 4.78 2.5 4.78 5.76V21h-4v-5.1c0-1.22-.02-2.78-1.8-2.78-1.8 0-2.08 1.33-2.08 2.7V21h-4z"/></svg></a>{% endif %}
+            <a href="mailto:{{ site.email }}" aria-label="Email Aivoraflux"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></a>
+            {% if site.whatsapp %}<a href="https://wa.me/{{ site.whatsapp }}" target="_blank" rel="noopener" aria-label="WhatsApp Aivoraflux"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.1A8 8 0 1 1 20 12z"/></svg></a>{% endif %}
+          </div>
+        </div>
+        <div>
+          <h2>Services</h2>
+          <ul>{% for s in site.services %}<li><a href="/services/{{ s.slug }}">{{ s.name }}</a></li>{% endfor %}</ul>
+        </div>
+        <div>
+          <h2>Company</h2>
+          <ul>
+            <li><a href="/about">About Us</a></li>
+            <li><a href="/work">Our Work</a></li>
+            <li><a href="/industries">Industries</a></li>
+            <li><a href="/engagement-models">Engagement Models</a></li>
+            <li><a href="/faqs">FAQs</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2>Contact</h2>
+          <ul>
+            <li><a href="mailto:{{ site.email }}">{{ site.email }}</a></li>
+            {% if site.linkedin %}<li><a href="{{ site.linkedin }}" target="_blank" rel="noopener">LinkedIn</a></li>{% endif %}
+            {% if site.whatsapp %}<li><a href="https://wa.me/{{ site.whatsapp }}" target="_blank" rel="noopener">WhatsApp</a></li>{% endif %}
+            <li><a href="{{ site.booking_url }}">Book a strategy call</a></li>
+            <li><a href="/contact#enquiry">Send an enquiry</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© {{ site.year }} Aivoraflux. All rights reserved.</span>
+        <span>Working with businesses in the UAE, USA, UK, India and beyond.</span>
+      </div>
+    </div>
+    <div class="footer__word" aria-hidden="true">aivoraflux</div>
+  </footer>
+
+  <script src="/static/site.js?v={{ site.asset_version }}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,8 +1,7 @@
 """FastAPI dashboard — Agent Studio product surface + legacy delivery routes.
 
-Public marketing
-    GET  /                              → landing page
-    GET  /pricing                       → pricing page
+Public marketing site → dashboard/site.py (/, /services, /work, /contact, …)
+    POST /contact/inquiry               → legacy enquiry endpoint (kept)
 
 Agent studio (auth-free for demo)
     GET  /dashboard                     → agent list + projects
@@ -69,6 +68,7 @@ from core.cost_estimator import estimate_project_cost, CostEstimate
 from core.workspace_factory import create_workspace
 from core.workspace_roles import ROLE_CATALOG
 from dataclasses import asdict
+from dashboard.site import router as site_router
 
 logger = logging.getLogger(__name__)
 
@@ -180,57 +180,8 @@ def _admin_gate(request: Request) -> bool:
 # Marketing
 # ─────────────────────────────────────────────────────────────
 
-@app.get("/", response_class=HTMLResponse)
-async def landing(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(request, "landing.html", {
-        "providers": list_providers(),
-        "guardrail_features": GUARDRAIL_FEATURES,
-    })
-
-
-@app.get("/pricing", response_class=HTMLResponse)
-async def pricing(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(request, "pricing.html", {})
-
-
-@app.get("/services", response_class=HTMLResponse)
-async def services(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(request, "services.html", {})
-
-
-@app.get("/industries", response_class=HTMLResponse)
-async def industries(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(request, "industries.html", {})
-
-
-@app.get("/case-studies", response_class=HTMLResponse)
-async def case_studies(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(request, "case_studies.html", {})
-
-
-@app.get("/about", response_class=HTMLResponse)
-async def about(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(request, "about.html", {})
-
-
-@app.get("/faqs", response_class=HTMLResponse)
-async def faqs(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(request, "faqs.html", {})
-
-
-@app.get("/contact", response_class=HTMLResponse)
-async def contact(request: Request, submitted: int = 0, error: int = 0) -> HTMLResponse:
-    smtp_ready = (
-        os.getenv("EMAIL_BACKEND", "stub") == "smtp"
-        and bool(os.getenv("SMTP_HOST", "").strip())
-        and bool(os.getenv("SMTP_USER", "").strip())
-    )
-    return templates.TemplateResponse(request, "contact.html", {
-        "submitted": bool(submitted),
-        "error": bool(error),
-        "smtp_ready": smtp_ready,
-        "base_url": str(request.base_url).rstrip("/"),
-    })
+# Public site pages live in dashboard/site.py (included below, after `app`).
+app.include_router(site_router)
 
 
 @app.post("/contact/inquiry")
@@ -263,7 +214,7 @@ async def contact_inquiry(
         safe_message,
     ])
     ok = send_email(recipient, subject, body, backend=os.getenv("EMAIL_BACKEND", "smtp"))
-    return RedirectResponse(url="/contact?submitted=1" if ok else "/contact?error=1", status_code=303)
+    return RedirectResponse(url="/contact?submitted=1#enquiry" if ok else "/contact?error=1#enquiry", status_code=303)
 
 
 # ─────────────────────────────────────────────────────────────

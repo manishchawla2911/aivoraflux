@@ -1,0 +1,104 @@
+{% extends "site/_layout.html" %}
+{% from "site/_macros.html" import icon, arrow %}
+
+{% macro select_field(name, label, options, placeholder) -%}
+<div class="field {{ 'has-error' if errors.get(name) }}">
+  <label for="f-{{ name }}">{{ label }} <span class="req" aria-hidden="true">*</span></label>
+  <select id="f-{{ name }}" name="{{ name }}" required aria-describedby="e-{{ name }}" {% if errors.get(name) %}aria-invalid="true"{% endif %}>
+    <option value="">{{ placeholder }}</option>
+    {% for o in options %}<option value="{{ o }}" {% if values.get(name) == o %}selected{% endif %}>{{ o }}</option>{% endfor %}
+  </select>
+  <p class="error" id="e-{{ name }}" role="alert">{{ errors.get(name, '') }}</p>
+</div>
+{%- endmacro %}
+
+{% macro input_field(name, label, type="text", autocomplete="", maxlength=160, required=true) -%}
+<div class="field {{ 'has-error' if errors.get(name) }}">
+  <label for="f-{{ name }}">{{ label }} {% if required %}<span class="req" aria-hidden="true">*</span>{% endif %}</label>
+  <input id="f-{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ values.get(name, '') }}" maxlength="{{ maxlength }}" {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %} {% if required %}required{% endif %} aria-describedby="e-{{ name }}" {% if errors.get(name) %}aria-invalid="true"{% endif %}>
+  <p class="error" id="e-{{ name }}" role="alert">{{ errors.get(name, '') }}</p>
+</div>
+{%- endmacro %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="hero__bg"></div>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span aria-current="page">Contact</span></nav>
+    <span class="eyebrow mt-4" data-reveal>Contact</span>
+    <h1 class="display" data-reveal>Let's talk about what you want to build.</h1>
+    <p class="lead" data-reveal>Book a strategy call, or tell us about your project and we will reply within one business day.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="container contact-grid">
+    <aside class="contact-aside" data-reveal>
+      <a class="card card--link contact-method" href="{{ site.booking_url }}" {% if site.booking_external %}target="_blank" rel="noopener"{% endif %}>
+        <div class="card__icon">{{ icon('calendar') }}</div>
+        <div><strong>Book a strategy call</strong><span>{{ '30 minutes, online. Pick a time that suits you.' if site.booking_external else 'Send the form and we will propose times.' }}</span></div>
+      </a>
+      <a class="card card--link contact-method" href="mailto:{{ site.email }}">
+        <div class="card__icon">{{ icon('mail') }}</div>
+        <div><strong>Email</strong><span>{{ site.email }}</span></div>
+      </a>
+      {% if site.whatsapp %}
+      <a class="card card--link contact-method" href="https://wa.me/{{ site.whatsapp }}" target="_blank" rel="noopener">
+        <div class="card__icon">{{ icon('chat') }}</div>
+        <div><strong>WhatsApp</strong><span>Message us directly</span></div>
+      </a>
+      {% endif %}
+      <div class="card" style="padding:22px">
+        <strong style="color:#fff">What happens next</strong>
+        <ol class="next-steps" style="list-style:none;padding:0">
+          <li><span><b>We reply within one business day</b> with a few questions or times for a call.</span></li>
+          <li><span><b>A 30-minute call</b> to understand the process, systems and goals.</span></li>
+          <li><span><b>A written recommendation</b> with a scoped first phase, before any commitment.</span></li>
+        </ol>
+      </div>
+      <div class="card contact-method">
+        <div class="card__icon">{{ icon('globe') }}</div>
+        <div><strong>Where we work</strong><span>Remote engagements across the USA, UAE, UK, India and beyond.</span></div>
+      </div>
+    </aside>
+
+    <div class="card form" id="enquiry" data-reveal>
+      <h2 class="h3 mt-0">Send an enquiry</h2>
+      <p class="muted mt-2">All fields marked <span class="req" style="color:var(--accent)">*</span> are required.</p>
+
+      {% if submitted %}
+      <div class="alert alert--ok mt-6" role="status">Thank you. Your enquiry has been received and we will be in touch within one business day.</div>
+      {% elif failed %}
+      <div class="alert alert--err mt-6" role="alert">Sorry, we could not send your enquiry just now. Please try again, or email us at <a href="mailto:{{ site.email }}">{{ site.email }}</a>.</div>
+      {% elif errors %}
+      <div class="alert alert--err mt-6" role="alert">Please correct the highlighted fields and submit again.</div>
+      {% endif %}
+
+      <form class="mt-6" method="post" action="/contact#enquiry" data-enquiry-form novalidate>
+        <div class="hp" aria-hidden="true">
+          <label for="f-website">Website</label>
+          <input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+        <div class="form-grid">
+          {{ input_field('full_name', 'Full name', autocomplete='name', maxlength=120) }}
+          {{ input_field('email', 'Business email', type='email', autocomplete='email') }}
+          {{ input_field('company', 'Company', autocomplete='organization') }}
+          {{ select_field('country', 'Country', countries, 'Select country') }}
+          {{ select_field('industry', 'Industry', industry_options, 'Select industry') }}
+          {{ select_field('service', 'Service required', service_options, 'Select a service') }}
+          <div class="full">{{ select_field('budget', 'Estimated budget', budget_options, 'Select a budget range') }}</div>
+          <div class="field full {{ 'has-error' if errors.get('message') }}">
+            <label for="f-message">Project description <span class="req" aria-hidden="true">*</span></label>
+            <textarea id="f-message" name="message" required minlength="20" maxlength="5000" aria-describedby="e-message" placeholder="What process or product do you want to improve? What systems are involved?" {% if errors.get('message') %}aria-invalid="true"{% endif %}>{{ values.get('message', '') }}</textarea>
+            <p class="error" id="e-message" role="alert">{{ errors.get('message', '') }}</p>
+          </div>
+        </div>
+        <div class="form-foot">
+          <p>We use your details only to respond to this enquiry.</p>
+          <button class="btn btn--primary" type="submit">Send enquiry {{ arrow() }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
