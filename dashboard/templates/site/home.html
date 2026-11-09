@@ -245,7 +245,7 @@
     <div class="industries" data-industries data-reveal>
       <div class="ind-tabs" role="tablist" aria-label="Industries">
         {% for name, ic, uses in home_industries %}
-        <button class="ind-tab" role="tab" id="ind-tab-{{ loop.index }}" aria-controls="ind-panel-{{ loop.index }}" aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ '0' if loop.first else '-1' }}">{{ name }}</button>
+        <button class="ind-tab" role="tab" id="ind-tab-{{ loop.index }}" aria-controls="ind-panel-{{ loop.index }}" aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ '0' if loop.first else '-1' }}"><span>{{ name }}</span></button>
         {% endfor %}
       </div>
       <div>

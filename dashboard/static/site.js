@@ -72,6 +72,7 @@
   var flow = document.querySelector("[data-flow]");
   if (flow) {
     var steps = Array.prototype.slice.call(flow.querySelectorAll("li"));
+    var flowList = flow.querySelector("ol");
     var status = flow.querySelector("[data-flow-status]");
     var setStatus = function (text, state) {
       status.textContent = text;
@@ -83,7 +84,7 @@
         li.classList.toggle("is-done", n < i);
         li.classList.toggle("is-active", n === i);
       });
-      flow.style.setProperty("--p", steps.length > 1 ? Math.min(i, steps.length - 1) / (steps.length - 1) : 0);
+      flowList.style.setProperty("--p", steps.length > 1 ? Math.min(Math.max(i, 0), steps.length - 1) / (steps.length - 1) : 0);
     };
     if (reduce) {
       paint(steps.length);
@@ -160,25 +161,39 @@
   var hero = document.querySelector("[data-hero]");
   if (hero) requestAnimationFrame(function () { requestAnimationFrame(function () { hero.classList.add("is-in"); hero.querySelectorAll(".reveal-words").forEach(function (h) { h.classList.add("is-in"); }); }); });
 
-  // Expertise cards: pointer-follow spotlight and a gentle tilt (fine pointers only).
+  // Expertise cards: pointer-follow spotlight + gentle tilt (fine pointers only).
+  // Tilt is spring-smoothed (velocity + damping) and written straight to
+  // transform, so it has momentum instead of snapping to the cursor.
   var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   if (finePointer && !reduce) {
     document.querySelectorAll("[data-tilt]").forEach(function (card) {
-      var raf = 0;
+      var tx = 0, ty = 0, x = 0, y = 0, vx = 0, vy = 0, raf = 0, active = false, pressed = 1, sc = 1;
+      var STIFF = 0.08, DAMP = 0.78;
+      var loop = function () {
+        vx = (vx + (tx - x) * STIFF) * DAMP; vy = (vy + (ty - y) * STIFF) * DAMP;
+        x += vx; y += vy;
+        sc += (pressed - sc) * 0.35; // press feedback folded into the same transform
+        card.style.transform = "perspective(1200px) rotateX(" + y.toFixed(3) + "deg) rotateY(" + x.toFixed(3) + "deg) scale(" + sc.toFixed(4) + ")";
+        if (active || Math.abs(tx - x) > 0.01 || Math.abs(vx) > 0.01 || Math.abs(ty - y) > 0.01 || Math.abs(pressed - sc) > 0.001) raf = requestAnimationFrame(loop);
+        else { raf = 0; if (!active) { card.style.transform = ""; card.style.transition = ""; } }
+      };
+      var kick = function () {
+        // While JS drives transform, drop the CSS transform transition so frames aren't smoothed twice.
+        card.style.transition = "border-color 200ms ease, box-shadow 300ms ease";
+        if (!raf) raf = requestAnimationFrame(loop);
+      };
+      card.addEventListener("pointerenter", function () { if (card.classList.contains("is-visible")) { active = true; kick(); } });
       card.addEventListener("pointermove", function (e) {
         var r = card.getBoundingClientRect();
-        var x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-        cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(function () {
-          card.style.setProperty("--mx", (x * 100).toFixed(1) + "%");
-          card.style.setProperty("--my", (y * 100).toFixed(1) + "%");
-          card.style.setProperty("--rx", ((0.5 - y) * 4).toFixed(2) + "deg");
-          card.style.setProperty("--ry", ((x - 0.5) * 5).toFixed(2) + "deg");
-        });
+        var px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+        card.style.setProperty("--mx", (px * 100).toFixed(1) + "%");
+        card.style.setProperty("--my", (py * 100).toFixed(1) + "%");
+        if (!active) return;
+        tx = (px - 0.5) * 5; ty = (0.5 - py) * 4; kick();
       });
-      card.addEventListener("pointerleave", function () {
-        card.style.setProperty("--rx", "0deg"); card.style.setProperty("--ry", "0deg");
-      });
+      card.addEventListener("pointerleave", function () { active = false; tx = 0; ty = 0; pressed = 1; kick(); });
+      card.addEventListener("pointerdown", function () { if (active) { pressed = 0.985; kick(); } });
+      card.addEventListener("pointerup", function () { pressed = 1; kick(); });
     });
   }
 
@@ -191,6 +206,8 @@
   var approach = document.querySelector("[data-approach]");
   var stages = approach ? Array.prototype.slice.call(approach.querySelectorAll("[data-stage]")) : [];
   var track = approach ? approach.querySelector(".approach__track") : null;
+  var fill = approach ? approach.querySelector(".approach__fill") : null;
+  var vertical = window.matchMedia("(max-width: 860px)");
   var ticking = false;
   var onScrollFx = function () {
     ticking = false;
@@ -204,7 +221,7 @@
     if (track) {
       var tr = track.getBoundingClientRect();
       var prog = reduce ? 1 : Math.min(1, Math.max(0, (vh * 0.75 - tr.top) / (tr.height + vh * 0.25)));
-      track.style.setProperty("--progress", prog.toFixed(3));
+      if (fill) fill.style.transform = (vertical.matches ? "scaleY(" : "scaleX(") + prog.toFixed(3) + ")";
       var active = Math.round(prog * (stages.length - 1) + 0.35);
       stages.forEach(function (s, i) { s.classList.toggle("is-active", i <= active - (prog < 0.02 ? 1 : 0)); });
     }
@@ -221,15 +238,24 @@
   // Industries: accessible tabs (arrow keys, Home/End).
   document.querySelectorAll("[data-industries]").forEach(function (root) {
     var tabs = Array.prototype.slice.call(root.querySelectorAll('[role="tab"]'));
-    var select = function (tab, focus) {
+    var current = tabs.filter(function (t) { return t.getAttribute("aria-selected") === "true"; })[0];
+    var select = function (tab, viaKeyboard) {
+      if (tab === current) { if (viaKeyboard) tab.focus(); return; }
+      current = tab;
       tabs.forEach(function (t) {
         var on = t === tab;
         t.setAttribute("aria-selected", String(on));
         t.tabIndex = on ? 0 : -1;
         var panel = document.getElementById(t.getAttribute("aria-controls"));
-        if (panel) { panel.hidden = !on; panel.classList.toggle("is-shown", on); }
+        if (!panel) return;
+        panel.hidden = !on;
+        // Never animate keyboard-initiated changes; pointer changes get a brief fade.
+        if (on && !viaKeyboard && panel.animate) {
+          panel.animate(reduce ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }],
+            { duration: 200, easing: "cubic-bezier(0.23, 1, 0.32, 1)" });
+        }
       });
-      if (focus) tab.focus();
+      if (viaKeyboard) tab.focus();
     };
     tabs.forEach(function (t, i) {
       t.addEventListener("click", function () { select(t, false); });

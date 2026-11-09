@@ -44,7 +44,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 router = APIRouter()
 
-ASSET_VERSION = "23"
+ASSET_VERSION = "32"
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")
 NAV = [
     ("/", "Home"),
