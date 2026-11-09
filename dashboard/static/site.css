@@ -650,6 +650,12 @@ a.row .text-link::before { content: "→"; order: 2; transition: transform var(-
 .stack-sm > * + * { margin-top: 12px; }
 .notice { font-size: 13px; color: var(--muted); border: 1px dashed var(--line-2); border-radius: 10px; padding: 12px 14px; }
 
+/* ---------- AI-search answer block ---------- */
+.answer { border: 1px solid var(--line-2); border-left: 3px solid var(--coral); border-radius: var(--radius); background: var(--g-850); padding: clamp(22px, 3vw, 32px); max-width: 860px; }
+.answer h2 { font-size: clamp(1.25rem, 2vw, 1.5rem); }
+.answer p { margin-top: 12px; color: var(--text-2); font-size: 1.05rem; line-height: 1.7; max-width: 70ch; }
+.answer .answer__meta, .answer__meta { margin-top: 14px; font-size: 13px; color: var(--muted); }
+
 /* ---------- Hover (fine pointers only; avoids sticky hover on touch) ---------- */
 @media (hover: hover) and (pointer: fine) {
   .btn:hover::before { transform: none; }

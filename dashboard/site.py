@@ -44,7 +44,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 router = APIRouter()
 
-ASSET_VERSION = "32"
+ASSET_VERSION = "33"
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")
 NAV = [
     ("/", "Home"),
@@ -89,6 +89,7 @@ def _site_context() -> dict:
             "email": email,
             "areaServed": ["US", "AE", "GB", "IN"],
             "knowsAbout": [s["name"] for s in C.SERVICES],
+            "makesOffer": [{"@type": "Offer", "itemOffered": {"@type": "Service", "name": s["name"], "url": f"{url}/services/{s['slug']}"}} for s in C.SERVICES],
             **({"sameAs": [linkedin]} if linkedin.startswith("https://") else {}),
         },
     }
@@ -129,6 +130,9 @@ async def service_detail(request: Request, slug: str) -> HTMLResponse:
         raise HTTPException(404, "Service not found")
     related = [s for s in C.SERVICES if s["slug"] != slug][:3]
     return render(request, "service_detail.html", {
+        "definition": C.DEFINITIONS.get(slug, service["intro"]),
+        "updated": C.CONTENT_UPDATED,
+        "updated_label": C.CONTENT_UPDATED_LABEL,
         "title": service["title"],
         "description": service["meta"],
         "service": service,
@@ -174,6 +178,8 @@ async def faqs(request: Request) -> HTMLResponse:
         "title": "Frequently Asked Questions",
         "description": "Answers to common questions about working with Aivoraflux on AI, automation and software projects.",
         "faqs": C.FAQS,
+        "updated": C.CONTENT_UPDATED,
+        "updated_label": C.CONTENT_UPDATED_LABEL,
     })
 
 
@@ -318,4 +324,38 @@ INTERNAL_PREFIXES = ["/dashboard", "/studio", "/agents", "/projects", "/settings
 async def robots() -> PlainTextResponse:
     lines = ["User-agent: *", "Allow: /"] + [f"Disallow: {p}" for p in INTERNAL_PREFIXES]
     lines += ["", f"Sitemap: {_site_url()}/sitemap.xml"]
+    return PlainTextResponse("\n".join(lines) + "\n")
+
+
+@router.get("/llms.txt", include_in_schema=False)
+async def llms_txt() -> PlainTextResponse:
+    """Plain-language summary of the site for AI assistants (llms.txt convention)."""
+    base = _site_url()
+    lines = [
+        "# Aivoraflux",
+        "",
+        "> " + C.DEFAULT_DESCRIPTION,
+        "",
+        "Aivoraflux is an AI engineering consultancy. It builds AI agents, intelligent automation, "
+        "document processing, machine learning systems, custom software and e-commerce websites, and "
+        "owns a vendor & procurement intelligence platform. It works with businesses in the UAE, USA, UK, India and beyond.",
+        "",
+        "## Services",
+    ]
+    lines += [f"- [{s['name']}]({base}/services/{s['slug']}): {C.DEFINITIONS.get(s['slug'], s['short'])}" for s in C.SERVICES]
+    lines += [
+        "",
+        "## Company",
+        f"- [Our work]({base}/work): own products, internal platforms and clearly labelled illustrative capabilities",
+        f"- [Industries]({base}/industries): use cases by sector",
+        f"- [Engagement models]({base}/engagement-models): strategy sprint, scoped build, embedded team",
+        f"- [FAQs]({base}/faqs)",
+        f"- [About]({base}/about)",
+        "",
+        "## Contact",
+        f"- [Contact and enquiries]({base}/contact)",
+        f"- Email: {os.getenv('PUBLIC_CONTACT_EMAIL', 'admin@aivoraflux.com').strip()}",
+        "",
+        f"Last updated: {C.CONTENT_UPDATED}",
+    ]
     return PlainTextResponse("\n".join(lines) + "\n")

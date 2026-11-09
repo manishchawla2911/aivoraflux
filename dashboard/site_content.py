@@ -366,3 +366,26 @@ HOME_INDUSTRIES = ["Financial Services", "Healthcare", "E-commerce & Retail", "M
 INDUSTRY_OPTIONS = [name for name, _, _ in INDUSTRIES] + ["Logistics & Supply Chain", "Technology / SaaS", "Other"]
 SERVICE_OPTIONS = [s["name"] for s in SERVICES] + ["Vendor & procurement platform", "Not sure yet"]
 BUDGET_OPTIONS = ["Under $500", "$500–$1,000", "$1,000–$2,000", "$2,000–$5,000", "$5,000+"]
+
+
+# ── AI-search (AEO) content ────────────────────────────────────────────────
+# Self-contained "What is X?" answers (roughly 40-60 words) placed near the top
+# of each service page so AI answer engines can quote them directly.
+CONTENT_UPDATED = "2026-11-10"
+CONTENT_UPDATED_LABEL = "November 2026"
+
+DEFINITIONS = {
+    "ai-machine-learning": "AI and machine learning development is building models that learn from your business data to forecast, classify or recommend, such as predicting demand, scoring leads or flagging unusual invoices, and putting those predictions into the tools your team already uses, with accuracy measured in production rather than assumed.",
+    "ai-agent-development": "AI agent engineering is building software agents that use a language model to complete multi-step work: reading documents, calling your systems' APIs, following business rules and handing decisions to a person when confidence is low. Production agents need guardrails, audit logs and evaluation, not just a prompt.",
+    "business-process-automation": "Intelligent automation combines AI document understanding with workflow automation and system integrations, so processes like vendor onboarding, invoice matching or claims handling run end to end. Unlike rule-only RPA, it can read unstructured documents, and it routes uncertain cases to people instead of guessing.",
+    "ecommerce-growth-optimization": "E-commerce optimization is improving an online store's speed, conversion rate and average order value through performance engineering, clearer product discovery, checkout fixes and AI personalisation such as smart search and recommendations, with every change measured in analytics rather than judged on opinion.",
+    "web-software-development": "Custom web and software engineering means designing and building applications around your own workflows, such as internal tools, customer portals or SaaS products, with clean APIs, automated testing and AI features where they add value, so the system can be maintained and extended long after launch.",
+    "ai-consulting-strategy": "AI consulting and strategy is assessing where AI and automation will create value in your business, which data and systems that depends on, and in what order to build. The output is a prioritised roadmap with a scoped first project, not a slide deck of possibilities.",
+}
+
+FAQS += [
+    ("What is intelligent document processing?", "Intelligent document processing (IDP) uses AI to read documents such as invoices, purchase orders, certificates and contracts, extract the fields that matter, validate them against business rules and your systems, and send low-confidence results to a reviewer."),
+    ("What is the difference between AI automation and RPA?", "RPA follows fixed rules on screens and structured data, so it breaks when formats change. AI automation can read unstructured documents like PDFs, emails and scans, understand what they contain, and route uncertain cases to a person. The two are often combined."),
+    ("Can Aivoraflux work alongside SAP Ariba, Coupa or Ivalua?", "Yes. We build AI that reads vendor documents, quotations and invoices and feeds clean, checked data into the procurement or ERP suite you already use, rather than replacing it."),
+    ("How much does an AI automation project cost?", "It depends on scope. Budgets range from under $500 for a small automation to $5,000+ for multi-system builds. We agree a fixed scope after a short discovery call."),
+]

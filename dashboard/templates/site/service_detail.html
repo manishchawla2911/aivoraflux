@@ -13,6 +13,7 @@
   "areaServed": ["US", "AE", "GB", "IN"]
 } | tojson }}</script>
 {%- set faq_items = [] %}
+{%- set _ = faq_items.append({"@type": "Question", "name": "What is " ~ service.name ~ "?", "acceptedAnswer": {"@type": "Answer", "text": definition}}) %}
 {%- for q, a in service.faqs %}{% set _ = faq_items.append({"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}) %}{% endfor %}
 <script type="application/ld+json">{{ {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": faq_items} | tojson }}</script>
 <script type="application/ld+json">{{ {
@@ -37,6 +38,16 @@
     <div class="hero__actions" data-reveal>
       <a class="btn btn--primary" href="{{ site.booking_url }}">Book a Strategy Call {{ arrow() }}</a>
       <a class="btn btn--ghost" href="/contact?service={{ service.name | urlencode }}#enquiry">Send an enquiry</a>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight" aria-labelledby="what-is">
+  <div class="container">
+    <div class="answer" data-reveal>
+      <h2 class="h3" id="what-is">What is {{ service.name }}?</h2>
+      <p>{{ definition }}</p>
+      <p class="answer__meta">By the Aivoraflux engineering team · Last updated <time datetime="{{ updated }}">{{ updated_label }}</time></p>
     </div>
   </div>
 </section>

@@ -151,3 +151,21 @@ def test_linkedin_link_only_when_configured(client, monkeypatch):
     assert "linkedin.com" not in client.get("/").text
     monkeypatch.setenv("LINKEDIN_URL", "https://www.linkedin.com/company/example")
     assert "https://www.linkedin.com/company/example" in client.get("/").text
+
+
+def test_service_pages_have_ai_answer_block(client):
+    from dashboard.site_content import DEFINITIONS
+    for s in SERVICES:
+        r = client.get(f"/services/{s['slug']}")
+        from html import escape
+        assert escape(f"What is {s['name']}?", quote=False) in r.text
+        assert escape(DEFINITIONS[s["slug"]][:40], quote=False) in r.text
+        assert "Last updated" in r.text
+
+
+def test_llms_txt_lists_every_service(client):
+    r = client.get("/llms.txt")
+    assert r.status_code == 200
+    assert r.text.startswith("# Aivoraflux")
+    for s in SERVICES:
+        assert f"/services/{s['slug']}" in r.text
