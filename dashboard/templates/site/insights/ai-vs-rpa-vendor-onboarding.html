@@ -1,0 +1,50 @@
+{% extends "site/_article.html" %}
+{% block body %}
+<div class="tldr">
+  <strong>In short</strong>
+  RPA repeats fixed steps on screens and structured data, so it suits stable, rule-only tasks. AI can read unstructured documents such as PDFs, scans and emails, so it suits vendor onboarding, where every supplier sends documents in a different format. Many teams combine them: AI reads and checks, RPA or APIs enter the clean data.
+</div>
+
+<h2 id="definitions">What each one does</h2>
+<p><strong>RPA (robotic process automation)</strong> is software that mimics a person clicking through applications: it copies values from one screen or file and enters them into another, following a script. It is reliable when the inputs and screens stay the same.</p>
+<p><strong>AI-based automation</strong> uses document AI and language models to understand content: it can recognise a trade licence in a scanned PDF, find the expiry date wherever it appears and decide whether it passes your rules. It can also say how confident it is.</p>
+
+<h2 id="compare">Side-by-side comparison</h2>
+<table>
+  <thead><tr><th></th><th>RPA</th><th>AI</th></tr></thead>
+  <tbody>
+    <tr><td>Best input</td><td>Structured data, fixed screens</td><td>Unstructured documents, emails, scans</td></tr>
+    <tr><td>Handles new document layouts</td><td>Usually needs rework</td><td>Generally yes, within the trained document types</td></tr>
+    <tr><td>Explains uncertainty</td><td>No: it follows the script or fails</td><td>Yes: confidence per field, reasons for flags</td></tr>
+    <tr><td>Typical failure</td><td>Breaks when a screen or format changes</td><td>Occasional wrong extraction, caught by review thresholds</td></tr>
+    <tr><td>Maintenance</td><td>Script updates whenever inputs change</td><td>Monitoring accuracy and adding examples</td></tr>
+    <tr><td>Fits vendor onboarding?</td><td>For data entry into systems without APIs</td><td>For reading and checking supplier documents</td></tr>
+  </tbody>
+</table>
+
+<h2 id="rpa-fits">When RPA is the right choice</h2>
+<ul>
+  <li>The data is already structured, such as a web form or a CSV export.</li>
+  <li>The target system has no API and needs entries typed into screens.</li>
+  <li>The steps rarely change.</li>
+</ul>
+
+<h2 id="ai-fits">When AI is the right choice</h2>
+<ul>
+  <li>Documents come from many suppliers in many formats.</li>
+  <li>The task involves reading and judging content, such as validity, expiry or name matching.</li>
+  <li>You need to know when the system is unsure, so a person can step in.</li>
+</ul>
+
+<h2 id="combine">The combined approach</h2>
+<p>For vendor onboarding, a practical design is: AI reads each document, extracts and checks the fields, and routes exceptions to a reviewer; once approved, the clean data is written into the ERP through its API, or by RPA where no API exists. Each tool does the part it is good at.</p>
+
+<h2 id="checklist">Decision checklist</h2>
+<ol>
+  <li>Are your inputs mostly structured data? If yes, RPA may be enough.</li>
+  <li>Do documents arrive as PDFs, scans or emails in varying layouts? Then you need AI for the reading.</li>
+  <li>Does your target system have an API? If yes, use it; use RPA only where it doesn't.</li>
+  <li>Do you need an audit trail of why each item was approved or flagged? Choose the design that records it.</li>
+</ol>
+<p>For the full onboarding workflow, read <a href="/insights/automate-vendor-onboarding">how to automate vendor onboarding without replacing your ERP</a>.</p>
+{% endblock %}

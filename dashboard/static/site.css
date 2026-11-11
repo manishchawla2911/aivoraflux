@@ -656,6 +656,39 @@ a.row .text-link::before { content: "→"; order: 2; transition: transform var(-
 .answer p { margin-top: 12px; color: var(--text-2); font-size: 1.05rem; line-height: 1.7; max-width: 70ch; }
 .answer .answer__meta, .answer__meta { margin-top: 14px; font-size: 13px; color: var(--muted); }
 
+/* ---------- Articles ---------- */
+.article-head .display { font-size: clamp(2.1rem, 4.6vw, 3.6rem); max-width: 960px; }
+.article-meta { margin-top: 20px; font-size: 14px; color: var(--muted); }
+.article-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: clamp(32px, 5vw, 72px); align-items: start; }
+.article-aside { position: sticky; top: 100px; display: grid; gap: 14px; }
+.article-aside .h3 { margin-top: 12px; font-size: 1.15rem; }
+.aside-links { margin-top: 12px; display: grid; gap: 10px; }
+.aside-links a { font-size: 14px; color: var(--mist-2); transition: color var(--dur-fast) ease; }
+.aside-links a:hover { color: var(--coral); }
+@media (max-width: 960px) { .article-wrap { grid-template-columns: 1fr; } .article-aside { position: static; } }
+.prose { max-width: 72ch; font-size: 1.05rem; line-height: 1.75; color: var(--text-2); }
+.prose > * + * { margin-top: 1.1em; }
+.prose h2 { margin-top: 2.2em; font-size: clamp(1.5rem, 2.6vw, 2rem); letter-spacing: -.03em; color: var(--mist); scroll-margin-top: 100px; }
+.prose h3 { margin-top: 1.8em; font-size: 1.25rem; color: var(--mist); }
+.prose strong { color: var(--mist); font-weight: 600; }
+.prose a { color: var(--coral-2); text-decoration: underline; text-underline-offset: 3px; }
+.prose ul, .prose ol { padding-left: 1.3em; }
+.prose ul { list-style: disc; } .prose ol { list-style: decimal; }
+.prose li + li { margin-top: .45em; }
+.prose li::marker { color: var(--coral); }
+.prose .tldr { border: 1px solid var(--line-2); border-left: 3px solid var(--coral); border-radius: var(--radius); background: var(--g-850); padding: 20px 24px; }
+.prose .tldr strong { display: block; margin-bottom: 6px; }
+.prose table { width: 100%; border-collapse: collapse; font-size: .95rem; display: block; overflow-x: auto; }
+.prose th, .prose td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.prose th { color: var(--mist); font-weight: 600; border-bottom-color: var(--line-3); white-space: nowrap; }
+.prose .faq { margin-top: 1em; }
+
+/* ---------- Founder ---------- */
+.founder { display: grid; grid-template-columns: 160px 1fr; gap: 28px; align-items: start; }
+.founder img { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; border: 1px solid var(--line-2); }
+.founder p { margin-top: 12px; color: var(--text-2); }
+@media (max-width: 600px) { .founder { grid-template-columns: 1fr; } }
+
 /* ---------- Hover (fine pointers only; avoids sticky hover on touch) ---------- */
 @media (hover: hover) and (pointer: fine) {
   .btn:hover::before { transform: none; }

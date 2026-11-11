@@ -58,6 +58,23 @@
   </div>
 </section>
 
+{% if founder %}
+<section class="section">
+  <div class="container">
+    <div class="section-head" data-reveal><span class="eyebrow">Who you'll work with</span></div>
+    <div class="founder" data-reveal>
+      {% if founder.photo %}<img src="{{ founder.photo }}" alt="{{ founder.name }}" width="160" height="160" loading="lazy">{% endif %}
+      <div>
+        <h2 class="h3">{{ founder.name }}</h2>
+        <span class="muted">{{ founder.role }}, Aivoraflux</span>
+        <p>{{ founder.bio }}</p>
+        {% if founder.linkedin %}<p><a class="text-link" href="{{ founder.linkedin }}" target="_blank" rel="noopener">LinkedIn profile</a></p>{% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
 <section class="section section--alt">
   <div class="container split">
     <div data-reveal>

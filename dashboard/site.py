@@ -44,17 +44,18 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 router = APIRouter()
 
-ASSET_VERSION = "33"
+ASSET_VERSION = "35"
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")
 NAV = [
     ("/", "Home"),
     ("/services", "Services"),
     ("/industries", "Industries"),
     ("/work", "Our Work"),
+    ("/insights", "Insights"),
     ("/about", "About Us"),
     ("/contact", "Contact"),
 ]
-STATIC_PATHS = ["/", "/services", "/industries", "/work", "/about", "/engagement-models", "/faqs", "/contact"]
+STATIC_PATHS = ["/", "/services", "/industries", "/work", "/insights", "/about", "/engagement-models", "/faqs", "/contact"]
 
 
 def _site_url() -> str:
@@ -131,6 +132,7 @@ async def service_detail(request: Request, slug: str) -> HTMLResponse:
     related = [s for s in C.SERVICES if s["slug"] != slug][:3]
     return render(request, "service_detail.html", {
         "definition": C.DEFINITIONS.get(slug, service["intro"]),
+        "service_insights": [x for x in C.INSIGHTS if x["service"] == slug],
         "updated": C.CONTENT_UPDATED,
         "updated_label": C.CONTENT_UPDATED_LABEL,
         "title": service["title"],
@@ -144,22 +146,25 @@ async def service_detail(request: Request, slug: str) -> HTMLResponse:
 async def industries(request: Request) -> HTMLResponse:
     return render(request, "industries.html", {
         "title": "Industries We Serve",
-        "description": "Practical AI and automation use cases for finance, healthcare, retail and e-commerce, real estate, manufacturing, education and professional services.",
+        "description": "Practical AI and automation use cases for finance, healthcare, retail and e-commerce, manufacturing, energy, education and professional services.",
+        "industry_intros": C.INDUSTRY_INTROS,
     })
 
 
 @router.get("/work", response_class=HTMLResponse)
 async def work(request: Request) -> HTMLResponse:
     return render(request, "work.html", {
-        "title": "Our Work",
+        "title": "Our Work: AI Procurement Platform & Automation",
         "description": "Aivoraflux products, internal platforms and illustrative capability demonstrations across procurement, document processing, analytics and automation.",
     })
 
 
 @router.get("/about", response_class=HTMLResponse)
 async def about(request: Request) -> HTMLResponse:
+    founder = C.FOUNDER if (C.FOUNDER.get("name") and C.FOUNDER.get("bio")) else None
     return render(request, "about.html", {
-        "title": "About Us",
+        "founder": founder,
+        "title": "About Us: AI Engineering & Automation Team",
         "description": "Aivoraflux is an AI engineering and automation consultancy that designs, builds and runs intelligent systems for growing businesses.",
     })
 
@@ -183,6 +188,33 @@ async def faqs(request: Request) -> HTMLResponse:
     })
 
 
+# ── Insights ──────────────────────────────────────────────────
+
+@router.get("/insights", response_class=HTMLResponse)
+async def insights(request: Request) -> HTMLResponse:
+    return render(request, "insights.html", {
+        "title": "Insights: AI in Procurement & Automation",
+        "description": "Practical guides on AI in procurement, vendor onboarding automation and document AI, from the Aivoraflux engineering team.",
+        "articles": C.INSIGHTS,
+    })
+
+
+@router.get("/insights/{slug}", response_class=HTMLResponse)
+async def insight_detail(request: Request, slug: str) -> HTMLResponse:
+    article = C.INSIGHT_BY_SLUG.get(slug)
+    if not article:
+        raise HTTPException(404, "Article not found")
+    others = [a for a in C.INSIGHTS if a["slug"] != slug]
+    return render(request, f"insights/{slug}.html", {
+        "title": article.get("seo_title") or article["title"],
+        "description": article["meta"],
+        "article": article,
+        "author": C.INSIGHTS_AUTHOR,
+        "related_service": C.SERVICE_BY_SLUG.get(article["service"]),
+        "others": others,
+    })
+
+
 # ── Contact ───────────────────────────────────────────────────
 
 FIELD_LIMITS = {"full_name": 120, "email": 160, "company": 160, "message": 5000}
@@ -190,12 +222,13 @@ FIELD_LIMITS = {"full_name": 120, "email": 160, "company": 160, "message": 5000}
 
 def _contact_ctx(values: dict | None = None, errors: dict | None = None, **extra) -> dict:
     ctx = {
-        "title": "Contact Us",
+        "title": "Contact Us: Book an AI Strategy Call",
         "description": "Book a strategy call or send an enquiry to Aivoraflux about AI, automation or software development.",
         "countries": C.COUNTRIES,
         "industry_options": C.INDUSTRY_OPTIONS,
         "service_options": C.SERVICE_OPTIONS,
         "budget_options": C.BUDGET_OPTIONS,
+        "contact_faqs": C.CONTACT_FAQS,
         "values": values or {},
         "errors": errors or {},
     }
@@ -307,7 +340,7 @@ async def pricing_redirect() -> RedirectResponse:
 @router.get("/sitemap.xml", include_in_schema=False)
 async def sitemap() -> Response:
     base = _site_url()
-    paths = STATIC_PATHS + [f"/services/{s['slug']}" for s in C.SERVICES]
+    paths = STATIC_PATHS + [f"/services/{s['slug']}" for s in C.SERVICES] + [f"/insights/{a['slug']}" for a in C.INSIGHTS]
     urls = "".join(
         f"<url><loc>{base}{p}</loc><changefreq>monthly</changefreq>"
         f"<priority>{'1.0' if p == '/' else '0.8' if p.startswith('/services') else '0.6'}</priority></url>"
@@ -322,7 +355,9 @@ INTERNAL_PREFIXES = ["/dashboard", "/studio", "/agents", "/projects", "/settings
 
 @router.get("/robots.txt", include_in_schema=False)
 async def robots() -> PlainTextResponse:
-    lines = ["User-agent: *", "Allow: /"] + [f"Disallow: {p}" for p in INTERNAL_PREFIXES]
+    # Content-Signal states the site's preference: OK for search and AI answers,
+    # not for model training. A preference, not enforcement.
+    lines = ["User-agent: *", "Content-Signal: search=yes, ai-input=yes, ai-train=no", "Allow: /"] + [f"Disallow: {p}" for p in INTERNAL_PREFIXES]
     lines += ["", f"Sitemap: {_site_url()}/sitemap.xml"]
     return PlainTextResponse("\n".join(lines) + "\n")
 
@@ -350,6 +385,9 @@ async def llms_txt() -> PlainTextResponse:
         f"- [Industries]({base}/industries): use cases by sector",
         f"- [Engagement models]({base}/engagement-models): strategy sprint, scoped build, embedded team",
         f"- [FAQs]({base}/faqs)",
+        "",
+        "## Insights",
+        *[f"- [{a['title']}]({base}/insights/{a['slug']}): {a['meta']}" for a in C.INSIGHTS],
         f"- [About]({base}/about)",
         "",
         "## Contact",
@@ -359,3 +397,37 @@ async def llms_txt() -> PlainTextResponse:
         f"Last updated: {C.CONTENT_UPDATED}",
     ]
     return PlainTextResponse("\n".join(lines) + "\n")
+
+
+# ── Security headers ──────────────────────────────────────────
+
+# Public pages load only same-origin scripts and Google Fonts, so they get a
+# strict CSP. Internal app pages load Tailwind/Alpine from a CDN and are left
+# without a CSP to avoid breaking them; they still get the other headers.
+PUBLIC_CSP = "; ".join([
+    "default-src 'self'",
+    "script-src 'self'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data:",
+    "connect-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+])
+SECURITY_HEADERS = {
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+}
+
+
+def add_security_headers(path: str, headers) -> None:
+    """Set security headers on a response (CSP only on public pages)."""
+    for k, v in SECURITY_HEADERS.items():
+        headers.setdefault(k, v)
+    if not any(path == p or path.startswith(p + "/") for p in INTERNAL_PREFIXES):
+        headers.setdefault("Content-Security-Policy", PUBLIC_CSP)

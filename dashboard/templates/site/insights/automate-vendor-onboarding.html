@@ -1,0 +1,49 @@
+{% extends "site/_article.html" %}
+{% block body %}
+<div class="tldr">
+  <strong>In short</strong>
+  To automate vendor onboarding without replacing your ERP, put an AI layer in front of it: collect supplier documents in one place, let AI extract and check the key fields against your rules, send exceptions to a reviewer, and write only verified vendor data into the ERP, which stays your system of record.
+</div>
+
+<h2 id="problem">The problem with manual onboarding</h2>
+<p>A new supplier typically sends a registration form and a set of supporting documents. Someone has to open each file, check that it is the right document, read the details, compare them with the form and with each other, note the expiry dates and chase anything missing. When a project mobilises, or many suppliers register at once, this becomes a queue that holds up purchase orders.</p>
+
+<h2 id="documents">Step 1: List the documents and what "valid" means</h2>
+<p>Start with the documents you actually require. Typical examples:</p>
+<ul>
+  <li><strong>Trade or commercial licence</strong>: company name, licence number, activities, expiry date.</li>
+  <li><strong>Tax registration</strong>: for example VAT TRN in the UAE, or GST and PAN in India.</li>
+  <li><strong>Insurance certificates</strong>: insurer, cover type, limit, expiry date.</li>
+  <li><strong>Bank letter or cancelled cheque</strong>: account name matching the company.</li>
+  <li><strong>Quality and safety certificates</strong>: such as ISO certificates, with scope and expiry.</li>
+  <li><strong>Signed declarations</strong>: code of conduct, conflict of interest.</li>
+</ul>
+<p>For each one, write the rules in plain language, for example: "licence must not expire within 30 days" or "company name must match across licence, tax certificate and bank letter".</p>
+
+<h2 id="intake">Step 2: Give documents one way in</h2>
+<p>Documents arriving in personal inboxes are the first thing to fix. Use a supplier portal, a dedicated mailbox or both, so every submission lands in one queue tagged with the supplier it belongs to.</p>
+
+<h2 id="extract">Step 3: Extract the fields with AI</h2>
+<p>Document AI reads each file, including scans and photos, identifies the document type and pulls out the fields you listed. Each field gets a confidence score, so you know which values can be trusted and which need a look.</p>
+
+<h2 id="validate">Step 4: Check against rules and your records</h2>
+<p>Run the extracted values through your rules: dates, matching names, required documents present, tax numbers in the right format. Where possible, compare with data you already hold, such as an existing vendor record in the ERP, to catch duplicates and changes.</p>
+
+<h2 id="exceptions">Step 5: Route exceptions to a person</h2>
+<p>Anything that fails a rule or falls below the confidence threshold goes to a reviewer, with the document, the extracted values and the reason it was flagged side by side. The reviewer approves, corrects or requests a new document. The AI can draft that request to the supplier.</p>
+
+<h2 id="erp">Step 6: Write verified data into the ERP</h2>
+<p>Once a supplier passes, create or update the vendor record in the ERP or procurement suite through its API or import process. The ERP stays the single source of truth; the AI layer only prepares and checks the data.</p>
+
+<h2 id="monitor">Step 7: Keep monitoring after onboarding</h2>
+<p>Onboarding is not the end. Store expiry dates and re-check them on a schedule, so the team is told before a licence or insurance certificate lapses, and the supplier is asked for a renewal automatically.</p>
+
+<h2 id="rollout">A sensible rollout</h2>
+<ol>
+  <li>Start with the three or four most common document types.</li>
+  <li>Measure accuracy on real past documents before going live.</li>
+  <li>Run in shadow mode alongside the team, then switch routine cases to automatic.</li>
+  <li>Add document types and the expiry monitoring once the core flow is stable.</li>
+</ol>
+<p>For the bigger picture, see <a href="/insights/ai-in-procurement">AI in procurement: a practical guide</a>.</p>
+{% endblock %}

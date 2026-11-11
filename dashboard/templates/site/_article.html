@@ -1,0 +1,76 @@
+{% extends "site/_layout.html" %}
+{% from "site/_macros.html" import arrow, cta_block %}
+
+{% block schema %}
+{%- set faq_items = [] %}
+{%- for q, a in article.faqs %}{% set _ = faq_items.append({"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}) %}{% endfor %}
+<script type="application/ld+json">{{ {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": article.title,
+  "description": article.meta,
+  "datePublished": article.published,
+  "dateModified": article.updated,
+  "author": {"@type": "Organization", "name": author, "url": site.url ~ "/about"},
+  "publisher": {"@type": "Organization", "name": "Aivoraflux", "logo": {"@type": "ImageObject", "url": site.url ~ "/static/logo.png"}},
+  "mainEntityOfPage": site.url ~ "/insights/" ~ article.slug,
+  "image": site.url ~ "/static/og-image.png"
+} | tojson }}</script>
+<script type="application/ld+json">{{ {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": faq_items} | tojson }}</script>
+<script type="application/ld+json">{{ {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": site.url ~ "/"},
+    {"@type": "ListItem", "position": 2, "name": "Insights", "item": site.url ~ "/insights"},
+    {"@type": "ListItem", "position": 3, "name": article.title, "item": site.url ~ "/insights/" ~ article.slug}
+  ]
+} | tojson }}</script>
+{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="hero__bg"></div>
+  <div class="container article-head">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><a href="/insights">Insights</a><span>/</span><span aria-current="page">{{ article.kind }}</span></nav>
+    <span class="eyebrow mt-4" data-reveal>{{ article.kind }}</span>
+    <h1 class="display" data-reveal>{{ article.title }}</h1>
+    <p class="lead" data-reveal>{{ article.dek }}</p>
+    <p class="article-meta" data-reveal>By the {{ author }} · Published <time datetime="{{ article.published }}">{{ article.published }}</time>{% if article.updated != article.published %} · Updated <time datetime="{{ article.updated }}">{{ article.updated }}</time>{% endif %} · {{ article.read_minutes }} min read</p>
+  </div>
+</section>
+
+<section class="section section--tight" style="padding-top:0">
+  <div class="container article-wrap">
+    <article class="prose">
+      {% block body %}{% endblock %}
+
+      <h2 id="faq">Frequently asked questions</h2>
+      <div class="faq">
+        {% for q, a in article.faqs %}
+        <details><summary>{{ q }}<span class="plus" aria-hidden="true">+</span></summary><p>{{ a }}</p></details>
+        {% endfor %}
+      </div>
+    </article>
+
+    <aside class="article-aside">
+      {% if related_service %}
+      <div class="card">
+        <span class="eyebrow">Related service</span>
+        <h2 class="h3">{{ related_service.name }}</h2>
+        <p>{{ related_service.short }}</p>
+        <a class="text-link" href="/services/{{ related_service.slug }}">Learn more {{ arrow() }}</a>
+      </div>
+      {% endif %}
+      <div class="card">
+        <span class="eyebrow">More insights</span>
+        <ul class="aside-links">
+          {% for o in others %}<li><a href="/insights/{{ o.slug }}">{{ o.title }}</a></li>{% endfor %}
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+
+{{ cta_block("Want to see this on your own documents?", "Bring one procurement workflow. We'll show you what AI can check automatically and what should stay with your team.", "Book a Strategy Call", site.booking_url) }}
+{% endblock %}

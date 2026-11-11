@@ -1,0 +1,58 @@
+{% extends "site/_article.html" %}
+{% block body %}
+<div class="tldr">
+  <strong>In short</strong>
+  AI in procurement means using machine learning and language models to read, check and route procurement documents and data, such as vendor registrations, quotations, purchase orders and invoices, so the team handles exceptions instead of every document. The safest way to start is one high-volume, rule-heavy step, with people reviewing anything the AI is unsure about.
+</div>
+
+<h2 id="what-is">What "AI in procurement" actually means</h2>
+<p>Most procurement work is not negotiation. It is reading: supplier registration forms, trade licences, insurance certificates, quotations, purchase orders, delivery notes and invoices. Each document has to be opened, understood, compared with something else and either approved or chased.</p>
+<p>That reading is where AI is strongest today. Modern document AI can extract the fields that matter from scanned PDFs and emails, compare them with your rules and records, and explain why something does not match. Language models can then summarise what is missing and draft the follow-up to the supplier.</p>
+<p>What AI does <strong>not</strong> replace is judgement on commercial trade-offs, supplier relationships and negotiation. A good system leaves those with your team and removes the paperwork around them.</p>
+
+<h2 id="where">Where AI helps, and where it doesn't</h2>
+<table>
+  <thead><tr><th>Procurement step</th><th>Good fit for AI?</th><th>Why</th></tr></thead>
+  <tbody>
+    <tr><td>Vendor registration and document checks</td><td><strong>Yes</strong></td><td>High volume, varied document formats, clear rules (valid, complete, not expired).</td></tr>
+    <tr><td>Certificate and licence expiry monitoring</td><td><strong>Yes</strong></td><td>Dates are extracted once and re-checked automatically before they lapse.</td></tr>
+    <tr><td>Quotation comparison against a BOQ or PO</td><td><strong>Yes</strong></td><td>Line-by-line matching is tedious for people and well suited to extraction plus rules.</td></tr>
+    <tr><td>Invoice to PO matching</td><td><strong>Yes</strong></td><td>Structured comparison with a clear exception path for mismatches.</td></tr>
+    <tr><td>Contract clause review</td><td>Partly</td><td>AI can flag clauses that differ from your standard terms; legal sign-off stays with people.</td></tr>
+    <tr><td>Supplier selection and negotiation</td><td>No (assist only)</td><td>Depends on relationships, strategy and context that are not in the documents.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="why-now">Why document work is the right place to start</h2>
+<p>Procurement teams often already have a suite, such as SAP Ariba, Coupa, Ivalua or an ERP, but the documents arriving into it are still checked by hand. Vendor paperwork arrives by email in many formats, gets saved to shared drives and is tracked in spreadsheets. Problems such as an expired insurance certificate tend to be found late, when a project or payment is already waiting.</p>
+<p>Because the rules are usually clear and the volume is high, this step gives a fast, measurable result without changing how the rest of procurement works.</p>
+
+<h2 id="path">A step-by-step adoption path</h2>
+<ol>
+  <li><strong>Pick one workflow.</strong> Choose a single, document-heavy step, such as vendor registration checks for new suppliers. Write down how it works today and roughly how long it takes.</li>
+  <li><strong>List the documents and rules.</strong> Which documents are required, which fields matter and what makes each one valid or invalid (for example, expiry date in the future, company name matching the registration).</li>
+  <li><strong>Test on real samples.</strong> Run the AI on a set of your actual past documents and measure accuracy field by field before anyone relies on it.</li>
+  <li><strong>Design the exception path.</strong> Decide what happens when the AI is unsure or a rule fails: who reviews it, what they see, and how the supplier is asked for a correction.</li>
+  <li><strong>Connect to your system of record.</strong> Pass checked, structured data into the ERP or procurement suite, rather than creating another place where vendor data lives.</li>
+  <li><strong>Run in shadow mode first.</strong> Let the AI work alongside the team for a period and compare its results with the human decisions.</li>
+  <li><strong>Switch on, measure, expand.</strong> Once accuracy is proven, let it handle the routine cases and move to the next workflow, such as quotation comparison.</li>
+</ol>
+
+<h2 id="suites">Working alongside Ariba, Coupa, Ivalua or your ERP</h2>
+<p>AI does not need to replace your procurement suite. In most organisations the best design is a layer that sits in front of it: documents come in, the AI reads and checks them, and only clean, verified data is written into the suite through its APIs or import tools. The suite stays the system of record, your approval workflows stay the same, and the team sees fewer, better-prepared items.</p>
+
+<h2 id="controls">Risks and the controls that manage them</h2>
+<ul>
+  <li><strong>Wrong extractions:</strong> use confidence thresholds and send low-confidence fields to a reviewer.</li>
+  <li><strong>Over-automation:</strong> keep approvals for high-value or unusual vendors with people.</li>
+  <li><strong>Auditability:</strong> log every extraction, rule result and decision, with the source document attached.</li>
+  <li><strong>Data residency and privacy:</strong> deploy in an environment that meets your company's and country's data rules, including your own cloud if required.</li>
+  <li><strong>Drift:</strong> monitor accuracy over time as suppliers change their document formats.</li>
+</ul>
+
+<h2 id="measure">How to measure whether it's working</h2>
+<p>Agree the measures before you start, and record a baseline. Useful ones are time per vendor registration, the share of documents processed without manual keying, the exception rate, problems caught early (such as expired certificates found before onboarding completed) and the time from supplier submission to approval.</p>
+
+<h2 id="next">Where to go next</h2>
+<p>For the practical detail of the first workflow, read <a href="/insights/automate-vendor-onboarding">how to automate vendor onboarding without replacing your ERP</a>. If you are deciding between tools, see <a href="/insights/ai-vs-rpa-vendor-onboarding">AI vs RPA for vendor onboarding</a>.</p>
+{% endblock %}

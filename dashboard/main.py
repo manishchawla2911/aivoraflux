@@ -108,6 +108,15 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="aivoraflux", lifespan=lifespan)
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    from dashboard.site import add_security_headers
+    add_security_headers(request.url.path, response.headers)
+    return response
+
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 

@@ -33,5 +33,34 @@
   </div>
 </section>
 
+<section class="section section--alt">
+  <div class="container split">
+    <div data-reveal>
+      <span class="eyebrow">How engagements work</span>
+      <h2 class="h2">Small first step, clear scope, then scale.</h2>
+    </div>
+    <div class="prose" data-reveal>
+      <p>Every engagement starts with a short discovery call about one process: what it involves today, which systems it touches and what a good result would look like. From that we write a scoped proposal for a first phase, with what will be delivered, what we need from your team and how success will be measured.</p>
+      <p>Most clients start with a Strategy Sprint or a single-workflow Automation Program. Once that is in production and the results are clear, the work can grow into more workflows or an ongoing embedded team.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container split">
+    <div data-reveal><span class="eyebrow">FAQs</span><h2 class="h2">Questions about working together</h2></div>
+    <div class="faq" data-reveal>
+      {% for q, a in [
+        ("How is pricing decided?", "After the discovery call we propose a fixed scope for the first phase and a price for it. Larger or ongoing work is priced per phase or as a monthly retainer."),
+        ("What do you need from our team?", "A named owner for the process, access to sample documents or data, and a contact for the systems we integrate with, such as your ERP or procurement suite."),
+        ("Who owns the code and data?", "Your data stays yours. Ownership and licensing of the delivered software are agreed in the contract before work starts."),
+        ("Can we start small?", "Yes. A single workflow or a short Strategy Sprint is the usual starting point, so you can judge the value before committing to more.")
+      ] %}
+      <details {% if loop.first %}open{% endif %}><summary>{{ q }}<span class="plus" aria-hidden="true">+</span></summary><p>{{ a }}</p></details>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
 {{ cta_block("Not sure where to start?", "Most clients begin with a short discovery call. There is no obligation.", "Book a Strategy Call", site.booking_url) }}
 {% endblock %}

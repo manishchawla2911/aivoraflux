@@ -16,10 +16,15 @@
   <div class="container">
     <div class="ind-list ind-list--full" data-reveal-group>
       {% for name, ic, uses in industries %}
-      <div data-reveal id="{{ name | lower | replace(' & ', '-') | replace(' ', '-') }}"><h2 class="h3">{{ name }}</h2><p>{{ uses | join('. ') }}.</p></div>
+      <div data-reveal id="{{ name | lower | replace(' & ', '-') | replace(' ', '-') }}">
+        <h2 class="h3">{{ name }}</h2>
+        {% if industry_intros.get(name) %}<p>{{ industry_intros[name] }}</p>{% endif %}
+        <ul class="check-list">{% for u in uses %}<li>{{ u }}</li>{% endfor %}</ul>
+      </div>
       {% endfor %}
     </div>
     <p class="muted mt-8" data-reveal>Working in logistics, SaaS or another sector? The same methods apply. <a class="text-link" href="/contact#enquiry">Tell us about your workflow {{ arrow() }}</a></p>
+    <p class="muted mt-4" data-reveal>New to AI in procurement? Start with our <a class="text-link" href="/insights/ai-in-procurement">practical guide {{ arrow() }}</a></p>
   </div>
 </section>
 

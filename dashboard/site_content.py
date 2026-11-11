@@ -8,10 +8,10 @@ from __future__ import annotations
 
 SITE_NAME = "Aivoraflux"
 SITE_TAGLINE = "AI engineering and automation consultancy"
+# Keep under 160 characters so search results show it in full.
 DEFAULT_DESCRIPTION = (
-    "Aivoraflux is an AI engineering consultancy. We build AI agents, intelligent "
-    "automation, document processing and custom software that solve real operational "
-    "problems for businesses in the USA, UAE and worldwide."
+    "AI engineering consultancy automating vendor onboarding, invoices and other "
+    "document-heavy workflows for businesses in the UAE, India, UK and USA."
 )
 
 PROCESS = [
@@ -38,7 +38,7 @@ SERVICES = [
         "short": "Predictive models and AI-powered applications built on your own data.",
         "bullets": ["Predictive analytics", "Custom machine learning", "Intelligent decision systems", "AI-powered applications"],
         "title": "AI & Machine Learning Development Services",
-        "meta": "Custom machine learning, predictive analytics and AI-powered applications engineered around your business data. AI development for companies in the USA, UAE and worldwide.",
+        "meta": "Custom machine learning, predictive analytics and AI applications built on your business data, for companies in the UAE, India, UK and USA.",
         "hero": "Machine learning that turns your operational data into better decisions.",
         "intro": "We design, train and deploy models that forecast, classify and recommend, and we wrap them in applications your teams actually use.",
         "problems": [
@@ -105,7 +105,7 @@ SERVICES = [
         "icon": "flow",
         "short": "Workflow automation and document processing that remove manual work.",
         "bullets": ["Workflow automation", "Document processing", "Business intelligence", "Enterprise integrations"],
-        "title": "Intelligent Business Process Automation Services",
+        "title": "Business Process Automation Services",
         "meta": "Intelligent business process automation: workflow automation, AI document processing, business intelligence and enterprise integrations that cut manual work.",
         "hero": "Automate the document-heavy workflows that slow your teams down.",
         "intro": "We combine AI document understanding, workflow engines and system integrations to move work from inboxes and spreadsheets into reliable automated flows.",
@@ -140,7 +140,7 @@ SERVICES = [
         "short": "Faster, higher-converting stores with AI-powered personalisation.",
         "bullets": ["Website performance optimization", "Conversion rate optimization", "AI-powered personalization", "Customer journey optimization"],
         "title": "E-commerce Website Optimization & Development",
-        "meta": "E-commerce website development and optimization: performance, conversion rate optimization, AI personalisation and customer journey improvements for D2C and retail brands.",
+        "meta": "Faster, higher-converting e-commerce stores: performance engineering, conversion design and AI search and recommendations for D2C brands.",
         "hero": "Online stores engineered to load fast and convert.",
         "intro": "We build and improve e-commerce websites for D2C and retail brands, combining performance engineering, conversion design and AI personalisation.",
         "problems": [
@@ -388,4 +388,95 @@ FAQS += [
     ("What is the difference between AI automation and RPA?", "RPA follows fixed rules on screens and structured data, so it breaks when formats change. AI automation can read unstructured documents like PDFs, emails and scans, understand what they contain, and route uncertain cases to a person. The two are often combined."),
     ("Can Aivoraflux work alongside SAP Ariba, Coupa or Ivalua?", "Yes. We build AI that reads vendor documents, quotations and invoices and feeds clean, checked data into the procurement or ERP suite you already use, rather than replacing it."),
     ("How much does an AI automation project cost?", "It depends on scope. Budgets range from under $500 for a small automation to $5,000+ for multi-system builds. We agree a fixed scope after a short discovery call."),
+]
+
+
+# ── Insights (articles) ───────────────────────────────────────────────────
+# Bodies live in templates/site/insights/<slug>.html. Rules: no invented
+# statistics, customers or quotes; name the author; keep dates accurate.
+INSIGHTS_AUTHOR = "Aivoraflux engineering team"
+INSIGHTS = [
+    {
+        "slug": "ai-in-procurement",
+        "seo_title": "AI in Procurement: A Practical Guide",
+        "title": "AI in Procurement: A Practical Guide to Automating Vendor Management",
+        "meta": "Where AI helps procurement and where it doesn't, a step-by-step adoption path, and how to work alongside Ariba, Coupa, Ivalua or your ERP.",
+        "dek": "Where AI genuinely helps a procurement team, where it doesn't, and a low-risk way to start.",
+        "kind": "Guide",
+        "published": "2026-11-11",
+        "updated": "2026-11-11",
+        "read_minutes": 9,
+        "service": "business-process-automation",
+        "faqs": [
+            ("What is AI in procurement?", "AI in procurement means using machine learning and language models to read, check and route procurement documents and data, such as vendor registrations, quotations, purchase orders and invoices, so the team handles exceptions instead of every document."),
+            ("Do we need to replace our procurement suite to use AI?", "No. Most of the value comes from AI that sits alongside an existing suite or ERP: it reads incoming documents, checks them against your rules and records, and passes clean, structured data into the system you already use."),
+            ("Where should a procurement team start with AI?", "Start with one high-volume, document-heavy step with clear rules, such as vendor registration checks or quotation comparison. Measure the current effort, automate that step with human review on exceptions, then expand."),
+            ("Is AI safe for procurement decisions?", "It is safe when it is designed with controls: confidence thresholds, human review for uncertain or high-value items, a full audit trail, and deployment in an environment that meets your data-residency rules."),
+            ("How do we measure whether AI in procurement is working?", "Track the time per document or vendor before and after, the share of items handled without manual keying, the exception rate, and errors caught, such as expired certificates found before they caused a problem."),
+        ],
+    },
+    {
+        "slug": "automate-vendor-onboarding",
+        "seo_title": "How to Automate Vendor Onboarding with AI",
+        "title": "How to Automate Vendor Onboarding Without Replacing Your ERP",
+        "meta": "A step-by-step guide to automating vendor registration and document checks with AI, while keeping your ERP or procurement suite as the system of record.",
+        "dek": "A practical, step-by-step approach that keeps your ERP as the system of record.",
+        "kind": "How-to",
+        "published": "2026-11-11",
+        "updated": "2026-11-11",
+        "read_minutes": 7,
+        "service": "business-process-automation",
+        "faqs": [
+            ("Which vendor documents can AI check?", "Common ones include trade licences, tax registrations (such as VAT TRN in the UAE or GST and PAN in India), insurance certificates, bank letters, quality certificates such as ISO, and signed declarations."),
+            ("How long does it take to automate vendor onboarding?", "It depends on the number of document types and systems involved. A focused first phase usually covers a handful of the most common documents and one integration, then expands once accuracy is proven on real samples."),
+            ("What happens when the AI is not sure?", "The document goes to a person in a review queue with the extracted fields and the reason it was flagged. Nothing is approved outside the rules you set."),
+        ],
+    },
+    {
+        "slug": "ai-vs-rpa-vendor-onboarding",
+        "seo_title": "AI vs RPA for Vendor Onboarding",
+        "title": "AI vs RPA for Vendor Onboarding: Which Fits Your Workflow?",
+        "meta": "AI and RPA compared for vendor onboarding: what each does well, where each breaks, and how to combine them. Includes a decision checklist.",
+        "dek": "What each approach does well, where each breaks, and when to combine them.",
+        "kind": "Comparison",
+        "published": "2026-11-11",
+        "updated": "2026-11-11",
+        "read_minutes": 6,
+        "service": "ai-agent-development",
+        "faqs": [
+            ("What is the difference between AI and RPA?", "RPA (robotic process automation) repeats fixed steps on screens and structured data. AI can read unstructured content such as PDFs, scans and emails, interpret it and decide what to do, and route uncertain cases to people."),
+            ("Can AI and RPA be used together?", "Yes. A common design uses AI to read and check documents and RPA or APIs to enter the resulting clean data into systems that have no API."),
+            ("Is RPA cheaper than AI?", "For stable, rule-only tasks on structured data, RPA can be simpler. When inputs vary, such as supplier documents in many formats, maintaining RPA rules often costs more than an AI approach that handles the variation."),
+        ],
+    },
+]
+INSIGHT_BY_SLUG = {a["slug"]: a for a in INSIGHTS}
+
+# Optional founder profile for the About page. Left empty on purpose: it is
+# shown only when real details are filled in (never invent a bio).
+FOUNDER = {
+    "name": "",
+    "role": "Founder",
+    "bio": "",
+    "photo": "",       # e.g. "/static/founder.jpg"
+    "linkedin": "",    # https://www.linkedin.com/in/...
+}
+
+# One-paragraph context per industry (Industries page).
+INDUSTRY_INTROS = {
+    "E-commerce & Retail": "Retail and D2C teams handle large catalogues, frequent supplier changes and high customer-service volumes. AI helps most where the same content is created or checked repeatedly: product data, supplier documents and customer requests.",
+    "Financial Services": "Banks, lenders and insurers run on documents: onboarding files, statements, claims and policies. The opportunity is reading and checking those documents faster while keeping a full audit trail for compliance.",
+    "Healthcare": "Hospital groups manage claims, referrals and a large supplier base for equipment and consumables. Automation can take on the paperwork around care, such as pre-approvals and procurement, so staff time goes to patients.",
+    "Manufacturing": "Manufacturers buy from many suppliers and depend on quality documentation and accurate forecasts. AI fits supplier quotations, certificate checks, maintenance data and demand planning.",
+    "Energy": "Energy, EPC and oil and gas projects involve large tenders, long vendor lists and strict pre-qualification. Vendor registration, tender analysis and inspection reports are where document AI saves the most effort.",
+    "Education": "Universities and school groups handle admissions enquiries, applications and institutional purchasing. Assistants and document processing reduce repetitive admin without changing how decisions are made.",
+    "Professional Services": "Consultancies and service firms reuse knowledge across proposals, contracts and reports. AI can draft from past work, review documents against standards and answer questions from internal knowledge.",
+}
+
+# Contact page FAQs.
+CONTACT_FAQS = [
+    ("What should I include in my enquiry?", "The process or product you want to improve, the systems involved (for example your ERP or procurement suite), rough volumes such as documents per month, and any deadline. A few sentences is enough to start."),
+    ("Do I need a fixed budget before contacting you?", "No. Pick the closest range on the form. We'll recommend a scoped first phase that fits it, or tell you if the problem needs a different approach."),
+    ("Can you work with confidential documents?", "Yes. We can work under an NDA, use anonymised samples for early tests, and deploy into your own cloud or on-premise environment when data must stay with you."),
+    ("Which countries do you work in?", "We work remotely with businesses in the UAE, India, the UK, the USA and elsewhere, with working sessions scheduled across time zones."),
 ]

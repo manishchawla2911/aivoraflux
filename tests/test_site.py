@@ -169,3 +169,57 @@ def test_llms_txt_lists_every_service(client):
     assert r.text.startswith("# Aivoraflux")
     for s in SERVICES:
         assert f"/services/{s['slug']}" in r.text
+
+
+def test_security_headers_public_and_internal(client):
+    r = client.get("/")
+    assert r.headers["strict-transport-security"].startswith("max-age=")
+    assert r.headers["x-content-type-options"] == "nosniff"
+    assert "frame-ancestors 'none'" in r.headers["content-security-policy"]
+    internal = client.get("/dashboard")
+    assert internal.headers["x-frame-options"] == "DENY"
+    assert "content-security-policy" not in internal.headers
+
+
+def test_titles_and_meta_description_lengths(client):
+    import re
+    from dashboard.site_content import INSIGHTS
+    for path in ["/", "/about", "/contact", "/work", "/services", "/industries", "/faqs", "/insights", *[f"/services/{s['slug']}" for s in SERVICES], *[f"/insights/{a['slug']}" for a in INSIGHTS]]:
+        html = client.get(path).text
+        title = re.search(r"<title>(.*?)</title>", html).group(1)
+        desc = re.search(r'<meta name="description" content="(.*?)">', html).group(1)
+        assert 30 <= len(title.replace("&amp;", "&")) <= 70, (path, title)
+        assert len(desc.replace("&amp;", "&")) <= 160, (path, len(desc))
+
+
+def test_insights_hub_and_articles(client):
+    from dashboard.site_content import INSIGHTS
+    hub = client.get("/insights")
+    assert hub.status_code == 200
+    for a in INSIGHTS:
+        r = client.get(f"/insights/{a['slug']}")
+        assert r.status_code == 200
+        assert '"@type": "Article"' in r.text
+        assert '"@type": "FAQPage"' in r.text
+        assert "Aivoraflux engineering team" in r.text
+        assert f"/insights/{a['slug']}" in hub.text
+    assert client.get("/insights/nope").status_code == 404
+
+
+def test_seo_files_include_insights(client):
+    from dashboard.site_content import INSIGHTS
+    sm = client.get("/sitemap.xml").text
+    llms = client.get("/llms.txt").text
+    for a in INSIGHTS:
+        assert f"/insights/{a['slug']}" in sm
+        assert f"/insights/{a['slug']}" in llms
+    assert "Content-Signal: search=yes, ai-input=yes, ai-train=no" in client.get("/robots.txt").text
+
+
+def test_founder_hidden_until_filled(client):
+    assert "Who you'll work with" not in client.get("/about").text
+
+
+def test_pages_expanded(client):
+    assert "Common questions" in client.get("/contact").text
+    assert "Energy, EPC and oil and gas projects" in client.get("/industries").text

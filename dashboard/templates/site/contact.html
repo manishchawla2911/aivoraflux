@@ -101,4 +101,19 @@
     </div>
   </div>
 </section>
+
+<section class="section section--alt">
+  <div class="container split">
+    <div data-reveal>
+      <span class="eyebrow">Before you send</span>
+      <h2 class="h2">Common questions</h2>
+      <p class="lead mt-4">Not sure what to write? A few sentences about the process you want to improve is enough.</p>
+    </div>
+    <div class="faq" data-reveal>
+      {% for q, a in contact_faqs %}
+      <details {% if loop.first %}open{% endif %}><summary>{{ q }}<span class="plus" aria-hidden="true">+</span></summary><p>{{ a }}</p></details>
+      {% endfor %}
+    </div>
+  </div>
+</section>
 {% endblock %}

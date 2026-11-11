@@ -1,0 +1,42 @@
+{% extends "site/_layout.html" %}
+{% from "site/_macros.html" import arrow, cta_block %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="hero__bg"></div>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span aria-current="page">Insights</span></nav>
+    <span class="eyebrow mt-4" data-reveal>Insights</span>
+    <h1 class="display" data-reveal>Practical notes on AI in procurement.</h1>
+    <p class="lead" data-reveal>Guides for procurement, operations and IT leaders on automating vendor onboarding, document checks and quotation work, written by the people who build these systems.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="split mb-insights" data-reveal style="margin-bottom:48px">
+      <div><span class="eyebrow">What we write about</span></div>
+      <div class="prose">
+        <p>Most procurement teams already have an ERP or procurement suite. What slows them down is the paperwork around it: supplier registrations, certificates, quotations and invoices that still arrive by email and are checked by hand. These guides explain, in plain language, how AI can take on that reading and checking, where it should not be trusted on its own, and how to introduce it without replacing the systems you already run.</p>
+        <ul>
+          <li><strong>AI in procurement:</strong> where it helps, where it doesn't, and a low-risk adoption path.</li>
+          <li><strong>Vendor onboarding:</strong> step-by-step automation of supplier document checks.</li>
+          <li><strong>Choosing an approach:</strong> AI, RPA, or a combination, and how to decide.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="rows" data-reveal-group>
+      {% for a in articles %}
+      <a class="row" href="/insights/{{ a.slug }}" data-reveal>
+        <span class="row__num">{{ a.kind }}</span>
+        <h2 class="h3">{{ a.title }}</h2>
+        <p>{{ a.dek }}<small>{{ a.read_minutes }} min read · {{ a.published }}</small></p>
+        <span class="text-link">Read</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{{ cta_block("Have a procurement workflow in mind?", "Tell us which step eats the most hours. We'll tell you plainly whether AI is the right fix.", "Book a Strategy Call", site.booking_url) }}
+{% endblock %}

@@ -130,6 +130,24 @@
   </div>
 </section>
 
+{% if service_insights %}
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-head" data-reveal><span class="eyebrow">Read the guide</span></div>
+    <div class="rows" data-reveal-group>
+      {% for a in service_insights %}
+      <a class="row" href="/insights/{{ a.slug }}" data-reveal>
+        <span class="row__num">{{ a.kind }}</span>
+        <h3>{{ a.title }}</h3>
+        <p>{{ a.dek }}<small>{{ a.read_minutes }} min read</small></p>
+        <span class="text-link">Read</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
 <section class="section">
   <div class="container">
     <div class="section-head" data-reveal><span class="eyebrow">Related services</span></div>
