@@ -38,7 +38,7 @@
   <header class="header">
     <div class="container header__inner">
       <a class="header__logo" href="/" aria-label="Aivoraflux home">
-        <img src="/static/logo-white.png" alt="Aivoraflux" width="125" height="34">
+        <picture><source srcset="/static/logo-white-2x.webp?v={{ site.asset_version }}" type="image/webp"><img src="/static/logo-white-2x.png?v={{ site.asset_version }}" alt="Aivoraflux" width="125" height="34"></picture>
       </a>
       <nav class="nav" aria-label="Primary">
         {% for href, label in site.nav %}
@@ -68,7 +68,7 @@
     <div class="container">
       <div class="footer__grid">
         <div class="footer__brand">
-          <img src="/static/logo-white.png" alt="Aivoraflux" width="125" height="34" loading="lazy">
+          <picture><source srcset="/static/logo-white-2x.webp?v={{ site.asset_version }}" type="image/webp"><img src="/static/logo-white-2x.png?v={{ site.asset_version }}" alt="Aivoraflux" width="125" height="34" loading="lazy"></picture>
           <p>AI engineering and technology consultancy. We turn complex business challenges into intelligent systems: AI agents, automation, machine learning and custom software.</p>
           <div class="footer__social">
             {% if site.linkedin %}<a href="{{ site.linkedin }}" target="_blank" rel="noopener" aria-label="Aivoraflux on LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.75h4V21H3zM9.5 9.75h3.8v1.54h.05c.53-.95 1.83-1.95 3.77-1.95 4.03 0 4.78 2.5 4.78 5.76V21h-4v-5.1c0-1.22-.02-2.78-1.8-2.78-1.8 0-2.08 1.33-2.08 2.7V21h-4z"/></svg></a>{% endif %}

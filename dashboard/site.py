@@ -44,7 +44,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 router = APIRouter()
 
-ASSET_VERSION = "35"
+ASSET_VERSION = "36"
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")
 NAV = [
     ("/", "Home"),
@@ -355,9 +355,9 @@ INTERNAL_PREFIXES = ["/dashboard", "/studio", "/agents", "/projects", "/settings
 
 @router.get("/robots.txt", include_in_schema=False)
 async def robots() -> PlainTextResponse:
-    # Content-Signal states the site's preference: OK for search and AI answers,
-    # not for model training. A preference, not enforcement.
-    lines = ["User-agent: *", "Content-Signal: search=yes, ai-input=yes, ai-train=no", "Allow: /"] + [f"Disallow: {p}" for p in INTERNAL_PREFIXES]
+    # Standard directives only: Lighthouse and robots validators flag unknown
+    # lines such as Content-Signal as errors.
+    lines = ["User-agent: *", "Allow: /"] + [f"Disallow: {p}" for p in INTERNAL_PREFIXES]
     lines += ["", f"Sitemap: {_site_url()}/sitemap.xml"]
     return PlainTextResponse("\n".join(lines) + "\n")
 
@@ -423,6 +423,16 @@ SECURITY_HEADERS = {
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
 }
+
+
+def add_cache_headers(path: str, query: str, headers) -> None:
+    """Long cache for versioned static assets (?v=...), a day for the rest."""
+    if not path.startswith("/static/") or "cache-control" in headers:
+        return
+    if "v=" in query:
+        headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    else:
+        headers["Cache-Control"] = "public, max-age=86400"
 
 
 def add_security_headers(path: str, headers) -> None:

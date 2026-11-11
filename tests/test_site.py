@@ -213,7 +213,9 @@ def test_seo_files_include_insights(client):
     for a in INSIGHTS:
         assert f"/insights/{a['slug']}" in sm
         assert f"/insights/{a['slug']}" in llms
-    assert "Content-Signal: search=yes, ai-input=yes, ai-train=no" in client.get("/robots.txt").text
+    robots = client.get("/robots.txt").text
+    assert "Content-Signal" not in robots  # non-standard; Lighthouse flags it as invalid
+    assert "Sitemap:" in robots
 
 
 def test_founder_hidden_until_filled(client):
@@ -223,3 +225,9 @@ def test_founder_hidden_until_filled(client):
 def test_pages_expanded(client):
     assert "Common questions" in client.get("/contact").text
     assert "Energy, EPC and oil and gas projects" in client.get("/industries").text
+
+
+def test_static_assets_cache_headers(client):
+    versioned = client.get("/static/site.css?v=1")
+    assert versioned.headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert client.get("/static/logo-white-2x.webp").headers["cache-control"] == "public, max-age=86400"

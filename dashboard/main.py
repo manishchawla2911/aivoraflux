@@ -113,8 +113,9 @@ app = FastAPI(title="aivoraflux", lifespan=lifespan)
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
-    from dashboard.site import add_security_headers
+    from dashboard.site import add_cache_headers, add_security_headers
     add_security_headers(request.url.path, response.headers)
+    add_cache_headers(request.url.path, request.url.query, response.headers)
     return response
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
