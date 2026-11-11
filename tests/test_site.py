@@ -184,7 +184,7 @@ def test_security_headers_public_and_internal(client):
 def test_titles_and_meta_description_lengths(client):
     import re
     from dashboard.site_content import INSIGHTS
-    for path in ["/", "/about", "/contact", "/work", "/services", "/industries", "/faqs", "/insights", *[f"/services/{s['slug']}" for s in SERVICES], *[f"/insights/{a['slug']}" for a in INSIGHTS]]:
+    for path in ["/", "/about", "/contact", "/work", "/services", "/industries", "/faqs", "/insights", "/education-training", *[f"/services/{s['slug']}" for s in SERVICES], *[f"/insights/{a['slug']}" for a in INSIGHTS]]:
         html = client.get(path).text
         title = re.search(r"<title>(.*?)</title>", html).group(1)
         desc = re.search(r'<meta name="description" content="(.*?)">', html).group(1)
@@ -231,3 +231,47 @@ def test_static_assets_cache_headers(client):
     versioned = client.get("/static/site.css?v=1")
     assert versioned.headers["cache-control"] == "public, max-age=31536000, immutable"
     assert client.get("/static/logo-white-2x.webp").headers["cache-control"] == "public, max-age=86400"
+
+
+def test_education_training_page(client):
+    from html import escape
+    from dashboard.site_content import EDUCATION
+    r = client.get("/education-training")
+    assert r.status_code == 200
+    assert "Building AI-Ready Minds for Tomorrow." in r.text
+    for _, name, _, _ in EDUCATION["programs"]:
+        assert escape(name, quote=False) in r.text
+    for _, name, _ in EDUCATION["partners"]:
+        assert name in r.text
+    for name, _ in EDUCATION["offerings"] + EDUCATION["formats"]:
+        assert escape(name, quote=False) in r.text
+    assert "Partner With Us" in r.text and "Explore Training Opportunities" in r.text
+    assert '"@type": "Service"' in r.text and '"@type": "Course"' in r.text
+    assert "$" not in r.text.split("<main", 1)[1].split("</main>", 1)[0]  # no pricing shown
+
+
+def test_education_nav_footer_and_seo_files(client):
+    home = client.get("/")
+    assert 'href="/education-training"' in home.text
+    assert "Building AI-Ready Minds for Tomorrow." in home.text
+    assert "/education-training" in client.get("/sitemap.xml").text
+    assert "/education-training" in client.get("/llms.txt").text
+
+
+def test_education_ctas_preselect_contact(client):
+    from dashboard.site_content import EDU_INSTITUTION_OPTION, EDU_STUDENT_OPTION
+    from html import escape
+    r = client.get("/contact", params={"service": EDU_INSTITUTION_OPTION, "industry": "Education"})
+    assert f'<option value="{escape(EDU_INSTITUTION_OPTION)}" selected>' in r.text
+    assert '<option value="Education" selected>' in r.text
+    r = client.get("/contact", params={"service": EDU_STUDENT_OPTION})
+    assert f'<option value="{escape(EDU_STUDENT_OPTION)}" selected>' in r.text
+
+
+def test_education_enquiry_submission_saves_lead(client):
+    from dashboard.site_content import EDU_INSTITUTION_OPTION
+    data = {**VALID, "service": EDU_INSTITUTION_OPTION, "industry": "Education", "company": "Example Engineering College"}
+    r = client.post("/contact", data=data, follow_redirects=False)
+    assert r.status_code == 303
+    leads = _leads()
+    assert leads[-1].service == EDU_INSTITUTION_OPTION

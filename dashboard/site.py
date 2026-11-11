@@ -24,6 +24,7 @@ Configuration (environment)
 from __future__ import annotations
 
 import logging
+from urllib.parse import urlencode
 import os
 import re
 from datetime import date
@@ -44,7 +45,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 router = APIRouter()
 
-ASSET_VERSION = "36"
+ASSET_VERSION = "38"
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")
 NAV = [
     ("/", "Home"),
@@ -52,10 +53,11 @@ NAV = [
     ("/industries", "Industries"),
     ("/work", "Our Work"),
     ("/insights", "Insights"),
+    ("/education-training", "Education & Training"),
     ("/about", "About Us"),
     ("/contact", "Contact"),
 ]
-STATIC_PATHS = ["/", "/services", "/industries", "/work", "/insights", "/about", "/engagement-models", "/faqs", "/contact"]
+STATIC_PATHS = ["/", "/services", "/industries", "/work", "/insights", "/education-training", "/about", "/engagement-models", "/faqs", "/contact"]
 
 
 def _site_url() -> str:
@@ -90,7 +92,8 @@ def _site_context() -> dict:
             "email": email,
             "areaServed": ["US", "AE", "GB", "IN"],
             "knowsAbout": [s["name"] for s in C.SERVICES],
-            "makesOffer": [{"@type": "Offer", "itemOffered": {"@type": "Service", "name": s["name"], "url": f"{url}/services/{s['slug']}"}} for s in C.SERVICES],
+            "makesOffer": [{"@type": "Offer", "itemOffered": {"@type": "Service", "name": s["name"], "url": f"{url}/services/{s['slug']}"}} for s in C.SERVICES]
+            + [{"@type": "Offer", "itemOffered": {"@type": "Service", "name": "AI Education & Professional Training", "url": f"{url}/education-training"}}],
             **({"sameAs": [linkedin]} if linkedin.startswith("https://") else {}),
         },
     }
@@ -113,7 +116,10 @@ def render(request: Request, template: str, ctx: dict | None = None, status_code
 
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request) -> HTMLResponse:
-    return render(request, "home.html")
+    return render(request, "home.html", {
+        "edu": C.EDUCATION,
+        "edu_institution_cta": "/contact?" + urlencode({"service": C.EDU_INSTITUTION_OPTION, "industry": "Education"}) + "#enquiry",
+    })
 
 
 @router.get("/services", response_class=HTMLResponse)
@@ -185,6 +191,20 @@ async def faqs(request: Request) -> HTMLResponse:
         "faqs": C.FAQS,
         "updated": C.CONTENT_UPDATED,
         "updated_label": C.CONTENT_UPDATED_LABEL,
+    })
+
+
+# ── Education & Training ──────────────────────────────────────
+
+@router.get("/education-training", response_class=HTMLResponse)
+async def education_training(request: Request) -> HTMLResponse:
+    q = lambda **kw: "/contact?" + urlencode(kw) + "#enquiry"
+    return render(request, "education_training.html", {
+        "title": "AI Education & Professional Training Programs",
+        "description": "Practical AI training for colleges, universities and companies: workshops, bootcamps, FDPs, hackathons and semester-long programmes.",
+        "edu": C.EDUCATION,
+        "institution_cta": q(service=C.EDU_INSTITUTION_OPTION, industry="Education"),
+        "student_cta": q(service=C.EDU_STUDENT_OPTION, industry="Education"),
     })
 
 
@@ -265,8 +285,10 @@ def validate_enquiry(form: dict) -> tuple[dict, dict]:
 
 
 @router.get("/contact", response_class=HTMLResponse)
-async def contact(request: Request, submitted: int = 0, error: int = 0, service: str = "") -> HTMLResponse:
+async def contact(request: Request, submitted: int = 0, error: int = 0, service: str = "", industry: str = "") -> HTMLResponse:
     preset = {"service": service} if service in C.SERVICE_OPTIONS else {}
+    if industry in C.INDUSTRY_OPTIONS:
+        preset["industry"] = industry
     return render(request, "contact.html", _contact_ctx(values=preset, submitted=bool(submitted), failed=bool(error)))
 
 
@@ -379,6 +401,7 @@ async def llms_txt() -> PlainTextResponse:
     ]
     lines += [f"- [{s['name']}]({base}/services/{s['slug']}): {C.DEFINITIONS.get(s['slug'], s['short'])}" for s in C.SERVICES]
     lines += [
+        f"- [AI Education & Professional Training]({base}/education-training): AI workshops, bootcamps, faculty development programmes, hackathons and semester-long training for colleges, universities and companies.",
         "",
         "## Company",
         f"- [Our work]({base}/work): own products, internal platforms and clearly labelled illustrative capabilities",

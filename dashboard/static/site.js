@@ -27,7 +27,7 @@
     menuBtn.addEventListener("click", function () { setOpen(!mobileNav.classList.contains("is-open")); });
     mobileNav.addEventListener("click", function (e) { if (e.target.closest("a")) setOpen(false); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") setOpen(false); });
-    window.addEventListener("resize", function () { if (window.innerWidth > 1020) setOpen(false); });
+    window.addEventListener("resize", function () { if (window.innerWidth > 1200) setOpen(false); });
   }
 
   // Scroll reveal with per-group stagger.

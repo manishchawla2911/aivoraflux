@@ -480,3 +480,60 @@ CONTACT_FAQS = [
     ("Can you work with confidential documents?", "Yes. We can work under an NDA, use anonymised samples for early tests, and deploy into your own cloud or on-premise environment when data must stay with you."),
     ("Which countries do you work in?", "We work remotely with businesses in the UAE, India, the UK, the USA and elsewhere, with working sessions scheduled across time zones."),
 ]
+
+
+# ── Education & Training vertical ─────────────────────────────────────────
+# No fixed pricing is shown anywhere (programmes are scoped per institution).
+EDU_INSTITUTION_OPTION = "Education & Training: institutional partnership"
+EDU_STUDENT_OPTION = "Education & Training: student programmes"
+SERVICE_OPTIONS += [EDU_INSTITUTION_OPTION, EDU_STUDENT_OPTION]
+
+EDUCATION = {
+    "heading": "Building AI-Ready Minds for Tomorrow.",
+    "description": (
+        "Aivoraflux partners with colleges, universities and organizations to deliver practical, "
+        "industry-oriented AI education and professional training programs that bridge the gap "
+        "between academic knowledge and real-world applications."
+    ),
+    "programs": [
+        ("brain", "AI & Generative AI Training", "How modern AI and large language models work, and how to apply them responsibly: prompting, retrieval and building with AI APIs.",
+         ["Foundations of AI and LLMs", "Prompt engineering and RAG", "Responsible AI use"]),
+        ("cpu", "Machine Learning & Deep Learning", "From classical models to neural networks, taught through datasets and problems that look like real work.",
+         ["Supervised and unsupervised learning", "Neural networks and deep learning", "Model evaluation in practice"]),
+        ("agent", "AI Agents & Intelligent Automation", "Designing agents that use tools, follow rules and hand decisions to people, the way we build them for clients.",
+         ["Agent design and tool use", "Workflow automation", "Guardrails and human review"]),
+        ("code", "Python & Data Science", "The programming and data skills every AI role starts with, from clean code to analysis and visualisation.",
+         ["Python for AI", "Data cleaning and analysis", "Visualisation and reporting"]),
+        ("layers", "Computer Vision & NLP", "Teaching machines to read images and language: document AI, image recognition and text understanding.",
+         ["Image classification and detection", "Text and document processing", "Practical vision and NLP pipelines"]),
+        ("briefcase", "Industry-Oriented AI Projects", "Hands-on projects built on realistic business problems, so learners finish with work they can show.",
+         ["Problem statements from real domains", "End-to-end project builds", "Code reviews and demos"]),
+    ],
+    "partners": [
+        ("cap", "Engineering Colleges", "AI curriculum support, workshops and project mentorship for engineering students and faculty."),
+        ("bank", "Universities", "Semester-long programmes, faculty development and research-oriented AI projects."),
+        ("compass", "Educational Institutions", "Skill development programmes and AI awareness for institutes and training centres."),
+        ("briefcase", "Corporate Organizations", "Upskilling for teams adopting AI, built around your tools, data and workflows."),
+    ],
+    "offerings": [
+        ("AI workshops and bootcamps", "Focused, hands-on sessions that take participants from concepts to a working build."),
+        ("Faculty Development Programs (FDP)", "Equipping faculty to teach AI and machine learning with current tools and examples."),
+        ("Student skill development programs", "Structured learning paths that build job-ready AI and data skills."),
+        ("Hackathons and AI competitions", "Problem statements, mentoring and judging for events that put skills to work."),
+        ("Final-year project mentorship", "Guidance from scoping to demo for final-year AI and data science projects."),
+        ("Semester-long AI training programs", "A full-semester partnership aligned with your academic calendar."),
+    ],
+    "formats": [
+        ("1-Day Workshops", "An intensive introduction to one topic, ideal for awareness and first hands-on experience."),
+        ("3–5 Day AI Bootcamps", "Concentrated, project-based learning that ends with a working build."),
+        ("30-Day Intensive Training", "A structured month of guided learning, assignments and a capstone project."),
+        ("Semester-Long Training Partnerships", "Training integrated with your academic calendar across a full semester."),
+        ("Customized Faculty Development Programs", "FDPs designed around your department's courses and goals."),
+    ],
+    "faqs": [
+        ("Who are these programmes for?", "Engineering colleges, universities, educational institutions and corporate teams. Programmes are designed for students, faculty or working professionals depending on the format."),
+        ("How are programmes priced?", "Every programme is scoped with the institution based on format, duration, topics and number of participants. Share your requirements and we'll send a tailored proposal."),
+        ("Can the content be customised to our syllabus?", "Yes. Topics, depth and projects are adapted to your curriculum, the participants' level and the outcomes you want."),
+        ("How can students take part?", "Students can join through programmes run with their institution, or send us an enquiry about upcoming training opportunities."),
+    ],
+}

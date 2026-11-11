@@ -1,0 +1,152 @@
+{% extends "site/_layout.html" %}
+{% from "site/_macros.html" import icon, arrow %}
+
+{% block schema %}
+{%- set offer_items = [] %}
+{%- for ic, name, text, points in edu.programs %}{% set _ = offer_items.append({"@type": "Offer", "itemOffered": {"@type": "Course", "name": name, "description": text, "provider": {"@type": "Organization", "name": "Aivoraflux"}}}) %}{% endfor %}
+{%- set faq_items = [] %}
+{%- for q, a in edu.faqs %}{% set _ = faq_items.append({"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}) %}{% endfor %}
+<script type="application/ld+json">{{ {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "AI Education & Professional Training",
+  "serviceType": "AI education and professional training",
+  "description": edu.description,
+  "url": site.url ~ "/education-training",
+  "provider": {"@type": "Organization", "name": "Aivoraflux", "url": site.url},
+  "audience": {"@type": "EducationalAudience", "educationalRole": "student, teacher, professional"},
+  "areaServed": ["IN", "AE", "GB", "US"],
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "AI training programmes",
+    "itemListElement": offer_items
+  }
+} | tojson }}</script>
+<script type="application/ld+json">{{ {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": faq_items} | tojson }}</script>
+<script type="application/ld+json">{{ {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": site.url ~ "/"},
+    {"@type": "ListItem", "position": 2, "name": "Education & Training", "item": site.url ~ "/education-training"}
+  ]
+} | tojson }}</script>
+{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="hero__bg"></div>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span aria-current="page">Education &amp; Training</span></nav>
+    <span class="eyebrow mt-4" data-reveal>AI Education &amp; Professional Training</span>
+    <h1 class="display" data-reveal>{{ edu.heading }}</h1>
+    <p class="lead" data-reveal>{{ edu.description }}</p>
+    <div class="hero__actions" data-reveal>
+      <a class="btn btn--primary" href="{{ institution_cta }}">Partner With Us {{ arrow() }}</a>
+      <a class="btn btn--ghost" href="{{ student_cta }}">Explore Training Opportunities</a>
+    </div>
+  </div>
+</section>
+
+{# Programmes: same card component as the rest of the site #}
+<section class="section" id="programs">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Programmes</span>
+      <h2 class="h2">What we teach. <span class="soft">Taught by people who build it.</span></h2>
+      <p class="lead">Every programme is hands-on and built around the same AI systems we engineer for businesses.</p>
+    </div>
+    <div class="grid grid-3" data-reveal-group>
+      {% for ic, name, text, points in edu.programs %}
+      <div class="card" data-reveal>
+        <div class="card__icon">{{ icon(ic) }}</div>
+        <h3 class="h3">{{ name }}</h3>
+        <p>{{ text }}</p>
+        <ul class="check-list">{% for p in points %}<li>{{ p }}</li>{% endfor %}</ul>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# Institutional partnerships #}
+<section class="section section--alt" id="partnerships">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Institutional partnerships</span>
+      <h2 class="h2">Who we partner with</h2>
+      <p class="lead">We work with academic and corporate teams to design programmes that fit their students, faculty and goals.</p>
+    </div>
+    <div class="grid grid-4" data-reveal-group>
+      {% for ic, name, text in edu.partners %}
+      <div class="card" data-reveal>
+        <div class="card__icon">{{ icon(ic) }}</div>
+        <h3 class="h3">{{ name }}</h3>
+        <p>{{ text }}</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="section-head mt-12" data-reveal style="margin-top:clamp(56px,7vw,96px)">
+      <span class="eyebrow">Our offerings</span>
+      <h2 class="h2">Ways to work together</h2>
+    </div>
+    <div class="reasons" data-reveal-group>
+      {% for name, text in edu.offerings %}
+      <div data-reveal><h3>{{ name }}</h3><p>{{ text }}</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# Training formats: same numbered-row component as Services and Insights #}
+<section class="section" id="formats">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Training formats</span>
+      <h2 class="h2">From a single day to a full semester.</h2>
+      <p class="lead">Every format is scoped with you, so there's no fixed price list. Tell us your goals and we'll propose the right fit.</p>
+    </div>
+    <div class="rows" data-reveal-group>
+      {% for name, text in edu.formats %}
+      <a class="row" href="{{ institution_cta }}" data-reveal>
+        <span class="row__num">0{{ loop.index }}</span>
+        <h3>{{ name }}</h3>
+        <p>{{ text }}</p>
+        <span class="text-link">Enquire</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# FAQs #}
+<section class="section section--alt">
+  <div class="container split">
+    <div data-reveal>
+      <span class="eyebrow">FAQs</span>
+      <h2 class="h2">Questions from institutions and students</h2>
+    </div>
+    <div class="faq" data-reveal>
+      {% for q, a in edu.faqs %}
+      <details {% if loop.first %}open{% endif %}><summary>{{ q }}<span class="plus" aria-hidden="true">+</span></summary><p>{{ a }}</p></details>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# Two-audience CTA, same CTA block styling as the rest of the site #}
+<section class="section" style="padding-top:clamp(40px,6vw,80px)">
+  <div class="container">
+    <div class="cta" data-reveal>
+      <span class="eyebrow">Get started</span>
+      <h2 class="h2 mt-6">Let's build <span class="hl">AI-ready</span> minds together.</h2>
+      <p class="lead">Institutions can partner with us on workshops, FDPs and semester programmes. Students can ask about upcoming training opportunities.</p>
+      <div class="cta__actions">
+        <a class="btn btn--primary btn--lg" href="{{ institution_cta }}">For Institutions: Partner With Us {{ arrow() }}</a>
+        <a class="btn btn--ghost btn--lg" href="{{ student_cta }}">For Students: Explore Training Opportunities</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -143,6 +143,32 @@
   </div>
 </section>
 
+{# ── 3b. Education & Training ───────────────────────────── #}
+<section class="section section--tight" id="education">
+  <div class="container">
+    <div class="feature">
+      <div class="feature__copy" data-reveal>
+        <span class="eyebrow">Education &amp; Training</span>
+        <h2 class="h2">{{ edu.heading }}</h2>
+        <p>{{ edu.description }}</p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="{{ edu_institution_cta }}">Partner With Us {{ arrow() }}</a>
+          <a class="btn btn--ghost" href="/education-training">Explore Training Opportunities</a>
+        </div>
+      </div>
+      <div class="rows" data-reveal-group>
+        {% for ic, name, text, points in edu.programs %}
+        <a class="row" href="/education-training#programs" data-reveal style="grid-template-columns:48px 1fr auto">
+          <span class="row__num">0{{ loop.index }}</span>
+          <h3>{{ name }}</h3>
+          <span class="text-link" aria-hidden="true"></span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
 {# ── 4. Approach ────────────────────────────────────────── #}
 <section class="section section--alt approach" data-approach>
   <div class="container">
